@@ -50,8 +50,8 @@ export default function HomePage() {
         <div className="grid grid-cols-2 md:grid-cols-2">
           <div className="relative h-[120px] sm:h-[200px] md:h-[350px] lg:h-[450px] overflow-hidden">
             <Image
-              src="/images/Yogurt Parfait Shot High Res.png"
-              alt="Yogurt Parfait"
+              src="/images/bbq_brisket.jpg"
+              alt="BBQ Brisket"
               fill
               className="object-cover"
               priority

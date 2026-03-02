@@ -82,6 +82,7 @@ export interface CateringProduct {
   categories: EventType[];
   pricing: ProductPricing;
   tags?: string[];
+  featured?: boolean;
   variantId?: string;
   slug?: string;
   inventory?: number;

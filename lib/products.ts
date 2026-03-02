@@ -436,6 +436,16 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     pricing: panPricing(137, 218),
     tags: ['entree', 'seafood', 'premium', 'gluten-free', 'dairy-free', 'halal'],
   },
+  {
+    id: 'beef-brisket',
+    title: 'Slow-Smoked Beef Brisket',
+    description: 'Melt-in-your-mouth Texas-style brisket, smoked low and slow over oak for 14 hours with our signature dry rub. Hand-sliced and served with tangy house BBQ sauce.',
+    image: '/images/bbq_brisket.jpg',
+    categories: ['lunch'],
+    pricing: panPricing(175, 300),
+    tags: ['entree', 'beef', 'bbq', 'premium', 'southern', 'gluten-free', 'dairy-free'],
+    featured: true,
+  },
 
   // ==================== LUNCH - SIDES (POTATOES) ====================
   {
@@ -470,11 +480,12 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
   {
     id: 'mac-and-cheese',
     title: 'Macaroni & Cheese',
-    description: 'Three-cheese baked mac with a golden crust.',
+    description: 'Creamy, soul-warming three-cheese baked mac with a crispy golden crust your guests won\'t stop talking about.',
     image: '/images/Macaroni and Cheese Shot Hi Res.png',
     categories: ['lunch'],
     pricing: panPricing(68, 109),
     tags: ['side', 'pasta', 'comfort', 'popular', 'vegetarian', 'halal'],
+    featured: true,
   },
   {
     id: 'spaghetti-meat-sauce',
@@ -591,11 +602,12 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
   {
     id: 'cornbread',
     title: 'Cornbread',
-    description: 'Sweet Southern-style muffins or squares.',
-    image: '/images/Breakfast Biscuits Shot High Res.png',
+    description: 'Golden, buttery Southern-style cornbread baked fresh — the perfect companion to any BBQ spread.',
+    image: '/images/cornbread.jpg',
     categories: ['lunch'],
     pricing: { type: 'per-dozen', pricePerDozen: 38, servesPerDozen: 12 },
     tags: ['side', 'bread', 'southern', 'vegetarian'],
+    featured: true,
   },
   {
     id: 'garlic-knots',

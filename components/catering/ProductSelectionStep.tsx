@@ -92,8 +92,12 @@ export default function ProductSelectionStep({
     return true;
   });
 
-  // Sort by pricing type to group similar items
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
+  // Separate featured items from regular items
+  const featuredProducts = filteredProducts.filter(p => p.featured);
+  const regularProducts = filteredProducts.filter(p => !p.featured);
+
+  // Sort regular products by pricing type to group similar items
+  const sortedProducts = [...regularProducts].sort((a, b) => {
     const typeOrder = { 'tray': 0, 'pan': 1, 'per-person': 2, 'per-dozen': 3, 'per-each': 4, 'per-container': 5 };
     const typeA = typeOrder[a.pricing.type] ?? 99;
     const typeB = typeOrder[b.pricing.type] ?? 99;
@@ -180,7 +184,35 @@ export default function ProductSelectionStep({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Product Grid */}
           <div className="lg:col-span-2">
-            {sortedProducts.length === 0 ? (
+            {/* Featured Items Banner */}
+            {featuredProducts.length > 0 && (
+              <div className="mb-8 rounded-2xl border-2 border-[#dabb64] bg-[#363333] overflow-hidden">
+                {/* Header */}
+                <div className="bg-[#dabb64] px-6 py-4 text-center">
+                  <p className="font-oswald text-xs sm:text-sm tracking-[0.2em] text-[#363333]/70 uppercase mb-1">
+                    Chef&apos;s Recommendation
+                  </p>
+                  <h3 className="font-oswald text-xl sm:text-2xl md:text-3xl font-bold text-[#363333] tracking-wide">
+                    THE SOUL DELIVERED BBQ SPREAD
+                  </h3>
+                  <p className="text-[#363333]/80 text-sm sm:text-base mt-1 max-w-xl mx-auto">
+                    Our guests&apos; most-loved trio — smoky brisket, creamy mac, and warm cornbread. Order all three and make it a meal they&apos;ll remember.
+                  </p>
+                </div>
+
+                {/* Featured Products Grid */}
+                <div className={`grid gap-0 divide-y sm:divide-y-0 sm:divide-x divide-white/10 ${
+                  featuredProducts.length === 3 ? 'sm:grid-cols-3' :
+                  featuredProducts.length === 2 ? 'sm:grid-cols-2' : 'grid-cols-1'
+                }`}>
+                  {featuredProducts.map((product) => (
+                    <CateringProductCard key={product.id} product={product} featured />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {sortedProducts.length === 0 && featuredProducts.length === 0 ? (
               <Card className="text-center py-12">
                 <p className="text-gray-500">
                   {searchTerm || activeFilters.length > 0
