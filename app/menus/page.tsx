@@ -1,15 +1,62 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { CATERING_PRODUCTS } from '@/lib/products';
 import { CateringProduct } from '@/lib/types';
 import { getDisplayPrice, getPricingTypeLabel } from '@/lib/pricing';
+import { classifyProducts, type Quadrant } from '@/lib/menu-engineering';
+import { loadMenuConfig, type MenuConfig } from '@/lib/menu-config';
 import DietaryFilterBar from '@/components/catering/DietaryFilterBar';
 
-// Menu sections organized by the PDF structure
+// --- Menu Engineering Defaults (used when no config is applied) ---
+
+const DEFAULT_REMOVED_IDS = ['celsius-energy', 'red-bull'];
+
+const DEFAULT_CHEFS_PICK_IDS = [
+  'herb-crusted-salmon',
+  'roasted-asparagus',
+  'pesto-pasta-salad',
+  'grilled-flank-steak',
+  'herb-salmon',
+];
+
+const DEFAULT_BBQ_BUNDLE_IDS = ['beef-brisket', 'mac-and-cheese', 'cornbread'];
+
+const DEFAULT_CUSTOMER_FAVORITE_IDS = [
+  'fried-chicken',
+  'breakfast-casserole',
+  'shrimp-grits',
+  'mac-and-cheese',
+  'signature-sandwich-package',
+  'collard-greens',
+];
+
+const QUADRANT_ORDER: Record<string, number> = {
+  star: 0,
+  plowhorse: 1,
+  puzzle: 2,
+  dog: 3,
+};
+
+// --- Menu Sections ---
+
 const MENU_SECTIONS = [
+  {
+    id: 'featured',
+    title: 'FEATURED',
+    subtitle: 'Curated Spreads & Best Sellers',
+    image: '/images/bbq_brisket.jpg',
+    subsections: [],
+  },
+  {
+    id: 'chefs-picks',
+    title: "CHEF'S PICKS",
+    subtitle: 'Hidden Gems Hand-Selected by Our Kitchen',
+    image: '/images/Herb-Crusted Salmon with Garlic Butter Sauce Shot Hi Res.png',
+    subsections: [],
+  },
   {
     id: 'breakfast',
     title: 'BREAKFAST',
@@ -61,7 +108,8 @@ const MENU_SECTIONS = [
   },
 ];
 
-// Map products to menu subsections
+// --- Product Mapping ---
+
 function getProductsForSubsection(subsectionId: string): CateringProduct[] {
   const mappings: Record<string, (p: CateringProduct) => boolean> = {
     'sunrise-staples': (p) =>
@@ -96,7 +144,7 @@ function getProductsForSubsection(subsectionId: string): CateringProduct[] {
       ['southwest-grain-bowl-bar', 'loaded-mashed-potato-bar'].includes(p.id),
     'entrees': (p) =>
       p.categories.includes('lunch') &&
-      ['garlic-herb-chicken', 'smothered-chicken', 'jerk-chicken', 'fried-chicken', 'fried-catfish', 'roasted-turkey', 'herb-crusted-salmon'].includes(p.id),
+      ['beef-brisket', 'garlic-herb-chicken', 'smothered-chicken', 'jerk-chicken', 'fried-chicken', 'fried-catfish', 'roasted-turkey', 'herb-crusted-salmon'].includes(p.id),
     'sides-potatoes': (p) =>
       p.categories.includes('lunch') &&
       ['garlic-mashed-potatoes', 'roasted-red-potatoes', 'potato-wedges'].includes(p.id),
@@ -117,7 +165,7 @@ function getProductsForSubsection(subsectionId: string): CateringProduct[] {
       ['fresh-brewed-coffee', 'hot-tea', 'hot-chocolate'].includes(p.id),
     'cold-beverages': (p) =>
       (p.tags?.includes('beverage') ?? false) &&
-      ['cold-brew-coffee', 'bottled-juices', 'coconut-water', 'bottled-water', 'assorted-sodas', 'sparkling-water', 'iced-tea', 'celsius-energy', 'red-bull'].includes(p.id),
+      ['cold-brew-coffee', 'bottled-juices', 'coconut-water', 'bottled-water', 'assorted-sodas', 'sparkling-water', 'iced-tea'].includes(p.id),
   };
 
   const filter = mappings[subsectionId];
@@ -134,19 +182,31 @@ function getProductsForSection(sectionId: string): CateringProduct[] {
   if (sectionId === 'desserts') {
     return CATERING_PRODUCTS.filter(p => p.tags?.includes('dessert'));
   }
-  if (sectionId === 'desserts') {
-    return CATERING_PRODUCTS.filter(p =>
-      p.categories.includes('dessert') &&
-      !p.tags?.includes('dessert') &&
-      !p.tags?.includes('beverage') &&
-      !p.categories.includes('breakfast') &&
-      !p.categories.includes('lunch')
-    );
-  }
   return [];
 }
 
-function MenuItemCard({ product }: { product: CateringProduct }) {
+// --- Badge Logic ---
+
+type MenuBadge = 'popular' | 'chefs-pick' | 'new' | null;
+
+function getBadgeForProduct(productId: string): MenuBadge {
+  if (productId === 'beef-brisket') return 'new';
+  const product = CATERING_PRODUCTS.find(p => p.id === productId);
+  if (product?.tags?.includes('popular')) return 'popular';
+  return null;
+}
+
+const BADGE_STYLES: Record<string, { bg: string; text: string; label: string }> = {
+  popular: { bg: 'bg-[#dabb64]', text: 'text-[#363333]', label: 'POPULAR' },
+  'chefs-pick': { bg: 'bg-[#4a90d9]', text: 'text-white', label: "CHEF'S PICK" },
+  new: { bg: 'bg-emerald-500', text: 'text-white', label: 'NEW' },
+};
+
+// --- Components ---
+
+function MenuItemCard({ product, badge }: { product: CateringProduct; badge?: MenuBadge }) {
+  const badgeStyle = badge ? BADGE_STYLES[badge] : null;
+
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       <div className="relative h-32 sm:h-40">
@@ -156,6 +216,11 @@ function MenuItemCard({ product }: { product: CateringProduct }) {
           fill
           className="object-cover"
         />
+        {badgeStyle && (
+          <div className={`absolute top-2 left-2 ${badgeStyle.bg} ${badgeStyle.text} px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide`}>
+            {badgeStyle.label}
+          </div>
+        )}
       </div>
       <div className="p-4">
         <h4 className="font-oswald font-bold text-[#363333] text-sm sm:text-base mb-1 line-clamp-1">
@@ -177,9 +242,74 @@ function MenuItemCard({ product }: { product: CateringProduct }) {
   );
 }
 
+// --- Page ---
+
 export default function MenusPage() {
-  const [activeSection, setActiveSection] = useState<string | null>('breakfast');
+  const [activeSection, setActiveSection] = useState<string | null>('featured');
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [menuConfig, setMenuConfig] = useState<MenuConfig | null>(null);
+
+  // Load menu engineering config from localStorage on mount
+  useEffect(() => {
+    setMenuConfig(loadMenuConfig());
+  }, []);
+
+  // Derive active IDs — config overrides defaults
+  const REMOVED_ITEM_IDS = useMemo(
+    () => new Set(menuConfig ? menuConfig.removedItemIds : DEFAULT_REMOVED_IDS),
+    [menuConfig],
+  );
+  const CHEFS_PICK_IDS = useMemo(
+    () => (menuConfig && menuConfig.chefsPickIds.length > 0 ? menuConfig.chefsPickIds : DEFAULT_CHEFS_PICK_IDS),
+    [menuConfig],
+  );
+  const CUSTOMER_FAVORITE_IDS = useMemo(
+    () => (menuConfig && menuConfig.featuredProductIds.length > 0 ? menuConfig.featuredProductIds : DEFAULT_CUSTOMER_FAVORITE_IDS),
+    [menuConfig],
+  );
+  const BBQ_BUNDLE_IDS = useMemo(
+    () => (menuConfig && menuConfig.bundles.length > 0 ? menuConfig.bundles[0].productIds : DEFAULT_BBQ_BUNDLE_IDS),
+    [menuConfig],
+  );
+
+  // Compute menu engineering classifications for quadrant-based ordering
+  const quadrantMap = useMemo(() => {
+    const classified = classifyProducts();
+    const map = new Map<string, Quadrant>();
+    for (const item of classified) {
+      map.set(item.productId, item.quadrant);
+    }
+    return map;
+  }, []);
+
+  // Sort products by quadrant: stars first, then plowhorses, puzzles, dogs
+  const sortByQuadrant = (products: CateringProduct[]): CateringProduct[] => {
+    return [...products].sort((a, b) => {
+      const aOrder = QUADRANT_ORDER[quadrantMap.get(a.id) || 'dog'] ?? 3;
+      const bOrder = QUADRANT_ORDER[quadrantMap.get(b.id) || 'dog'] ?? 3;
+      return aOrder - bOrder;
+    });
+  };
+
+  // Featured section data
+  const bbqBundleProducts = BBQ_BUNDLE_IDS
+    .map(id => CATERING_PRODUCTS.find(p => p.id === id))
+    .filter(Boolean) as CateringProduct[];
+
+  const customerFavorites = filterByDietary(
+    CUSTOMER_FAVORITE_IDS
+      .map(id => CATERING_PRODUCTS.find(p => p.id === id))
+      .filter(Boolean) as CateringProduct[],
+    activeFilters,
+  );
+
+  // Chef's Picks data
+  const chefsPickProducts = filterByDietary(
+    CHEFS_PICK_IDS
+      .map(id => CATERING_PRODUCTS.find(p => p.id === id))
+      .filter(Boolean) as CateringProduct[],
+    activeFilters,
+  );
 
   const handleToggleFilter = (tag: string) => {
     setActiveFilters(prev =>
@@ -189,7 +319,7 @@ export default function MenusPage() {
     );
   };
 
-  // Update active section based on scroll position
+  // Track scroll position to update active nav tab
   useEffect(() => {
     const handleScroll = () => {
       const sections = MENU_SECTIONS.map(s => ({
@@ -215,7 +345,7 @@ export default function MenusPage() {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      const offset = 80; // Account for sticky header
+      const offset = 80;
       const elementPosition = element.getBoundingClientRect().top + window.scrollY;
       window.scrollTo({
         top: elementPosition - offset,
@@ -243,6 +373,27 @@ export default function MenusPage() {
           </div>
         </div>
       </div>
+
+      {/* Menu Engineering Active Indicator */}
+      {menuConfig && (
+        <div className="bg-green-50 border-b border-green-200">
+          <div className="container mx-auto px-4 py-2 flex items-center justify-center gap-2 text-sm text-green-800">
+            <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>
+              Optimized by Menu Engineering &mdash; applied{' '}
+              {new Date(menuConfig.appliedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            </span>
+            <Link
+              href="/menu-engineering"
+              className="ml-2 text-green-700 underline hover:text-green-900 font-semibold"
+            >
+              Dashboard
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Quick Navigation */}
       <div className="bg-white border-b sticky top-0 z-40 shadow-sm">
@@ -277,32 +428,137 @@ export default function MenusPage() {
             id={section.id}
             className={`mb-16 sm:mb-20 scroll-mt-20 ${sectionIndex > 0 ? 'pt-8' : ''}`}
           >
-            {/* Section Header */}
-            <div className="relative mb-8 sm:mb-12 rounded-2xl overflow-hidden">
-              <div className="relative h-48 sm:h-64">
-                <Image
-                  src={section.image}
-                  alt={section.title}
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#363333]/90 via-[#363333]/70 to-transparent" />
-              </div>
-              <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-10">
-                <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#f7efd7] tracking-wider mb-2">
+            {/* Section Header — text-only for Featured/Chef's Picks, hero image for categories */}
+            {section.id === 'featured' || section.id === 'chefs-picks' ? (
+              <div className="mb-8 sm:mb-12">
+                <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#363333] tracking-wider mb-2">
                   {section.title}
                 </h2>
-                <p className="text-[#dabb64] text-base sm:text-lg">
+                <p className="text-gray-500 text-base sm:text-lg">
                   {section.subtitle}
                 </p>
+                <div className="h-1 w-16 bg-[#dabb64] mt-4" />
               </div>
-            </div>
+            ) : (
+              <div className="relative mb-8 sm:mb-12 rounded-2xl overflow-hidden">
+                <div className="relative h-48 sm:h-64">
+                  <Image
+                    src={section.image}
+                    alt={section.title}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#363333]/90 via-[#363333]/70 to-transparent" />
+                </div>
+                <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-10">
+                  <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#f7efd7] tracking-wider mb-2">
+                    {section.title}
+                  </h2>
+                  <p className="text-[#dabb64] text-base sm:text-lg">
+                    {section.subtitle}
+                  </p>
+                </div>
+              </div>
+            )}
 
-            {/* Subsections */}
-            {section.subsections.length > 0 ? (
+            {/* === FEATURED SECTION === */}
+            {section.id === 'featured' && (
+              <>
+                {/* BBQ Pitmaster Bundle Showcase */}
+                <div className="mb-12">
+                  <div className="bg-[#363333] rounded-2xl overflow-hidden">
+                    <div className="grid md:grid-cols-2 gap-0">
+                      <div className="relative h-64 md:h-auto min-h-[280px]">
+                        <Image
+                          src="/images/bbq_brisket.jpg"
+                          alt="BBQ Pitmaster Spread"
+                          fill
+                          className="object-cover"
+                        />
+                        <div className="absolute top-4 left-4 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold tracking-wide">
+                          SIGNATURE SPREAD
+                        </div>
+                      </div>
+                      <div className="p-6 sm:p-8 flex flex-col justify-center">
+                        <h3 className="font-oswald text-2xl sm:text-3xl font-bold text-[#f7efd7] mb-3 tracking-wide">
+                          BBQ PITMASTER PACKAGE
+                        </h3>
+                        <p className="text-white/70 mb-6 text-sm sm:text-base">
+                          Our Texas-style brisket smoked low and slow for 14 hours, paired with soul-warming
+                          three-cheese mac &amp; cheese and golden buttery Southern cornbread. The complete BBQ
+                          spread your guests won&apos;t stop talking about.
+                        </p>
+                        <div className="flex flex-wrap gap-3 mb-6">
+                          {bbqBundleProducts.map(p => (
+                            <div key={p.id} className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
+                              <div className="w-8 h-8 rounded-full overflow-hidden relative flex-shrink-0">
+                                <Image src={p.image} alt={p.title} fill className="object-cover" />
+                              </div>
+                              <div>
+                                <span className="text-white text-xs font-semibold">{p.title.split('(')[0].trim()}</span>
+                                <span className="text-[#dabb64] text-[10px] block">{getDisplayPrice(p)}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <Link
+                          href="/#catering"
+                          className="inline-flex items-center gap-2 bg-[#dabb64] text-[#363333] font-oswald font-bold px-6 py-3 rounded-lg hover:bg-[#f7efd7] transition-all w-fit"
+                        >
+                          <span>Build This Spread</span>
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                          </svg>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Customer Favorites */}
+                {customerFavorites.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-4 mb-6">
+                      <div>
+                        <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#363333]">
+                          Customer Favorites
+                        </h3>
+                        <p className="text-sm text-gray-500">Our most ordered items across all categories</p>
+                      </div>
+                      <div className="flex-1 h-px bg-[#dabb64]/50" />
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                      {customerFavorites.map(product => (
+                        <MenuItemCard key={product.id} product={product} badge="popular" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* === CHEF'S PICKS SECTION === */}
+            {section.id === 'chefs-picks' && chefsPickProducts.length > 0 && (
+              <div>
+                <p className="text-gray-600 mb-6 max-w-2xl">
+                  Premium selections with exceptional flavor profiles and outstanding value.
+                  These are the items our team recommends for an elevated catering experience.
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                  {chefsPickProducts.map(product => (
+                    <MenuItemCard key={product.id} product={product} badge="chefs-pick" />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* === STANDARD SUBSECTION RENDERING === */}
+            {section.subsections.length > 0 && (
               <div className="space-y-12">
                 {section.subsections.map((subsection) => {
-                  const products = filterByDietary(getProductsForSubsection(subsection.id), activeFilters);
+                  const rawProducts = getProductsForSubsection(subsection.id).filter(p => !REMOVED_ITEM_IDS.has(p.id));
+                  const sorted = sortByQuadrant(rawProducts);
+                  const products = filterByDietary(sorted, activeFilters);
                   if (products.length === 0) return null;
 
                   return (
@@ -318,18 +574,24 @@ export default function MenusPage() {
                       </div>
                       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                         {products.map((product) => (
-                          <MenuItemCard key={product.id} product={product} />
+                          <MenuItemCard
+                            key={product.id}
+                            product={product}
+                            badge={getBadgeForProduct(product.id)}
+                          />
                         ))}
                       </div>
                     </div>
                   );
                 })}
               </div>
-            ) : (
-              /* Direct products for sections without subsections */
+            )}
+
+            {/* === FLAT SECTIONS (desserts) === */}
+            {section.subsections.length === 0 && section.id !== 'featured' && section.id !== 'chefs-picks' && (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {filterByDietary(getProductsForSection(section.id), activeFilters).map((product) => (
-                  <MenuItemCard key={product.id} product={product} />
+                {filterByDietary(sortByQuadrant(getProductsForSection(section.id).filter(p => !REMOVED_ITEM_IDS.has(p.id))), activeFilters).map((product) => (
+                  <MenuItemCard key={product.id} product={product} badge={getBadgeForProduct(product.id)} />
                 ))}
               </div>
             )}
