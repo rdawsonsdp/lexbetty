@@ -150,8 +150,8 @@
 }
 
 .hover-lift:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 40px -15px rgba(93, 64, 55, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -10px rgba(93, 64, 55, 0.1);
 }
 
 .img-zoom {
@@ -159,7 +159,7 @@
 }
 
 .group:hover .img-zoom {
-  transform: scale(1.08);
+  transform: scale(1.03);
 }
 
 /* Button enhancements */
@@ -335,6 +335,15 @@ button:active,
 a:active {
   transform: scale(0.98);
   transition: transform 0.1s ease-out;
+}
+
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 /* Better scrollbar */

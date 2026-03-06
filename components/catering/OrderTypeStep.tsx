@@ -54,7 +54,7 @@ export default function OrderTypeStep() {
             HOW WOULD YOU LIKE TO ORDER?
           </h2>
           <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
-            Build a custom menu or choose from our curated packages
+            However you like to plan — we&apos;ve got you covered either way.
           </p>
         </div>
 

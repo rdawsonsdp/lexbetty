@@ -9,7 +9,8 @@ export default function Header() {
   const navLinks = [
     { href: '/', label: 'HOME' },
     { href: '/menu-engineering', label: 'MENU ENGINEERING' },
-    { href: 'https://www.caterpro.com', label: 'CATERPRO', external: true },
+    { href: '/admin/menu', label: 'ADMIN' },
+    { href: 'https://www.catersmith.com', label: 'CATERSMITH', external: true },
   ];
 
   return (
@@ -19,8 +20,8 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
             <Image
-              src="/images/CaterPro.png"
-              alt="CaterPro"
+              src="/images/CaterSmith.png"
+              alt="CaterSmith"
               width={180}
               height={60}
               className="h-10 sm:h-12 lg:h-14 w-auto"

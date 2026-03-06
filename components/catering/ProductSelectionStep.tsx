@@ -128,7 +128,7 @@ export default function ProductSelectionStep({
             BUILD YOUR {state.eventType?.toUpperCase() || 'EVENT'}
           </h2>
           <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto mb-6">
-            Select items for your {state.eventType || ''} - sizes auto-adjust to your {state.headcount} guest count
+            No wrong choices here — everything&apos;s crowd-tested and loved. Sizes adjust automatically for your {state.headcount} guests.
           </p>
         </div>
 
@@ -186,22 +186,19 @@ export default function ProductSelectionStep({
           <div className="lg:col-span-2">
             {/* Featured Items Banner */}
             {featuredProducts.length > 0 && (
-              <div className="mb-8 rounded-2xl border-2 border-[#dabb64] bg-[#363333] overflow-hidden">
-                {/* Header */}
-                <div className="bg-[#dabb64] px-6 py-4 text-center">
-                  <p className="font-oswald text-xs sm:text-sm tracking-[0.2em] text-[#363333]/70 uppercase mb-1">
+              <div className="mb-10">
+                {/* Subtle header */}
+                <div className="mb-5">
+                  <p className="font-oswald text-xs tracking-[0.2em] text-[#8B7355] uppercase mb-1">
                     Chef&apos;s Recommendation
                   </p>
-                  <h3 className="font-oswald text-xl sm:text-2xl md:text-3xl font-bold text-[#363333] tracking-wide">
-                    THE SOUL DELIVERED BBQ SPREAD
+                  <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#363333] tracking-wide">
+                    The BBQ Spread
                   </h3>
-                  <p className="text-[#363333]/80 text-sm sm:text-base mt-1 max-w-xl mx-auto">
-                    Our guests&apos; most-loved trio — smoky brisket, creamy mac, and warm cornbread. Order all three and make it a meal they&apos;ll remember.
-                  </p>
                 </div>
 
-                {/* Featured Products Grid */}
-                <div className={`grid gap-0 divide-y sm:divide-y-0 sm:divide-x divide-white/10 ${
+                {/* Featured Products — clean horizontal row */}
+                <div className={`grid gap-6 sm:gap-8 ${
                   featuredProducts.length === 3 ? 'sm:grid-cols-3' :
                   featuredProducts.length === 2 ? 'sm:grid-cols-2' : 'grid-cols-1'
                 }`}>

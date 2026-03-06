@@ -578,6 +578,7 @@ export default function CheckoutPage() {
                     </svg>
                     Event Details
                   </h2>
+                  <p className="text-sm text-gray-500 mb-4">Almost there — just a few details so we can deliver everything perfectly.</p>
 
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
@@ -727,6 +728,8 @@ export default function CheckoutPage() {
                     <div className="text-sm">{submitError}</div>
                   </div>
                 )}
+
+                <p className="text-sm text-gray-500 text-center mb-4">Take your time. Look it over. We want this to be exactly right.</p>
 
                 <div className="flex gap-4">
                   <button

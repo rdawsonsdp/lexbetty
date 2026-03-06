@@ -43,7 +43,7 @@ export default function HeadcountBudgetStep() {
             HOW MANY GUESTS?
           </h2>
           <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto mb-8">
-            This helps us recommend the right portions and pricing for your event
+            The more we know, the better we serve. This helps us get your portions just right.
           </p>
 
           {/* Large Headcount Input */}
@@ -102,7 +102,7 @@ export default function HeadcountBudgetStep() {
             WHAT&apos;S YOUR PER-PERSON BUDGET?
           </h3>
           <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto mb-8">
-            Optional — helps us highlight the best options for your budget
+            Totally optional — this just helps us highlight the best value for your group.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">

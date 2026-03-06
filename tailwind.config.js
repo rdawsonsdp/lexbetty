@@ -8,7 +8,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Urban Bistro Brand Colors
+        // CaterSmith Brand Colors
         cream: '#f7efd7',
         'primary-brown': '#363333',
         'accent-gold': '#dabb64',

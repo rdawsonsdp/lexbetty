@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { EventType } from '@/lib/types';
-import { getProductsByEventType } from '@/lib/products';
+import { getProductsFromDB } from '@/lib/supabase/products';
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const eventType = searchParams.get('eventType') as EventType | null;
 
-    // Get products from local data, filtered by event type if specified
-    const products = getProductsByEventType(eventType);
+    // Fetch from Supabase with automatic fallback to hardcoded products
+    const products = await getProductsFromDB(eventType);
 
     return NextResponse.json({ products });
   } catch (error) {

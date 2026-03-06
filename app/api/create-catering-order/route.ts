@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createCateringDraftOrder } from '@/lib/shopify';
 
 interface CreateOrderRequest {
-  lineItems: Array<{ variantId: string; quantity: number }>;
+  items?: Array<{ productId: string; title: string; quantity: number; unitPrice: number; totalPrice: number; selectedSize: string; displayText: string }>;
+  lineItems?: Array<{ variantId: string; quantity: number }>;
   headcount: number;
   eventType: string;
   buyerInfo: {
@@ -11,16 +12,22 @@ interface CreateOrderRequest {
     phone: string;
     company: string;
     eventDate: string;
+    eventTime?: string;
+    deliveryAddress?: string;
     notes?: string;
   };
+  setupRequired?: boolean;
+  deliveryFee?: number;
+  orderTotal?: number;
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: CreateOrderRequest = await request.json();
 
-    // Validate required fields
-    if (!body.lineItems || body.lineItems.length === 0) {
+    // Validate required fields — checkout sends `items`, Shopify path uses `lineItems`
+    const hasItems = (body.items && body.items.length > 0) || (body.lineItems && body.lineItems.length > 0);
+    if (!hasItems) {
       return NextResponse.json(
         { success: false, error: 'No items in order' },
         { status: 400 }
@@ -58,8 +65,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Create the draft order in Shopify
+    const lineItems = body.lineItems ?? (body.items || []).map(item => ({
+      variantId: item.productId,
+      quantity: item.quantity,
+    }));
     const result = await createCateringDraftOrder(
-      body.lineItems,
+      lineItems,
       body.headcount,
       body.eventType,
       body.buyerInfo

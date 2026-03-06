@@ -17,13 +17,13 @@ const robotoCondensed = Roboto_Condensed({
 });
 
 export const metadata: Metadata = {
-  title: 'CaterPro | The right food. The right amount. Every event.',
+  title: 'CaterSmith | The right food. The right amount. Every event.',
   description:
-    'CaterPro offers exceptional catering for corporate events, meetings, and special occasions. The right food, the right amount, every event.',
+    'CaterSmith offers exceptional catering for corporate events, meetings, and special occasions. The right food, the right amount, every event.',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Urban Bistro',
+    title: 'CaterSmith',
   },
 };
 

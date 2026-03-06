@@ -141,7 +141,7 @@ export default function OrderConfirmationPage() {
             </svg>
           </div>
           <h1 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#f7efd7] tracking-wider mb-3">
-            ORDER CONFIRMED!
+            YOU DID IT — THE FOOD IS PLANNED!
           </h1>
           <p className="text-[#dabb64] text-lg sm:text-xl font-oswald font-bold">
             Order #{orderDetails.orderNumber}
@@ -153,13 +153,18 @@ export default function OrderConfirmationPage() {
       <div className="bg-[#dabb64] py-3">
         <div className="container mx-auto px-4 text-center">
           <p className="font-oswald font-bold text-[#363333] text-sm sm:text-base tracking-wide">
-            ON TIME, AS ORDERED — GUARANTEED
+            NOW YOU CAN FOCUS ON THE FUN PART — WE&apos;VE GOT THE FOOD HANDLED.
           </p>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-8 sm:py-12 max-w-4xl">
         <div className="grid gap-6">
+          {/* Warm Paragraph */}
+          <p className="text-center text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
+            Our team will reach out to confirm payment and delivery details. All that&apos;s left for you is to enjoy the event.
+          </p>
+
           {/* Order Summary Card */}
           <Card>
             <h2 className="font-oswald text-xl font-bold text-[#363333] mb-4 flex items-center gap-2">
@@ -253,7 +258,7 @@ export default function OrderConfirmationPage() {
               <svg className="w-5 h-5 text-[#dabb64]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              What Happens Next
+              Here&apos;s What We&apos;ll Take Care Of
             </h2>
             <div className="space-y-0">
               {TIMELINE_STEPS.map((step, index) => (

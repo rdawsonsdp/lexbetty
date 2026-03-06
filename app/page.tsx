@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCatering } from '@/context/CateringContext';
-import { EVENT_TYPES } from '@/lib/event-types';
+import { useEnabledEventTypes } from '@/lib/hooks/useEnabledEventTypes';
 import StepIndicator from '@/components/catering/StepIndicator';
 import HeadcountBudgetStep from '@/components/catering/HeadcountBudgetStep';
 import OrderTypeStep from '@/components/catering/OrderTypeStep';
@@ -19,6 +19,7 @@ import RecommendedItems from '@/components/catering/RecommendedItems';
 
 export default function HomePage() {
   const { state, dispatch } = useCatering();
+  const { eventTypes: EVENT_TYPES } = useEnabledEventTypes();
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
 
   const handleSelectEventType = (eventTypeId: string) => {
@@ -74,13 +75,13 @@ export default function HomePage() {
             URBAN BISTRO
           </h1>
           <p className="font-oswald text-base sm:text-xl md:text-[2.5rem] font-bold text-[#dabb64] tracking-wider whitespace-nowrap">
-            THE RIGHT FOOD. THE RIGHT AMOUNT. EVERY EVENT.
+            YOU&apos;VE GOT ENOUGH TO WORRY ABOUT. LET US HANDLE THE FOOD.
           </p>
         </div>
 
         <div className="bg-[#dabb64] py-4 text-center">
           <p className="font-oswald text-sm sm:text-base tracking-wide text-[#363333]">
-            Plan your next remarkable event!
+            Plan Your Event Menu
           </p>
         </div>
       </section>
@@ -109,7 +110,7 @@ export default function HomePage() {
               WHAT ARE YOU PLANNING?
             </h2>
             <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
-              Select your event type to see our curated menu options
+              No wrong choices here — pick what fits and we&apos;ll show you the best options.
             </p>
           </div>
 

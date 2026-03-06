@@ -11,8 +11,8 @@ export default function Footer() {
           {/* Logo & Brand */}
           <div className="md:col-span-1">
             <Image
-              src="/images/CaterPro.png"
-              alt="CaterPro"
+              src="/images/CaterSmith.png"
+              alt="CaterSmith"
               width={160}
               height={50}
               className="h-10 w-auto mb-4"
@@ -103,7 +103,7 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-500">
-          <p>&copy; {currentYear} Urban Bistro. All rights reserved.</p>
+          <p>&copy; {currentYear} CaterSmith. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -206,8 +206,8 @@ export default function CateringCart({ onCheckout }: CateringCartProps) {
         {calculatedItems.length === 0 ? (
           <div className="text-center py-8">
             <div className="text-4xl mb-3">🍽️</div>
-            <p className="text-sm text-gray-500">Add items to build your order</p>
-            <p className="text-xs text-gray-400 mt-1">Sizes auto-adjust to your guest count</p>
+            <p className="text-sm text-gray-500">Start adding items — we&apos;ll keep track of everything for you.</p>
+            <p className="text-xs text-gray-400 mt-1">Portions adjust automatically to your guest count.</p>
           </div>
         ) : (
           <>

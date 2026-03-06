@@ -9,6 +9,7 @@ import { getDisplayPrice, getPricingTypeLabel } from '@/lib/pricing';
 import { classifyProducts, type Quadrant } from '@/lib/menu-engineering';
 import { loadMenuConfig, type MenuConfig } from '@/lib/menu-config';
 import DietaryFilterBar from '@/components/catering/DietaryFilterBar';
+import { useDisabledCategories } from '@/lib/hooks/useEnabledEventTypes';
 
 // --- Menu Engineering Defaults (used when no config is applied) ---
 
@@ -248,6 +249,7 @@ export default function MenusPage() {
   const [activeSection, setActiveSection] = useState<string | null>('featured');
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [menuConfig, setMenuConfig] = useState<MenuConfig | null>(null);
+  const { disabledCategories } = useDisabledCategories();
 
   // Load menu engineering config from localStorage on mount
   useEffect(() => {
@@ -319,10 +321,26 @@ export default function MenusPage() {
     );
   };
 
+  // Map menu section IDs to category IDs for filtering
+  const sectionCategoryMap: Record<string, string> = {
+    breakfast: 'breakfast',
+    lunch: 'lunch',
+    desserts: 'dessert',
+  };
+
+  const visibleSections = useMemo(
+    () =>
+      MENU_SECTIONS.filter((s) => {
+        const cat = sectionCategoryMap[s.id];
+        return !cat || !disabledCategories.includes(cat);
+      }),
+    [disabledCategories],
+  );
+
   // Track scroll position to update active nav tab
   useEffect(() => {
     const handleScroll = () => {
-      const sections = MENU_SECTIONS.map(s => ({
+      const sections = visibleSections.map(s => ({
         id: s.id,
         element: document.getElementById(s.id),
       }));
@@ -399,7 +417,7 @@ export default function MenusPage() {
       <div className="bg-white border-b sticky top-0 z-40 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex overflow-x-auto gap-2 py-4 scrollbar-hide">
-            {MENU_SECTIONS.map((section) => (
+            {visibleSections.map((section) => (
               <button
                 key={section.id}
                 onClick={() => scrollToSection(section.id)}
@@ -422,7 +440,7 @@ export default function MenusPage() {
 
       {/* Menu Sections */}
       <div className="container mx-auto px-4 py-8 sm:py-12">
-        {MENU_SECTIONS.map((section, sectionIndex) => (
+        {visibleSections.map((section, sectionIndex) => (
           <section
             key={section.id}
             id={section.id}
