@@ -3,13 +3,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { CATERING_PRODUCTS } from '@/lib/products';
 import { CateringProduct } from '@/lib/types';
 import { getDisplayPrice, getPricingTypeLabel } from '@/lib/pricing';
 import { classifyProducts, type Quadrant } from '@/lib/menu-engineering';
 import { loadMenuConfig, type MenuConfig } from '@/lib/menu-config';
 import DietaryFilterBar from '@/components/catering/DietaryFilterBar';
 import { useDisabledCategories } from '@/lib/hooks/useEnabledEventTypes';
+import { useActiveProducts } from '@/lib/hooks/useActiveProducts';
 
 // --- Menu Engineering Defaults (used when no config is applied) ---
 
@@ -111,7 +111,7 @@ const MENU_SECTIONS = [
 
 // --- Product Mapping ---
 
-function getProductsForSubsection(subsectionId: string): CateringProduct[] {
+function getProductsForSubsection(subsectionId: string, allProducts: CateringProduct[]): CateringProduct[] {
   const mappings: Record<string, (p: CateringProduct) => boolean> = {
     'sunrise-staples': (p) =>
       p.categories.includes('breakfast') &&
@@ -171,7 +171,7 @@ function getProductsForSubsection(subsectionId: string): CateringProduct[] {
 
   const filter = mappings[subsectionId];
   if (!filter) return [];
-  return CATERING_PRODUCTS.filter(filter);
+  return allProducts.filter(filter);
 }
 
 function filterByDietary(products: CateringProduct[], filters: string[]): CateringProduct[] {
@@ -179,9 +179,9 @@ function filterByDietary(products: CateringProduct[], filters: string[]): Cateri
   return products.filter(p => filters.every(f => p.tags?.includes(f)));
 }
 
-function getProductsForSection(sectionId: string): CateringProduct[] {
+function getProductsForSection(sectionId: string, allProducts: CateringProduct[]): CateringProduct[] {
   if (sectionId === 'desserts') {
-    return CATERING_PRODUCTS.filter(p => p.tags?.includes('dessert'));
+    return allProducts.filter(p => p.tags?.includes('dessert'));
   }
   return [];
 }
@@ -190,9 +190,9 @@ function getProductsForSection(sectionId: string): CateringProduct[] {
 
 type MenuBadge = 'popular' | 'chefs-pick' | 'new' | null;
 
-function getBadgeForProduct(productId: string): MenuBadge {
+function getBadgeForProduct(productId: string, allProducts: CateringProduct[]): MenuBadge {
   if (productId === 'beef-brisket') return 'new';
-  const product = CATERING_PRODUCTS.find(p => p.id === productId);
+  const product = allProducts.find(p => p.id === productId);
   if (product?.tags?.includes('popular')) return 'popular';
   return null;
 }
@@ -250,6 +250,7 @@ export default function MenusPage() {
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [menuConfig, setMenuConfig] = useState<MenuConfig | null>(null);
   const { disabledCategories } = useDisabledCategories();
+  const { activeProducts } = useActiveProducts();
 
   // Load menu engineering config from localStorage on mount
   useEffect(() => {
@@ -293,14 +294,14 @@ export default function MenusPage() {
     });
   };
 
-  // Featured section data
+  // Featured section data — filtered to active products only
   const bbqBundleProducts = BBQ_BUNDLE_IDS
-    .map(id => CATERING_PRODUCTS.find(p => p.id === id))
+    .map(id => activeProducts.find(p => p.id === id))
     .filter(Boolean) as CateringProduct[];
 
   const customerFavorites = filterByDietary(
     CUSTOMER_FAVORITE_IDS
-      .map(id => CATERING_PRODUCTS.find(p => p.id === id))
+      .map(id => activeProducts.find(p => p.id === id))
       .filter(Boolean) as CateringProduct[],
     activeFilters,
   );
@@ -308,7 +309,7 @@ export default function MenusPage() {
   // Chef's Picks data
   const chefsPickProducts = filterByDietary(
     CHEFS_PICK_IDS
-      .map(id => CATERING_PRODUCTS.find(p => p.id === id))
+      .map(id => activeProducts.find(p => p.id === id))
       .filter(Boolean) as CateringProduct[],
     activeFilters,
   );
@@ -574,7 +575,7 @@ export default function MenusPage() {
             {section.subsections.length > 0 && (
               <div className="space-y-12">
                 {section.subsections.map((subsection) => {
-                  const rawProducts = getProductsForSubsection(subsection.id).filter(p => !REMOVED_ITEM_IDS.has(p.id));
+                  const rawProducts = getProductsForSubsection(subsection.id, activeProducts).filter(p => !REMOVED_ITEM_IDS.has(p.id));
                   const sorted = sortByQuadrant(rawProducts);
                   const products = filterByDietary(sorted, activeFilters);
                   if (products.length === 0) return null;
@@ -595,7 +596,7 @@ export default function MenusPage() {
                           <MenuItemCard
                             key={product.id}
                             product={product}
-                            badge={getBadgeForProduct(product.id)}
+                            badge={getBadgeForProduct(product.id, activeProducts)}
                           />
                         ))}
                       </div>
@@ -608,8 +609,8 @@ export default function MenusPage() {
             {/* === FLAT SECTIONS (desserts) === */}
             {section.subsections.length === 0 && section.id !== 'featured' && section.id !== 'chefs-picks' && (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {filterByDietary(sortByQuadrant(getProductsForSection(section.id).filter(p => !REMOVED_ITEM_IDS.has(p.id))), activeFilters).map((product) => (
-                  <MenuItemCard key={product.id} product={product} badge={getBadgeForProduct(product.id)} />
+                {filterByDietary(sortByQuadrant(getProductsForSection(section.id, activeProducts).filter(p => !REMOVED_ITEM_IDS.has(p.id))), activeFilters).map((product) => (
+                  <MenuItemCard key={product.id} product={product} badge={getBadgeForProduct(product.id, activeProducts)} />
                 ))}
               </div>
             )}

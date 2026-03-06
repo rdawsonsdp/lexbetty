@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useCatering } from '@/context/CateringContext';
 import { getEventTypeName } from '@/lib/event-types';
 import { formatCurrency } from '@/lib/pricing';
-import { getProductsByEventType } from '@/lib/products';
 import { getBudgetStatus } from '@/lib/budgets';
+import { useActiveProducts } from '@/lib/hooks/useActiveProducts';
 import CateringProductCard from './CateringProductCard';
 import CateringCart from './CateringCart';
 import Card from '@/components/ui/Card';
@@ -30,6 +30,7 @@ export default function ProductSelectionStep({
   const [searchTerm, setSearchTerm] = useState('');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const { getActiveByEventType } = useActiveProducts();
 
   useEffect(() => {
     sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -70,8 +71,8 @@ export default function ProductSelectionStep({
     };
   }, [isCartOpen]);
 
-  // Get products filtered by event type from local data
-  const products = getProductsByEventType(state.eventType);
+  // Get products filtered by event type, respecting active/inactive status
+  const products = getActiveByEventType(state.eventType);
 
   // Filter products based on search term and dietary filters
   const filteredProducts = products.filter((product) => {

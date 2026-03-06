@@ -4,11 +4,11 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCatering } from '@/context/CateringContext';
-import { CATERING_PRODUCTS } from '@/lib/products';
 import { CateringProduct } from '@/lib/types';
 import { getDisplayPrice, getPricingTypeLabel } from '@/lib/pricing';
 import Card from '@/components/ui/Card';
 import DietaryFilterBar from '@/components/catering/DietaryFilterBar';
+import { useActiveProducts } from '@/lib/hooks/useActiveProducts';
 
 type Category = 'all' | 'breakfast' | 'lunch' | 'dessert';
 
@@ -77,6 +77,7 @@ export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const { state } = useCatering();
+  const { activeProducts } = useActiveProducts();
 
   const handleToggleFilter = (tag: string) => {
     setActiveFilters(prev =>
@@ -87,7 +88,7 @@ export default function ProductsPage() {
   };
 
   // Filter products by category, search, and dietary filters
-  const filteredProducts = CATERING_PRODUCTS.filter((product) => {
+  const filteredProducts = activeProducts.filter((product) => {
     const matchesCategory =
       activeCategory === 'all' || product.categories.includes(activeCategory as any);
     const matchesSearch =
@@ -125,7 +126,7 @@ export default function ProductsPage() {
             FULL MENU
           </h1>
           <p className="text-[#dabb64] text-lg">
-            Browse all {CATERING_PRODUCTS.length} items from our catering menu
+            Browse all {activeProducts.length} items from our catering menu
           </p>
         </div>
       </div>

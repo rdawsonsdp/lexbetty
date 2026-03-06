@@ -34,8 +34,12 @@ function AdminMenuPage() {
   const [editingProduct, setEditingProduct] = useState<AdminProduct | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isBatchSaving, setIsBatchSaving] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [disabledCategories, setDisabledCategories] = useState<string[]>([]);
+  const [dirtyIds, setDirtyIds] = useState<Set<string>>(new Set());
+  // Snapshot of products at last save/load, used to detect real changes
+  const [cleanSnapshot, setCleanSnapshot] = useState<Map<string, { is_active: boolean; featured?: boolean }>>(new Map());
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });
@@ -46,8 +50,15 @@ function AdminMenuPage() {
     try {
       const res = await fetch('/api/admin/products', { headers: authHeaders() });
       if (!res.ok) throw new Error('Failed to fetch');
-      const { products } = await res.json();
-      setProducts(products);
+      const { products: fetched } = await res.json();
+      setProducts(fetched);
+      // Capture clean state for dirty tracking
+      const snap = new Map<string, { is_active: boolean; featured?: boolean }>();
+      for (const p of fetched as AdminProduct[]) {
+        snap.set(p.id, { is_active: p.is_active, featured: p.featured });
+      }
+      setCleanSnapshot(snap);
+      setDirtyIds(new Set());
     } catch (err) {
       console.error('Failed to load products:', err);
       showToast('Failed to load products', 'error');
@@ -141,59 +152,86 @@ function AdminMenuPage() {
     }
   };
 
-  // Toggle featured
-  const handleToggleFeatured = async (id: string, featured: boolean) => {
-    const prev = [...products];
-    setProducts(ps => ps.map(p => p.id === id ? { ...p, featured } : p));
-
-    try {
-      const product = products.find(p => p.id === id);
-      if (!product) return;
-      const res = await fetch(`/api/admin/products/${id}`, {
-        method: 'PUT',
-        headers: authHeaders(),
-        body: JSON.stringify({ ...product, featured }),
-      });
-      if (!res.ok) throw new Error();
-    } catch {
-      setProducts(prev);
-      showToast('Failed to update', 'error');
-    }
+  // Helper: mark a product dirty or clean based on whether it differs from snapshot
+  const updateDirty = (id: string, newState: { is_active: boolean; featured?: boolean }) => {
+    const clean = cleanSnapshot.get(id);
+    setDirtyIds(prev => {
+      const next = new Set(prev);
+      if (clean && clean.is_active === newState.is_active && (clean.featured ?? false) === (newState.featured ?? false)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
   };
 
-  // Toggle active
-  const handleToggleActive = async (id: string, active: boolean) => {
-    const prev = [...products];
-    setProducts(ps => ps.map(p => p.id === id ? { ...p, is_active: active } : p));
+  // Toggle featured — local only
+  const handleToggleFeatured = (id: string, featured: boolean) => {
+    setProducts(ps => ps.map(p => {
+      if (p.id !== id) return p;
+      const updated = { ...p, featured };
+      updateDirty(id, { is_active: updated.is_active, featured });
+      return updated;
+    }));
+  };
 
-    if (!active) {
+  // Toggle active — local only
+  const handleToggleActive = (id: string, active: boolean) => {
+    setProducts(ps => ps.map(p => {
+      if (p.id !== id) return p;
+      const updated = { ...p, is_active: active };
+      updateDirty(id, { is_active: active, featured: updated.featured });
+      return updated;
+    }));
+  };
+
+  // Batch save all dirty changes
+  const handleBatchSave = async () => {
+    if (dirtyIds.size === 0) return;
+    setIsBatchSaving(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const id of Array.from(dirtyIds)) {
+      const product = products.find(p => p.id === id);
+      if (!product) continue;
+
       try {
-        const res = await fetch(`/api/admin/products/${id}`, {
-          method: 'DELETE',
-          headers: authHeaders(),
-        });
-        if (!res.ok) throw new Error();
-        showToast('Item deactivated');
+        if (!product.is_active) {
+          const res = await fetch(`/api/admin/products/${id}`, {
+            method: 'DELETE',
+            headers: authHeaders(),
+          });
+          if (!res.ok) throw new Error();
+        } else {
+          const res = await fetch(`/api/admin/products/${id}`, {
+            method: 'PUT',
+            headers: authHeaders(),
+            body: JSON.stringify(product),
+          });
+          if (!res.ok) throw new Error();
+        }
+        successCount++;
       } catch {
-        setProducts(prev);
-        showToast('Failed to deactivate', 'error');
-      }
-    } else {
-      try {
-        const product = products.find(p => p.id === id);
-        if (!product) return;
-        const res = await fetch(`/api/admin/products/${id}`, {
-          method: 'PUT',
-          headers: authHeaders(),
-          body: JSON.stringify({ ...product, is_active: true }),
-        });
-        if (!res.ok) throw new Error();
-        showToast('Item activated');
-      } catch {
-        setProducts(prev);
-        showToast('Failed to activate', 'error');
+        failCount++;
       }
     }
+
+    if (failCount === 0) {
+      showToast(`Saved ${successCount} change${successCount !== 1 ? 's' : ''}`);
+      // Update snapshot to current state
+      const snap = new Map<string, { is_active: boolean; featured?: boolean }>();
+      for (const p of products) {
+        snap.set(p.id, { is_active: p.is_active, featured: p.featured });
+      }
+      setCleanSnapshot(snap);
+      setDirtyIds(new Set());
+    } else {
+      showToast(`${failCount} change${failCount !== 1 ? 's' : ''} failed to save`, 'error');
+    }
+
+    setIsBatchSaving(false);
   };
 
   // Save product (create or update)
@@ -268,6 +306,44 @@ function AdminMenuPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Sticky Save Bar */}
+      {dirtyIds.size > 0 && (
+        <div className="sticky top-0 z-50 bg-amber-50 border-b-2 border-amber-300 shadow-md">
+          <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <span className="text-sm font-medium text-amber-800">
+              {dirtyIds.size} unsaved change{dirtyIds.size !== 1 ? 's' : ''}
+            </span>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  // Revert: reload products from server
+                  setLoading(true);
+                  fetchProducts();
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                disabled={isBatchSaving}
+              >
+                Discard
+              </button>
+              <button
+                onClick={handleBatchSave}
+                disabled={isBatchSaving}
+                className="px-5 py-2 text-sm font-bold text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
+              >
+                {isBatchSaving ? (
+                  <>
+                    <span className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                    Saving...
+                  </>
+                ) : (
+                  `Save Changes (${dirtyIds.size})`
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-4xl mx-auto px-4 py-6">
         <AdminHeader
           itemCount={products.length}
