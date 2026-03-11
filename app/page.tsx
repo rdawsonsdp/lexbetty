@@ -125,7 +125,7 @@ export default function HomePage() {
             </p>
           </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              <div className="flex flex-wrap justify-center gap-6 max-w-4xl mx-auto">
                 {EVENT_TYPES.map((eventType, index) => {
                   const isSelected = state.eventType === eventType.id;
                   const isUnselected = state.eventType && state.eventType !== eventType.id;
@@ -133,7 +133,7 @@ export default function HomePage() {
                   return (
                     <div
                       key={eventType.id}
-                      className="animate-scale-in"
+                      className="animate-scale-in w-full sm:w-[calc(50%-0.75rem)] max-w-[400px]"
                       style={{ animationDelay: `${index * 0.1}s` }}
                     >
                       <div

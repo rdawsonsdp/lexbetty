@@ -128,7 +128,7 @@ export default function CateringProductCard({ product, featured }: CateringProdu
             <div className="text-lg sm:text-xl font-oswald font-bold text-[#383838]">
               {formatCurrency(displayTotal)}
             </div>
-            <div className="text-xs text-[#B0B0B0] mt-0.5">
+            <div className="text-sm text-gray-600 mt-0.5">
               {itemQty > 1 ? `${itemQty} × ` : ''}{orderCalc.displayText}
             </div>
           </div>
@@ -187,7 +187,7 @@ export default function CateringProductCard({ product, featured }: CateringProdu
           <div className="text-lg sm:text-xl font-oswald font-bold text-[#383838]">
             {formatCurrency(displayTotal)}
           </div>
-          <div className="text-xs text-[#B0B0B0] mt-0.5">
+          <div className="text-sm text-gray-600 mt-0.5">
             {itemQty > 1 ? `${itemQty} × ` : ''}{orderCalc.displayText}
           </div>
         </div>
