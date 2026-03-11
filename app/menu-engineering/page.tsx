@@ -3,13 +3,14 @@
 import { useMemo } from 'react';
 import { classifyProducts, generateRecommendations, getQuadrantSummary, getQuadrantColor, getQuadrantLabel, getQuadrantEmoji } from '@/lib/menu-engineering';
 import { formatCurrency } from '@/lib/pricing';
+import AdminAuthGate from '@/components/admin/AdminAuthGate';
 import DashboardKPIs from '@/components/menu-engineering/DashboardKPIs';
 import MonthlySalesTable from '@/components/menu-engineering/MonthlySalesTable';
 import MenuMatrix from '@/components/menu-engineering/MenuMatrix';
 import SeasonalTrends from '@/components/menu-engineering/SeasonalTrends';
 import RecommendedUpdates from '@/components/menu-engineering/RecommendedUpdates';
 
-export default function MenuEngineeringPage() {
+function MenuEngineeringContent() {
   const products = useMemo(() => classifyProducts(), []);
   const recommendations = useMemo(() => generateRecommendations(products), [products]);
   const quadrantSummary = useMemo(() => getQuadrantSummary(products), [products]);
@@ -100,5 +101,13 @@ export default function MenuEngineeringPage() {
         <RecommendedUpdates recommendations={recommendations} />
       </div>
     </div>
+  );
+}
+
+export default function MenuEngineeringPage() {
+  return (
+    <AdminAuthGate>
+      <MenuEngineeringContent />
+    </AdminAuthGate>
   );
 }

@@ -46,51 +46,74 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       {/* Hero Section */}
-      <section className="bg-white pt-6 pb-2">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 gap-4 max-w-4xl mx-auto">
-            {/* Left: Brisket Hero */}
-            <div>
-              <div className="relative aspect-square rounded-lg overflow-hidden bg-black">
-                <Image
-                  src="/images/brisket-knife-hero.png"
-                  alt="Best Brisket in Chicago - Lexington Betty Smokehouse"
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
-              <h2 className="font-oswald text-lg sm:text-xl md:text-2xl font-bold text-[#383838] tracking-wide mt-3">
-                Best Brisket in Chicago
-              </h2>
-              <p className="font-oswald text-sm text-[#E8621A] tracking-wide">
-                Smoked Low & Slow
-              </p>
-            </div>
+      <section>
+        {/* Mobile: Single full-width hero */}
+        <div className="md:hidden relative aspect-[4/5] overflow-hidden bg-black">
+          <Image
+            src="/images/chef-dominique-hero.png"
+            alt="Celebrity Chef Dominique Leach - Lexington Betty Smokehouse"
+            fill
+            className="object-cover object-top"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <div className="absolute inset-0 flex flex-col items-start justify-end p-6">
+            <h1 className="font-oswald text-4xl font-bold text-white tracking-wider leading-[0.95] mb-2 drop-shadow-lg">
+              BEST BBQ<br />IN CHICAGO
+            </h1>
+            <p className="font-oswald text-sm text-[#E8621A] tracking-widest font-bold drop-shadow">
+              CHEF DOMINIQUE LEACH
+            </p>
+          </div>
+        </div>
 
-            {/* Right: Chef Dominique */}
-            <div>
-              <div className="relative aspect-square rounded-lg overflow-hidden bg-black">
-                <Image
-                  src="/images/chef-dominique-hero.png"
-                  alt="Celebrity Chef Dominique Leach"
-                  fill
-                  className="object-cover object-top"
-                  priority
-                />
+        {/* Desktop: Two-up grid */}
+        <div className="hidden md:block bg-white pt-6 pb-2">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-2 gap-4 max-w-4xl mx-auto">
+              {/* Left: Brisket Hero */}
+              <div>
+                <div className="relative aspect-square rounded-lg overflow-hidden bg-black">
+                  <Image
+                    src="/images/brisket-knife-hero.png"
+                    alt="Best Brisket in Chicago - Lexington Betty Smokehouse"
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                </div>
+                <h2 className="font-oswald text-xl md:text-2xl font-bold text-[#383838] tracking-wide mt-3">
+                  Best Brisket in Chicago
+                </h2>
+                <p className="font-oswald text-sm text-[#E8621A] tracking-wide">
+                  Smoked Low & Slow
+                </p>
               </div>
-              <h2 className="font-oswald text-lg sm:text-xl md:text-2xl font-bold text-[#383838] tracking-wide mt-3">
-                Chef Dominique Leach
-              </h2>
-              <p className="font-oswald text-sm text-[#E8621A] tracking-wide">
-                Celebrity Chef
-              </p>
+
+              {/* Right: Chef Dominique */}
+              <div>
+                <div className="relative aspect-square rounded-lg overflow-hidden bg-black">
+                  <Image
+                    src="/images/chef-dominique-hero.png"
+                    alt="Celebrity Chef Dominique Leach"
+                    fill
+                    className="object-cover object-top"
+                    priority
+                  />
+                </div>
+                <h2 className="font-oswald text-xl md:text-2xl font-bold text-[#383838] tracking-wide mt-3">
+                  Chef Dominique Leach
+                </h2>
+                <p className="font-oswald text-sm text-[#E8621A] tracking-wide">
+                  Celebrity Chef
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Accent Bar */}
-        <div className="bg-[#E8621A] py-3 text-center mt-6">
+        <div className="bg-[#E8621A] py-3 text-center md:mt-6">
           <p className="font-oswald text-sm sm:text-base tracking-widest text-white font-bold uppercase">
             Catering for Every Occasion
           </p>
