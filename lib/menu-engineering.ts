@@ -214,7 +214,7 @@ export function getQuadrantEmoji(q: Quadrant): string {
 export function getQuadrantColor(q: Quadrant): string {
   switch (q) {
     case 'star':
-      return '#dabb64';
+      return '#E8621A';
     case 'plowhorse':
       return '#e88c3a';
     case 'puzzle':

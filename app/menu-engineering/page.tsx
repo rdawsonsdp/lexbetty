@@ -17,7 +17,7 @@ export default function MenuEngineeringPage() {
   return (
     <div className="min-h-screen bg-[#f7f5f0]">
       {/* Hero Header */}
-      <section className="bg-[#363333] text-white py-8 sm:py-12">
+      <section className="bg-[#383838] text-white py-8 sm:py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-oswald font-bold mb-2">
@@ -29,19 +29,19 @@ export default function MenuEngineeringPage() {
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-lg text-sm">
-                <svg className="w-4 h-4 text-[#dabb64]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 text-[#E8621A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 Oct 2025 – Mar 2026
               </span>
               <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-lg text-sm">
-                <svg className="w-4 h-4 text-[#dabb64]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 text-[#E8621A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                 </svg>
                 {products.length} Products Analyzed
               </span>
               <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-lg text-sm">
-                <svg className="w-4 h-4 text-[#dabb64]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 text-[#E8621A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
                 {recommendations.length} Recommendations
@@ -52,7 +52,7 @@ export default function MenuEngineeringPage() {
       </section>
 
       {/* Quadrant Quick Stats */}
-      <section className="bg-[#363333] border-t border-white/10 pb-8">
+      <section className="bg-[#383838] border-t border-white/10 pb-8">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {quadrantSummary.map((qs) => (

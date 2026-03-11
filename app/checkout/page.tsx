@@ -149,14 +149,14 @@ export default function CheckoutPage() {
   // Redirect if cart is empty
   if (calculatedItems.length === 0) {
     return (
-      <div className="min-h-screen bg-[#f7efd7] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center p-4">
         <Card className="max-w-md w-full text-center">
           <div className="text-5xl mb-4">🛒</div>
-          <h2 className="font-oswald text-2xl font-bold text-[#363333] mb-2">Your Cart is Empty</h2>
+          <h2 className="font-oswald text-2xl font-bold text-[#383838] mb-2">Your Cart is Empty</h2>
           <p className="text-gray-600 mb-6">Add some items to your order before checking out.</p>
           <Link
             href="/#catering"
-            className="inline-block bg-[#363333] text-white font-oswald font-bold px-6 py-3 rounded-lg hover:bg-[#dabb64] hover:text-[#363333] transition-colors"
+            className="inline-block bg-[#383838] text-white font-oswald font-bold px-6 py-3 rounded-lg hover:bg-[#E8621A] hover:text-[#383838] transition-colors"
           >
             Start Ordering
           </Link>
@@ -305,9 +305,9 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7efd7]">
+    <div className="min-h-screen bg-[#FAFAFA]">
       {/* Header */}
-      <div className="bg-[#363333] py-6 sm:py-8">
+      <div className="bg-[#383838] py-6 sm:py-8">
         <div className="container mx-auto px-4">
           <Link
             href="/#catering"
@@ -318,7 +318,7 @@ export default function CheckoutPage() {
             </svg>
             Back to Order
           </Link>
-          <h1 className="font-oswald text-3xl sm:text-4xl font-bold text-[#f7efd7] tracking-wider">
+          <h1 className="font-oswald text-3xl sm:text-4xl font-bold text-[#FAFAFA] tracking-wider">
             CHECKOUT
           </h1>
         </div>
@@ -339,7 +339,7 @@ export default function CheckoutPage() {
                   {index > 0 && (
                     <div
                       className={`absolute right-1/2 top-5 w-full h-0.5 -translate-y-1/2 ${
-                        isCompleted || isCurrent ? 'bg-[#dabb64]' : 'bg-gray-200'
+                        isCompleted || isCurrent ? 'bg-[#E8621A]' : 'bg-gray-200'
                       }`}
                       style={{ width: 'calc(100% + 2rem)', right: '50%', zIndex: 0 }}
                     />
@@ -349,9 +349,9 @@ export default function CheckoutPage() {
                   <div
                     className={`relative z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-colors ${
                       isCurrent
-                        ? 'bg-[#dabb64] text-[#363333]'
+                        ? 'bg-[#E8621A] text-[#383838]'
                         : isCompleted
-                        ? 'bg-[#363333] text-white'
+                        ? 'bg-[#383838] text-white'
                         : 'bg-gray-200 text-gray-400'
                     }`}
                   >
@@ -361,7 +361,7 @@ export default function CheckoutPage() {
                   {/* Label */}
                   <p
                     className={`mt-2 text-xs sm:text-sm font-oswald font-semibold ${
-                      isCurrent ? 'text-[#363333]' : isCompleted ? 'text-[#363333]' : 'text-gray-400'
+                      isCurrent ? 'text-[#383838]' : isCompleted ? 'text-[#383838]' : 'text-gray-400'
                     }`}
                   >
                     {step.label}
@@ -385,8 +385,8 @@ export default function CheckoutPage() {
               <div className="space-y-6">
                 {/* Contact Information */}
                 <Card>
-                  <h2 className="font-oswald text-xl font-bold text-[#363333] mb-4 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-[#dabb64]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <h2 className="font-oswald text-xl font-bold text-[#383838] mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-[#E8621A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                     Contact Information
@@ -402,7 +402,7 @@ export default function CheckoutPage() {
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleInputChange}
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#dabb64]/50 ${
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 ${
                           errors.firstName ? 'border-red-500' : 'border-gray-300'
                         }`}
                       />
@@ -418,7 +418,7 @@ export default function CheckoutPage() {
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleInputChange}
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#dabb64]/50 ${
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 ${
                           errors.lastName ? 'border-red-500' : 'border-gray-300'
                         }`}
                       />
@@ -434,7 +434,7 @@ export default function CheckoutPage() {
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#dabb64]/50 ${
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 ${
                           errors.email ? 'border-red-500' : 'border-gray-300'
                         }`}
                       />
@@ -451,7 +451,7 @@ export default function CheckoutPage() {
                         value={formData.phone}
                         onChange={handleInputChange}
                         placeholder="(555) 123-4567"
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#dabb64]/50 ${
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 ${
                           errors.phone ? 'border-red-500' : 'border-gray-300'
                         }`}
                       />
@@ -467,7 +467,7 @@ export default function CheckoutPage() {
                         name="company"
                         value={formData.company}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#dabb64]/50"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50"
                       />
                     </div>
                   </div>
@@ -475,8 +475,8 @@ export default function CheckoutPage() {
 
                 {/* Delivery Address */}
                 <Card>
-                  <h2 className="font-oswald text-xl font-bold text-[#363333] mb-4 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-[#dabb64]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <h2 className="font-oswald text-xl font-bold text-[#383838] mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-[#E8621A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
@@ -494,7 +494,7 @@ export default function CheckoutPage() {
                         value={formData.address}
                         onChange={handleInputChange}
                         placeholder="123 Main Street"
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#dabb64]/50 ${
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 ${
                           errors.address ? 'border-red-500' : 'border-gray-300'
                         }`}
                       />
@@ -511,7 +511,7 @@ export default function CheckoutPage() {
                         value={formData.address2}
                         onChange={handleInputChange}
                         placeholder="Suite 100, Floor 2, etc."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#dabb64]/50"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50"
                       />
                     </div>
 
@@ -525,7 +525,7 @@ export default function CheckoutPage() {
                           name="city"
                           value={formData.city}
                           onChange={handleInputChange}
-                          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#dabb64]/50 ${
+                          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 ${
                             errors.city ? 'border-red-500' : 'border-gray-300'
                           }`}
                         />
@@ -543,7 +543,7 @@ export default function CheckoutPage() {
                           onChange={handleInputChange}
                           placeholder="IL"
                           maxLength={2}
-                          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#dabb64]/50 ${
+                          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 ${
                             errors.state ? 'border-red-500' : 'border-gray-300'
                           }`}
                         />
@@ -560,7 +560,7 @@ export default function CheckoutPage() {
                           value={formData.zip}
                           onChange={handleInputChange}
                           placeholder="60601"
-                          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#dabb64]/50 ${
+                          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 ${
                             errors.zip ? 'border-red-500' : 'border-gray-300'
                           }`}
                         />
@@ -572,8 +572,8 @@ export default function CheckoutPage() {
 
                 {/* Event Details */}
                 <Card>
-                  <h2 className="font-oswald text-xl font-bold text-[#363333] mb-4 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-[#dabb64]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <h2 className="font-oswald text-xl font-bold text-[#383838] mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-[#E8621A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     Event Details
@@ -591,7 +591,7 @@ export default function CheckoutPage() {
                         value={formData.eventDate}
                         onChange={handleInputChange}
                         min={getMinDate()}
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#dabb64]/50 ${
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 ${
                           errors.eventDate ? 'border-red-500' : 'border-gray-300'
                         }`}
                       />
@@ -606,7 +606,7 @@ export default function CheckoutPage() {
                         name="deliveryTime"
                         value={formData.deliveryTime}
                         onChange={handleInputChange}
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#dabb64]/50 ${
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 ${
                           errors.deliveryTime ? 'border-red-500' : 'border-gray-300'
                         }`}
                       >
@@ -625,7 +625,7 @@ export default function CheckoutPage() {
                           name="setupRequired"
                           checked={formData.setupRequired}
                           onChange={handleInputChange}
-                          className="w-5 h-5 rounded border-gray-300 text-[#dabb64] focus:ring-[#dabb64]"
+                          className="w-5 h-5 rounded border-gray-300 text-[#E8621A] focus:ring-[#E8621A]"
                         />
                         <span className="text-sm text-gray-700">
                           <strong>Full Setup Service</strong> — Our team will set up your catering spread
@@ -643,7 +643,7 @@ export default function CheckoutPage() {
                         onChange={handleInputChange}
                         rows={3}
                         placeholder="Loading dock access, dietary restrictions, allergies, etc."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#dabb64]/50 resize-none"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 resize-none"
                       />
                     </div>
                   </div>
@@ -657,14 +657,14 @@ export default function CheckoutPage() {
               /* Confirmation Step */
               <div className="space-y-6">
                 <Card>
-                  <h2 className="font-oswald text-xl font-bold text-[#363333] mb-4">
+                  <h2 className="font-oswald text-xl font-bold text-[#383838] mb-4">
                     Review Your Order
                   </h2>
 
                   {/* Contact Summary */}
                   <div className="mb-6 pb-6 border-b border-gray-200">
                     <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Contact</h3>
-                    <p className="text-[#363333] font-medium">{formData.firstName} {formData.lastName}</p>
+                    <p className="text-[#383838] font-medium">{formData.firstName} {formData.lastName}</p>
                     <p className="text-gray-600 text-sm">{formData.email}</p>
                     <p className="text-gray-600 text-sm">{formData.phone}</p>
                     {formData.company && <p className="text-gray-600 text-sm">{formData.company}</p>}
@@ -673,23 +673,23 @@ export default function CheckoutPage() {
                   {/* Delivery Summary */}
                   <div className="mb-6 pb-6 border-b border-gray-200">
                     <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Delivery</h3>
-                    <p className="text-[#363333]">{formData.address}</p>
-                    {formData.address2 && <p className="text-[#363333]">{formData.address2}</p>}
-                    <p className="text-[#363333]">{formData.city}, {formData.state} {formData.zip}</p>
+                    <p className="text-[#383838]">{formData.address}</p>
+                    {formData.address2 && <p className="text-[#383838]">{formData.address2}</p>}
+                    <p className="text-[#383838]">{formData.city}, {formData.state} {formData.zip}</p>
                   </div>
 
                   {/* Event Summary */}
                   <div className="mb-6 pb-6 border-b border-gray-200">
                     <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Event</h3>
-                    <div className="flex items-center gap-4 text-[#363333]">
+                    <div className="flex items-center gap-4 text-[#383838]">
                       <div className="flex items-center gap-2">
-                        <svg className="w-5 h-5 text-[#dabb64]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 text-[#E8621A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         <span>{new Date(formData.eventDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <svg className="w-5 h-5 text-[#dabb64]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 text-[#E8621A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span>{formData.deliveryTime}</span>
@@ -710,10 +710,10 @@ export default function CheckoutPage() {
                       {calculatedItems.map(item => (
                         <div key={item.product.id} className="flex justify-between text-sm">
                           <div>
-                            <p className="font-medium text-[#363333]">{item.product.title}</p>
+                            <p className="font-medium text-[#383838]">{item.product.title}</p>
                             <p className="text-gray-500 text-xs">{item.displayText}</p>
                           </div>
-                          <p className="font-semibold text-[#363333]">{formatCurrency(item.totalPrice)}</p>
+                          <p className="font-semibold text-[#383838]">{formatCurrency(item.totalPrice)}</p>
                         </div>
                       ))}
                     </div>
@@ -735,7 +735,7 @@ export default function CheckoutPage() {
                   <button
                     onClick={() => setCurrentStep(1)}
                     disabled={isSubmitting}
-                    className="flex-1 px-6 py-3 border-2 border-[#363333] text-[#363333] font-oswald font-bold rounded-lg hover:bg-[#363333] hover:text-white transition-colors disabled:opacity-50"
+                    className="flex-1 px-6 py-3 border-2 border-[#383838] text-[#383838] font-oswald font-bold rounded-lg hover:bg-[#383838] hover:text-white transition-colors disabled:opacity-50"
                   >
                     Edit Details
                   </button>
@@ -759,29 +759,29 @@ export default function CheckoutPage() {
 
           {/* Order Summary Sidebar */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-4 bg-[#f7efd7]">
-              <h2 className="font-oswald text-xl font-bold text-[#363333] mb-4">
+            <Card className="sticky top-4 bg-[#FAFAFA]">
+              <h2 className="font-oswald text-xl font-bold text-[#383838] mb-4">
                 Order Summary
               </h2>
 
               <div className="space-y-3 mb-4 pb-4 border-b border-gray-200">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">{calculatedItems.length} item{calculatedItems.length !== 1 ? 's' : ''}</span>
-                  <span className="font-medium text-[#363333]">{formatCurrency(totalCost)}</span>
+                  <span className="font-medium text-[#383838]">{formatCurrency(totalCost)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Guests</span>
-                  <span className="font-medium text-[#363333]">{state.headcount}</span>
+                  <span className="font-medium text-[#383838]">{state.headcount}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Delivery</span>
-                  <span className="font-medium text-[#363333]">{formatCurrency(deliveryFee)}</span>
+                  <span className="font-medium text-[#383838]">{formatCurrency(deliveryFee)}</span>
                 </div>
               </div>
 
               <div className="flex justify-between font-oswald font-bold text-lg mb-2">
-                <span className="text-[#363333]">Total</span>
-                <span className="text-[#dabb64]">{formatCurrency(orderTotal)}</span>
+                <span className="text-[#383838]">Total</span>
+                <span className="text-[#E8621A]">{formatCurrency(orderTotal)}</span>
               </div>
 
               <div className="flex justify-between text-sm text-gray-500">
@@ -795,7 +795,7 @@ export default function CheckoutPage() {
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                   {calculatedItems.map(item => (
                     <div key={item.product.id} className="text-sm">
-                      <p className="text-[#363333] truncate">{item.product.title}</p>
+                      <p className="text-[#383838] truncate">{item.product.title}</p>
                     </div>
                   ))}
                 </div>
@@ -826,7 +826,7 @@ export default function CheckoutPage() {
               {/* Support */}
               <div className="mt-4 pt-4 border-t border-gray-200">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Need Help?</p>
-                <a href="tel:3126008155" className="text-sm text-[#dabb64] hover:text-[#363333] transition-colors font-semibold">
+                <a href="tel:3126008155" className="text-sm text-[#E8621A] hover:text-[#383838] transition-colors font-semibold">
                   (312) 600-8155
                 </a>
                 <p className="text-xs text-gray-400 mt-1">Call, email, or text us anytime</p>

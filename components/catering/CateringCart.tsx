@@ -85,26 +85,26 @@ export default function CateringCart({ onCheckout }: CateringCartProps) {
 
   return (
     <>
-      <Card className="animate-scale-in delay-200 bg-[#f7efd7]" hover={false}>
+      <Card className="animate-scale-in delay-200 bg-[#FAFAFA]" hover={false}>
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg sm:text-xl font-oswald font-bold text-[#363333] tracking-wide">
+          <h2 className="text-lg sm:text-xl font-oswald font-bold text-[#383838] tracking-wide">
             Your Order
           </h2>
         </div>
 
         {/* Large Stats Display */}
         {state.selectedItems.length > 0 && (
-          <div className="grid grid-cols-2 gap-4 mb-4 p-4 bg-white rounded-xl border-l-4 border-[#dabb64]">
+          <div className="grid grid-cols-2 gap-4 mb-4 p-4 bg-white rounded-xl border-l-4 border-[#E8621A]">
             <div>
               <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Per Person</p>
-              <p className="font-oswald text-2xl sm:text-3xl font-bold text-[#363333]">
+              <p className="font-oswald text-2xl sm:text-3xl font-bold text-[#383838]">
                 {formatCurrency(totalPerPerson)}
               </p>
             </div>
             <div>
               <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Total</p>
-              <p className="font-oswald text-2xl sm:text-3xl font-bold text-[#dabb64]">
+              <p className="font-oswald text-2xl sm:text-3xl font-bold text-[#E8621A]">
                 {formatCurrency(orderTotal)}
               </p>
             </div>
@@ -145,7 +145,7 @@ export default function CateringCart({ onCheckout }: CateringCartProps) {
           <div className="mb-4 p-3 bg-white/50 rounded-lg text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600">Event Type:</span>
-              <span className="font-medium text-[#363333]">
+              <span className="font-medium text-[#383838]">
                 {getEventTypeName(state.eventType)}
               </span>
             </div>
@@ -154,7 +154,7 @@ export default function CateringCart({ onCheckout }: CateringCartProps) {
 
         {/* Headcount Input */}
         <div className="mb-4 sm:mb-6">
-          <label className="text-xs font-semibold text-[#363333] uppercase tracking-wide mb-2 block font-oswald">
+          <label className="text-xs font-semibold text-[#383838] uppercase tracking-wide mb-2 block font-oswald">
             Number of Guests
           </label>
           <div className="flex items-center gap-2">
@@ -173,7 +173,7 @@ export default function CateringCart({ onCheckout }: CateringCartProps) {
                 const val = parseInt(e.target.value, 10);
                 if (!isNaN(val) && val >= 1) handleHeadcountChange(val);
               }}
-              className="flex-1 text-center font-bold text-[#363333] text-lg border border-gray-300 rounded-lg py-1.5 focus:outline-none focus:ring-2 focus:ring-[#dabb64]/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              className="flex-1 text-center font-bold text-[#383838] text-lg border border-gray-300 rounded-lg py-1.5 focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
             <button
               onClick={() => handleHeadcountChange(state.headcount + 5)}
@@ -192,8 +192,8 @@ export default function CateringCart({ onCheckout }: CateringCartProps) {
                 onClick={() => handleHeadcountChange(n)}
                 className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-colors ${
                   state.headcount === n
-                    ? 'bg-[#363333] text-white'
-                    : 'bg-white text-gray-600 hover:bg-[#dabb64]/20 hover:text-[#363333]'
+                    ? 'bg-[#383838] text-white'
+                    : 'bg-white text-gray-600 hover:bg-[#E8621A]/20 hover:text-[#383838]'
                 }`}
               >
                 {n}
@@ -218,15 +218,15 @@ export default function CateringCart({ onCheckout }: CateringCartProps) {
                   className="flex justify-between items-start border-b border-gray-200 pb-3"
                 >
                   <div className="flex-1 min-w-0 pr-2">
-                    <p className="font-oswald font-semibold text-[#363333] text-sm truncate">
+                    <p className="font-oswald font-semibold text-[#383838] text-sm truncate">
                       {item.itemQuantity > 1 ? `${item.itemQuantity} × ` : ''}{item.product.title}
                     </p>
-                    <p className="text-xs text-[#8B7355] mt-0.5">
+                    <p className="text-xs text-[#B0B0B0] mt-0.5">
                       {item.displayText}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <p className="font-oswald font-bold text-[#363333] text-sm whitespace-nowrap">
+                    <p className="font-oswald font-bold text-[#383838] text-sm whitespace-nowrap">
                       {formatCurrency(item.totalPrice)}
                     </p>
                     <button
@@ -252,16 +252,16 @@ export default function CateringCart({ onCheckout }: CateringCartProps) {
             </button>
 
             {/* Totals */}
-            <div className="border-t-2 border-[#dabb64] pt-4 space-y-3">
+            <div className="border-t-2 border-[#E8621A] pt-4 space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Guests</span>
-                <span className="font-semibold text-[#363333]">
+                <span className="font-semibold text-[#383838]">
                   {state.headcount}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Subtotal</span>
-                <span className="font-semibold text-[#363333]">
+                <span className="font-semibold text-[#383838]">
                   {formatCurrency(totalCost)}
                 </span>
               </div>
@@ -273,19 +273,19 @@ export default function CateringCart({ onCheckout }: CateringCartProps) {
                   <span className="text-gray-600">Delivery</span>
                   <span className="text-xs text-gray-400">({getOrderSizeLabel(state.headcount)})</span>
                 </div>
-                <span className="font-semibold text-[#363333]">
+                <span className="font-semibold text-[#383838]">
                   {formatCurrency(deliveryFee)}
                 </span>
               </div>
               <div className="flex justify-between text-sm pt-2 border-t border-gray-200">
                 <span className="text-gray-600 font-medium">Order Total</span>
-                <span className="font-bold text-[#363333]">
+                <span className="font-bold text-[#383838]">
                   {formatCurrency(orderTotal)}
                 </span>
               </div>
               <div className="flex justify-between text-lg font-oswald font-bold pt-2 border-t border-gray-200">
-                <span className="text-[#363333]">Per Person</span>
-                <span className="text-[#dabb64]">
+                <span className="text-[#383838]">Per Person</span>
+                <span className="text-[#E8621A]">
                   {formatCurrency(totalPerPerson)}
                 </span>
               </div>

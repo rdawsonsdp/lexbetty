@@ -8,16 +8,19 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // CaterSmith Brand Colors
-        cream: '#f7efd7',
-        'primary-brown': '#363333',
-        'accent-gold': '#dabb64',
-        'light-brown': '#8B7355',
-        charcoal: '#333333',
+        // Lexington Betty Smokehouse Brand Colors
+        cream: '#EDE3D0',
+        'primary-brown': '#383838',
+        'accent-gold': '#E8621A',
+        'light-brown': '#B0B0B0',
+        charcoal: '#383838',
+        'smokehouse-orange': '#E8621A',
+        'smoke-gray': '#B0B0B0',
+        'warm-white': '#FAFAFA',
         'success-green': '#4CAF50',
         'error-red': '#E53935',
-        'muted': '#8B7355',
-        'dark': '#363333',
+        'muted': '#B0B0B0',
+        'dark': '#2D2D2D',
       },
       fontFamily: {
         oswald: ['var(--font-oswald)', 'Oswald', 'sans-serif'],

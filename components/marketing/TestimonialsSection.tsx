@@ -35,7 +35,7 @@ function StarRating({ rating }: { rating: number }) {
       {Array.from({ length: 5 }).map((_, i) => (
         <svg
           key={i}
-          className={`w-4 h-4 ${i < rating ? 'text-[#dabb64]' : 'text-gray-300'}`}
+          className={`w-4 h-4 ${i < rating ? 'text-[#E8621A]' : 'text-gray-300'}`}
           fill="currentColor"
           viewBox="0 0 20 20"
         >
@@ -48,10 +48,10 @@ function StarRating({ rating }: { rating: number }) {
 
 export default function TestimonialsSection() {
   return (
-    <section className="bg-[#f7efd7] py-12 sm:py-16">
+    <section className="bg-[#FAFAFA] py-12 sm:py-16">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
-          <h2 className="font-oswald text-3xl sm:text-4xl font-bold text-[#363333] tracking-wider mb-3">
+          <h2 className="font-oswald text-3xl sm:text-4xl font-bold text-[#383838] tracking-wider mb-3">
             WHAT OUR CLIENTS SAY
           </h2>
           <p className="text-gray-600 max-w-xl mx-auto">
@@ -67,7 +67,7 @@ export default function TestimonialsSection() {
                 &ldquo;{testimonial.quote}&rdquo;
               </p>
               <div className="border-t border-gray-200 pt-3">
-                <p className="font-oswald font-bold text-[#363333] text-sm">
+                <p className="font-oswald font-bold text-[#383838] text-sm">
                   {testimonial.author}
                 </p>
                 <p className="text-xs text-gray-500">{testimonial.company}</p>

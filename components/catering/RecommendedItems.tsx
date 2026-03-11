@@ -32,10 +32,10 @@ export default function RecommendedItems() {
   };
 
   return (
-    <div className="border-2 border-[#dabb64]/50 rounded-xl p-4 sm:p-6 bg-[#dabb64]/5">
+    <div className="border-2 border-[#E8621A]/50 rounded-xl p-4 sm:p-6 bg-[#E8621A]/5">
       <div className="flex items-center gap-2 mb-4">
-        <span className="text-[#dabb64] text-lg">&#9733;</span>
-        <h3 className="font-oswald text-lg font-bold text-[#363333] tracking-wide">
+        <span className="text-[#E8621A] text-lg">&#9733;</span>
+        <h3 className="font-oswald text-lg font-bold text-[#383838] tracking-wide">
           RECOMMENDED FOR YOUR {getEventTypeName(state.eventType).toUpperCase()}
         </h3>
         <span className="text-xs text-gray-500">
@@ -43,33 +43,33 @@ export default function RecommendedItems() {
         </span>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {recommended.map((product) => {
           const calc = calculateProductOrder(product, state.headcount);
           return (
             <div
               key={product.id}
-              className="flex-shrink-0 w-[180px] sm:w-[200px] bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+              className="bg-white rounded-lg overflow-hidden"
             >
-              <div className="relative h-24">
+              <div className="relative aspect-square">
                 <Image
                   src={product.image}
                   alt={product.title}
                   fill
                   className="object-cover"
-                  sizes="200px"
+                  sizes="(max-width: 640px) 50vw, 33vw"
                 />
               </div>
-              <div className="p-3">
-                <h4 className="font-oswald font-semibold text-[#363333] text-sm line-clamp-1 mb-1">
+              <div className="pt-3 pb-2">
+                <h4 className="font-oswald font-semibold text-[#383838] text-sm sm:text-base line-clamp-1">
                   {product.title}
                 </h4>
-                <p className="text-xs text-gray-500 mb-2">
+                <p className="text-xs sm:text-sm text-gray-500 mb-2">
                   {formatCurrency(calc.totalPrice / state.headcount)}/person
                 </p>
                 <button
                   onClick={() => handleAdd(product)}
-                  className="w-full text-xs font-semibold bg-[#363333] text-white py-1.5 rounded-lg hover:bg-[#dabb64] hover:text-[#363333] transition-colors"
+                  className="w-full text-xs sm:text-sm font-semibold bg-[#383838] text-white py-2 rounded-lg hover:bg-[#E8621A] transition-colors"
                 >
                   Add to Order
                 </button>

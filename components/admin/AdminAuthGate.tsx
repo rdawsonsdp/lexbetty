@@ -78,13 +78,13 @@ export default function AdminAuthGate({ children }: AdminAuthGateProps) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter admin password"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#dabb64] focus:border-transparent"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#E8621A] focus:border-transparent"
             autoFocus
           />
           {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
           <button
             type="submit"
-            className="w-full mt-4 bg-[#363333] text-white py-3 rounded-lg font-semibold hover:bg-[#4a4747] transition-colors"
+            className="w-full mt-4 bg-[#383838] text-white py-3 rounded-lg font-semibold hover:bg-[#4a4747] transition-colors"
           >
             Sign In
           </button>

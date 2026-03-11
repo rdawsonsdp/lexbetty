@@ -21,7 +21,12 @@ export async function fetchCateringProducts(
   }
 
   // Return local product data
-  return getProductsByEventType(eventType || null);
+  if (eventType) {
+    return getProductsByEventType(eventType);
+  }
+  // Return all products when no event type specified
+  const { CATERING_PRODUCTS } = await import('./products');
+  return CATERING_PRODUCTS;
 }
 
 /**

@@ -67,7 +67,7 @@ export default function PricingTypeFields({ register, setValue, watch }: Pricing
             onClick={() => handleTypeChange(pt.value)}
             className={`px-3 py-2 text-sm rounded-lg border transition-colors ${
               pricingType === pt.value
-                ? 'border-[#dabb64] bg-[#dabb64]/10 text-gray-900 font-medium'
+                ? 'border-[#E8621A] bg-[#E8621A]/10 text-gray-900 font-medium'
                 : 'border-gray-200 text-gray-600 hover:border-gray-300'
             }`}
           >

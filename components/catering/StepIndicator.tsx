@@ -30,7 +30,7 @@ export default function StepIndicator({
                   currentStep > step.number
                     ? 'bg-green-500 text-white'
                     : currentStep === step.number
-                    ? 'bg-[#363333] text-white ring-4 ring-[#363333]/20'
+                    ? 'bg-[#383838] text-white ring-4 ring-[#383838]/20'
                     : 'bg-gray-200 text-gray-400'
                 }
               `}
@@ -58,7 +58,7 @@ export default function StepIndicator({
                 mt-2 text-xs sm:text-sm font-medium hidden sm:block
                 ${
                   currentStep >= step.number
-                    ? 'text-[#363333]'
+                    ? 'text-[#383838]'
                     : 'text-gray-400'
                 }
               `}

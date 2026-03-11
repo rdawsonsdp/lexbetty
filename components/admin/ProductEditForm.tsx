@@ -69,7 +69,7 @@ export default function ProductEditForm({ product, onSave, onDelete, onCancel, i
             <input
               {...register('id')}
               placeholder="e.g., beef-brisket"
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#dabb64]"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#E8621A]"
             />
             {errors.id && <p className="text-red-500 text-sm mt-1">{errors.id.message}</p>}
           </div>
@@ -79,7 +79,7 @@ export default function ProductEditForm({ product, onSave, onDelete, onCancel, i
           <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
           <input
             {...register('title')}
-            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#dabb64]"
+            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#E8621A]"
           />
           {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>}
         </div>
@@ -89,7 +89,7 @@ export default function ProductEditForm({ product, onSave, onDelete, onCancel, i
           <textarea
             {...register('description')}
             rows={3}
-            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#dabb64] resize-y"
+            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#E8621A] resize-y"
           />
           {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
         </div>
@@ -114,7 +114,7 @@ export default function ProductEditForm({ product, onSave, onDelete, onCancel, i
               onClick={() => toggleCategory(cat)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 categories?.includes(cat)
-                  ? 'bg-[#363333] text-white'
+                  ? 'bg-[#383838] text-white'
                   : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
               }`}
             >
@@ -145,7 +145,7 @@ export default function ProductEditForm({ product, onSave, onDelete, onCancel, i
             <button
               type="button"
               onClick={() => setValue('featured', !featured)}
-              className={`relative w-11 h-6 rounded-full transition-colors ${featured ? 'bg-[#dabb64]' : 'bg-gray-300'}`}
+              className={`relative w-11 h-6 rounded-full transition-colors ${featured ? 'bg-[#E8621A]' : 'bg-gray-300'}`}
             >
               <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow ${featured ? 'translate-x-5' : ''}`} />
             </button>
@@ -169,7 +169,7 @@ export default function ProductEditForm({ product, onSave, onDelete, onCancel, i
         <button
           type="submit"
           disabled={isSaving}
-          className="flex-1 bg-[#363333] text-white py-3 rounded-lg font-semibold hover:bg-[#4a4747] transition-colors disabled:opacity-50"
+          className="flex-1 bg-[#383838] text-white py-3 rounded-lg font-semibold hover:bg-[#4a4747] transition-colors disabled:opacity-50"
         >
           {isSaving ? 'Saving...' : isNew ? 'Create Item' : 'Save Changes'}
         </button>

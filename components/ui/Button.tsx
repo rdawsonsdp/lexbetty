@@ -25,13 +25,13 @@ export default function Button({
   const variantStyles = {
     primary: disabled
       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-      : 'bg-[#363333] text-white hover:bg-gray-800 active:bg-gray-900 focus:ring-[#363333] shadow-md hover:shadow-lg',
+      : 'bg-[#E8621A] text-white hover:opacity-90 active:opacity-80 focus:ring-[#E8621A] shadow-md hover:shadow-lg',
     secondary: disabled
       ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-      : 'bg-[#dabb64] text-[#363333] hover:bg-[#c9aa54] active:bg-[#b89944] focus:ring-[#dabb64] shadow-md hover:shadow-lg',
+      : 'bg-[#383838] text-white hover:bg-gray-700 active:bg-gray-800 focus:ring-[#383838] shadow-md hover:shadow-lg',
     outline: disabled
       ? 'border-2 border-gray-300 text-gray-500 cursor-not-allowed'
-      : 'border-2 border-[#363333] text-[#363333] hover:bg-[#363333] hover:text-white focus:ring-[#363333]',
+      : 'border-2 border-[#383838] text-[#383838] hover:bg-[#383838] hover:text-white focus:ring-[#383838]',
   };
 
   return (

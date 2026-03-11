@@ -2,25 +2,18 @@ import { EventTypeConfig } from './types';
 
 export const EVENT_TYPES: EventTypeConfig[] = [
   {
-    id: 'breakfast',
-    name: 'Breakfast',
-    description: 'Morning meetings, early events, and AM gatherings',
-    icon: '🌅',
-    suggestedItems: ['pastries', 'muffins', 'coffee cake', 'danishes', 'croissants'],
-  },
-  {
     id: 'lunch',
-    name: 'Lunch',
-    description: 'Midday meetings, working lunches, and afternoon events',
-    icon: '☀️',
-    suggestedItems: ['sandwich trays', 'salads', 'savory items', 'dessert trays'],
+    name: 'BBQ Catering',
+    description: 'Smoked meats, soulful sides, and everything BBQ',
+    icon: '🔥',
+    suggestedItems: ['rib tips', 'brisket', 'pulled pork', 'smoked chicken', 'mac n cheese'],
   },
   {
     id: 'dessert',
-    name: 'Dessert',
-    description: 'Sweet treats, cakes, and delicious endings',
+    name: 'Desserts & Drinks',
+    description: 'Sweet endings and refreshing beverages',
     icon: '🍰',
-    suggestedItems: ['cake slices', 'cheesecake', 'cookies', 'brownies', 'pies'],
+    suggestedItems: ['banana pudding', 'peach cobbler', 'lemonade', 'cookies'],
   },
 ];
 

@@ -4,7 +4,8 @@ import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useCatering } from '@/context/CateringContext';
-import { getPackagesByEventType, getPackagesByBudget } from '@/lib/packages';
+import { getPackagesByBudget } from '@/lib/packages';
+import { useActivePackages } from '@/lib/hooks/useActivePackages';
 import { formatCurrency } from '@/lib/pricing';
 import { CateringPackage } from '@/lib/types';
 import Card from '@/components/ui/Card';
@@ -13,6 +14,7 @@ import Button from '@/components/ui/Button';
 export default function PackageSelectionStep() {
   const router = useRouter();
   const { state, dispatch } = useCatering();
+  const { packages: allFetchedPackages } = useActivePackages();
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -20,7 +22,7 @@ export default function PackageSelectionStep() {
   }, []);
 
   const allPackages = state.eventType
-    ? getPackagesByEventType(state.eventType)
+    ? allFetchedPackages.filter(pkg => pkg.categories.includes(state.eventType!))
     : [];
 
   const withinBudget = state.budgetRange
@@ -52,13 +54,13 @@ export default function PackageSelectionStep() {
     <div ref={sectionRef} className="bg-white py-12 sm:py-16 scroll-mt-4">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
-          <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#363333] tracking-wider mb-4">
+          <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#383838] tracking-wider mb-4">
             CHOOSE A PACKAGE
           </h2>
           <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
             Pre-built menus designed for {state.headcount} guests
             {state.budgetRange && (
-              <span className="text-[#dabb64] font-semibold"> within your {state.budgetRange.label}/person budget</span>
+              <span className="text-[#E8621A] font-semibold"> within your {state.budgetRange.label}/person budget</span>
             )}
           </p>
         </div>
@@ -83,7 +85,7 @@ export default function PackageSelectionStep() {
                   <Card
                     className={`relative flex flex-col h-full transition-all duration-300 ${
                       isSelected
-                        ? 'ring-4 ring-[#dabb64] bg-[#dabb64]/10'
+                        ? 'ring-4 ring-[#E8621A] bg-[#E8621A]/10'
                         : inBudget && state.budgetRange
                         ? 'ring-2 ring-green-400/50'
                         : ''
@@ -109,20 +111,20 @@ export default function PackageSelectionStep() {
                     </div>
 
                     {/* Title & Price */}
-                    <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#363333] mb-1 tracking-wide">
+                    <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#383838] mb-1 tracking-wide">
                       {pkg.title}
                     </h3>
                     <p className="text-sm text-gray-600 mb-4">{pkg.description}</p>
 
                     {/* Price */}
-                    <div className="mb-4 p-3 bg-[#f7efd7] rounded-lg">
+                    <div className="mb-4 p-3 bg-[#FAFAFA] rounded-lg">
                       <div className="flex items-baseline gap-1">
-                        <span className="font-oswald text-3xl font-bold text-[#363333]">
+                        <span className="font-oswald text-3xl font-bold text-[#383838]">
                           {formatCurrency(pkg.pricePerPerson)}
                         </span>
                         <span className="text-sm text-gray-500">/person</span>
                       </div>
-                      <p className="text-sm text-[#363333] font-semibold mt-1">
+                      <p className="text-sm text-[#383838] font-semibold mt-1">
                         {state.headcount} guests = {formatCurrency(pkg.pricePerPerson * state.headcount)} total
                       </p>
                     </div>
@@ -168,9 +170,9 @@ export default function PackageSelectionStep() {
         {/* Checkout Button */}
         {state.selectedPackage && (
           <div className="mt-10 text-center animate-scale-in">
-            <div className="inline-block bg-[#f7efd7] rounded-xl p-6 border-2 border-[#dabb64]">
+            <div className="inline-block bg-[#FAFAFA] rounded-xl p-6 border-2 border-[#E8621A]">
               <p className="text-sm text-gray-600 mb-2">Selected: <strong>{state.selectedPackage.title}</strong></p>
-              <p className="font-oswald text-2xl font-bold text-[#363333] mb-4">
+              <p className="font-oswald text-2xl font-bold text-[#383838] mb-4">
                 {formatCurrency(state.selectedPackage.pricePerPerson * state.headcount)} for {state.headcount} guests
               </p>
               <Button onClick={handleCheckout} className="px-10">
@@ -184,7 +186,7 @@ export default function PackageSelectionStep() {
         <div className="mt-10 text-center">
           <button
             onClick={handleBack}
-            className="font-oswald text-gray-500 hover:text-[#363333] transition-colors tracking-wide"
+            className="font-oswald text-gray-500 hover:text-[#383838] transition-colors tracking-wide"
           >
             ← BACK TO ORDER TYPE
           </button>

@@ -32,7 +32,7 @@ export default function MenuMatrix({ products }: MenuMatrixProps) {
 
   return (
     <section className="mb-8">
-      <h2 className="text-xl sm:text-2xl font-oswald font-semibold text-[#363333] mb-4">
+      <h2 className="text-xl sm:text-2xl font-oswald font-semibold text-[#383838] mb-4">
         Menu Engineering Matrix
       </h2>
 
@@ -44,8 +44,8 @@ export default function MenuMatrix({ products }: MenuMatrixProps) {
             onClick={() => setSelectedCategory(cat)}
             className={`px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all ${
               selectedCategory === cat
-                ? 'bg-[#363333] text-white shadow-md'
-                : 'bg-white text-gray-600 border border-gray-200 hover:border-[#dabb64] hover:text-[#363333]'
+                ? 'bg-[#383838] text-white shadow-md'
+                : 'bg-white text-gray-600 border border-gray-200 hover:border-[#E8621A] hover:text-[#383838]'
             }`}
           >
             {cat === 'all' ? 'All Categories' : cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -61,7 +61,7 @@ export default function MenuMatrix({ products }: MenuMatrixProps) {
         <div className="relative w-full" style={{ paddingBottom: '60%', minHeight: 300 }}>
           <div className="absolute inset-0">
             {/* Quadrant backgrounds */}
-            <div className="absolute top-0 left-1/2 right-0 bottom-1/2 bg-[#dabb64]/8 rounded-tr-lg" />
+            <div className="absolute top-0 left-1/2 right-0 bottom-1/2 bg-[#E8621A]/8 rounded-tr-lg" />
             <div className="absolute top-0 left-0 right-1/2 bottom-1/2 bg-[#4a90d9]/8 rounded-tl-lg" />
             <div className="absolute top-1/2 left-1/2 right-0 bottom-0 bg-[#e88c3a]/8 rounded-br-lg" />
             <div className="absolute top-1/2 left-0 right-1/2 bottom-0 bg-gray-100/50 rounded-bl-lg" />
@@ -117,7 +117,7 @@ export default function MenuMatrix({ products }: MenuMatrixProps) {
                     style={{ backgroundColor: color }}
                   />
                   {isHovered && (
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-[#363333] text-white px-3 py-2 rounded-lg shadow-lg text-xs whitespace-nowrap z-30 pointer-events-none">
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-[#383838] text-white px-3 py-2 rounded-lg shadow-lg text-xs whitespace-nowrap z-30 pointer-events-none">
                       <div className="font-semibold">{product.title}</div>
                       <div className="text-gray-300">
                         Rev: {formatCurrency(product.totalRevenue)} | Margin: {product.avgMarginPct}%
@@ -125,7 +125,7 @@ export default function MenuMatrix({ products }: MenuMatrixProps) {
                       <div className="text-gray-300">
                         Units: {product.totalUnits} | Trend: {product.trend} ({product.trendPct > 0 ? '+' : ''}{product.trendPct}%)
                       </div>
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#363333]" />
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#383838]" />
                     </div>
                   )}
                 </div>
@@ -157,7 +157,7 @@ export default function MenuMatrix({ products }: MenuMatrixProps) {
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: getQuadrantColor(q) }}
                   />
-                  <span className="font-oswald font-semibold text-[#363333]">
+                  <span className="font-oswald font-semibold text-[#383838]">
                     {getQuadrantEmoji(q)} {getQuadrantLabel(q)}s
                   </span>
                   <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
@@ -196,7 +196,7 @@ export default function MenuMatrix({ products }: MenuMatrixProps) {
                       }`}
                     >
                       <div className="min-w-0 flex-1">
-                        <div className="font-medium text-[#363333] truncate">
+                        <div className="font-medium text-[#383838] truncate">
                           {item.title}
                         </div>
                         <div className="text-xs text-gray-400">
@@ -204,7 +204,7 @@ export default function MenuMatrix({ products }: MenuMatrixProps) {
                         </div>
                       </div>
                       <div className="text-right ml-3 flex-shrink-0">
-                        <div className="font-semibold text-[#363333]">
+                        <div className="font-semibold text-[#383838]">
                           {formatCurrency(item.totalRevenue)}
                         </div>
                         <div className="text-xs text-gray-400">{item.avgMarginPct}% margin</div>

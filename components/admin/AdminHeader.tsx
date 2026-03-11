@@ -24,12 +24,12 @@ export default function AdminHeader({ itemCount, searchTerm, onSearchChange, onA
             placeholder="Search items..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#dabb64] focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#E8621A] focus:border-transparent"
           />
         </div>
         <button
           onClick={onAddClick}
-          className="flex items-center gap-2 bg-[#dabb64] text-gray-900 px-4 py-2.5 rounded-lg font-semibold hover:bg-[#c5a855] transition-colors whitespace-nowrap"
+          className="flex items-center gap-2 bg-[#E8621A] text-gray-900 px-4 py-2.5 rounded-lg font-semibold hover:bg-[#c5a855] transition-colors whitespace-nowrap"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

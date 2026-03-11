@@ -42,7 +42,7 @@ export default function TagInput({ tags, onChange }: TagInputProps) {
 
   return (
     <div>
-      <div className="flex flex-wrap gap-2 p-3 border border-gray-300 rounded-lg min-h-[44px] focus-within:ring-2 focus-within:ring-[#dabb64] focus-within:border-transparent">
+      <div className="flex flex-wrap gap-2 p-3 border border-gray-300 rounded-lg min-h-[44px] focus-within:ring-2 focus-within:ring-[#E8621A] focus-within:border-transparent">
         {tags.map(tag => (
           <span key={tag} className="inline-flex items-center gap-1 bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full text-sm">
             {tag}

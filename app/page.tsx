@@ -30,8 +30,7 @@ export default function HomePage() {
   };
 
   const eventImages: Record<string, string> = {
-    breakfast: '/images/Shrimp and Grits Shot High Res.png',
-    lunch: '/images/Stacked Sandwiches Hi Res Shot.png',
+    lunch: '/images/brisket-sauce-pour.jpg',
     dessert: '/images/BSB Chocolate Chip Cookies Hi Res Shot.png',
   };
 
@@ -44,44 +43,55 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7efd7]">
+    <div className="min-h-screen bg-[#FAFAFA]">
       {/* Hero Section */}
-      <section className="relative">
-        {/* Two-Image Hero */}
-        <div className="grid grid-cols-2 md:grid-cols-2">
-          <div className="relative h-[120px] sm:h-[200px] md:h-[350px] lg:h-[450px] overflow-hidden">
-            <Image
-              src="/images/bbq_brisket.jpg"
-              alt="BBQ Brisket"
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
-          <div className="relative h-[120px] sm:h-[200px] md:h-[350px] lg:h-[450px] overflow-hidden">
-            <Image
-              src="/images/Stacked Sandwiches Hi Res Shot.png"
-              alt="Gourmet Sandwiches"
-              fill
-              className="object-cover"
-              priority
-            />
+      <section className="bg-white pt-6 pb-2">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 gap-4 max-w-4xl mx-auto">
+            {/* Left: Brisket Hero */}
+            <div>
+              <div className="relative aspect-square rounded-lg overflow-hidden bg-black">
+                <Image
+                  src="/images/brisket-knife-hero.png"
+                  alt="Best Brisket in Chicago - Lexington Betty Smokehouse"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+              <h2 className="font-oswald text-lg sm:text-xl md:text-2xl font-bold text-[#383838] tracking-wide mt-3">
+                Best Brisket in Chicago
+              </h2>
+              <p className="font-oswald text-sm text-[#E8621A] tracking-wide">
+                Smoked Low & Slow
+              </p>
+            </div>
+
+            {/* Right: Chef Dominique */}
+            <div>
+              <div className="relative aspect-square rounded-lg overflow-hidden bg-black">
+                <Image
+                  src="/images/chef-dominique-hero.png"
+                  alt="Celebrity Chef Dominique Leach"
+                  fill
+                  className="object-cover object-top"
+                  priority
+                />
+              </div>
+              <h2 className="font-oswald text-lg sm:text-xl md:text-2xl font-bold text-[#383838] tracking-wide mt-3">
+                Chef Dominique Leach
+              </h2>
+              <p className="font-oswald text-sm text-[#E8621A] tracking-wide">
+                Celebrity Chef
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Title Banner */}
-        <div className="bg-[#363333] py-8 sm:py-10 text-center">
-          <h1 className="font-oswald text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-[#f7efd7] tracking-wider mb-2">
-            URBAN BISTRO
-          </h1>
-          <p className="font-oswald text-base sm:text-xl md:text-[2.5rem] font-bold text-[#dabb64] tracking-wider whitespace-nowrap">
-            YOU&apos;VE GOT ENOUGH TO WORRY ABOUT. LET US HANDLE THE FOOD.
-          </p>
-        </div>
-
-        <div className="bg-[#dabb64] py-4 text-center">
-          <p className="font-oswald text-sm sm:text-base tracking-wide text-[#363333]">
-            Plan Your Event Menu
+        {/* Accent Bar */}
+        <div className="bg-[#E8621A] py-3 text-center mt-6">
+          <p className="font-oswald text-sm sm:text-base tracking-widest text-white font-bold uppercase">
+            Catering for Every Occasion
           </p>
         </div>
       </section>
@@ -96,17 +106,17 @@ export default function HomePage() {
       <ClientLogos />
 
       {/* Step Indicator */}
-      <section id="catering" className="bg-[#f7efd7] pt-12 sm:pt-16">
+      <section id="catering" className="bg-[#FAFAFA] pt-12 sm:pt-16">
         <div className="container mx-auto px-4">
           <StepIndicator currentStep={state.currentStep} />
         </div>
       </section>
 
       {/* Step 1: Event Type Selection */}
-      <section className="bg-[#f7efd7] pb-12 sm:pb-16">
+      <section className="bg-[#FAFAFA] pb-12 sm:pb-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-10">
-            <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#363333] tracking-wider mb-4">
+            <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#383838] tracking-wider mb-4">
               WHAT ARE YOU PLANNING?
             </h2>
             <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
@@ -132,7 +142,7 @@ export default function HomePage() {
                           transition-all duration-300 shadow-md
                           h-[180px] sm:h-[240px] md:h-[320px]
                           ${isSelected
-                            ? 'ring-4 ring-[#dabb64] scale-[1.02]'
+                            ? 'ring-4 ring-[#E8621A] scale-[1.02]'
                             : 'hover:scale-105'
                           }
                           ${isUnselected ? 'opacity-50 grayscale' : ''}
@@ -196,9 +206,9 @@ export default function HomePage() {
       <TestimonialsSection />
 
       {/* Browse Full Menu Link */}
-      <section className="bg-[#363333] py-12 sm:py-16">
+      <section className="bg-[#383838] py-12 sm:py-16">
         <div className="container mx-auto px-4 text-center">
-          <h3 className="font-oswald text-2xl sm:text-3xl font-bold text-[#f7efd7] mb-3 tracking-wide">
+          <h3 className="font-oswald text-2xl sm:text-3xl font-bold text-[#FAFAFA] mb-3 tracking-wide">
             LOOKING FOR SOMETHING ELSE?
           </h3>
           <p className="text-white/70 mb-6 max-w-xl mx-auto">
@@ -206,7 +216,7 @@ export default function HomePage() {
           </p>
           <Link
             href="/products"
-            className="inline-flex items-center gap-2 bg-[#dabb64] text-[#363333] font-oswald font-bold px-8 py-3 rounded-lg hover:bg-[#f7efd7] transition-all group"
+            className="inline-flex items-center gap-2 bg-[#E8621A] text-white font-oswald font-bold px-8 py-3 rounded-lg hover:opacity-90 transition-all group"
           >
             <span>Browse Full Menu</span>
             <svg

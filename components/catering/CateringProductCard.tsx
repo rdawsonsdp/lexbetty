@@ -63,7 +63,7 @@ export default function CateringProductCard({ product, featured }: CateringProdu
     <div className="flex items-center justify-between bg-white rounded-lg border border-gray-200">
       <button
         onClick={() => handleUpdateQuantity(itemQty - 1)}
-        className="w-10 h-10 flex items-center justify-center text-[#363333] hover:bg-gray-50 rounded-l-lg transition-colors font-bold text-lg"
+        className="w-10 h-10 flex items-center justify-center text-[#383838] hover:bg-gray-50 rounded-l-lg transition-colors font-bold text-lg"
         aria-label="Decrease quantity"
       >
         {itemQty === 1 ? (
@@ -72,13 +72,13 @@ export default function CateringProductCard({ product, featured }: CateringProdu
           </svg>
         ) : '−'}
       </button>
-      <span className="font-oswald font-bold text-[#363333] text-lg min-w-[2rem] text-center">
+      <span className="font-oswald font-bold text-[#383838] text-lg min-w-[2rem] text-center">
         {itemQty}
       </span>
       <button
         onClick={() => handleUpdateQuantity(Math.min(itemQty + 1, 4))}
         disabled={itemQty >= 4}
-        className="w-10 h-10 flex items-center justify-center text-[#363333] hover:bg-gray-50 rounded-r-lg transition-colors font-bold text-lg disabled:opacity-30 disabled:cursor-not-allowed"
+        className="w-10 h-10 flex items-center justify-center text-[#383838] hover:bg-gray-50 rounded-r-lg transition-colors font-bold text-lg disabled:opacity-30 disabled:cursor-not-allowed"
         aria-label="Increase quantity"
       >
         +
@@ -94,7 +94,7 @@ export default function CateringProductCard({ product, featured }: CateringProdu
   ) : (
     <button
       onClick={handleAdd}
-      className="w-full font-oswald text-sm tracking-wide border border-[#363333] text-[#363333] py-2.5 rounded-lg hover:bg-[#363333] hover:text-white transition-colors"
+      className="w-full font-oswald text-sm tracking-wide border border-[#383838] text-[#383838] py-2.5 rounded-lg hover:bg-[#383838] hover:text-white transition-colors"
     >
       Add to Order
     </button>
@@ -105,7 +105,7 @@ export default function CateringProductCard({ product, featured }: CateringProdu
     return (
       <div className="flex flex-col h-full group">
         {/* Clean image — no overlays */}
-        <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
+        <div className="relative aspect-square overflow-hidden rounded-lg">
           <Image
             src={product.image}
             alt={product.title}
@@ -117,7 +117,7 @@ export default function CateringProductCard({ product, featured }: CateringProdu
 
         {/* Content */}
         <div className="flex-1 pt-4 flex flex-col">
-          <h3 className="font-oswald text-base sm:text-lg font-semibold text-[#363333] mb-1 tracking-wide">
+          <h3 className="font-oswald text-base sm:text-lg font-semibold text-[#383838] mb-1 tracking-wide">
             {product.title}
           </h3>
 
@@ -125,10 +125,10 @@ export default function CateringProductCard({ product, featured }: CateringProdu
 
           {/* Price + serving info */}
           <div className="mb-3">
-            <div className="text-lg sm:text-xl font-oswald font-bold text-[#363333]">
+            <div className="text-lg sm:text-xl font-oswald font-bold text-[#383838]">
               {formatCurrency(displayTotal)}
             </div>
-            <div className="text-xs text-[#8B7355] mt-0.5">
+            <div className="text-xs text-[#B0B0B0] mt-0.5">
               {itemQty > 1 ? `${itemQty} × ` : ''}{orderCalc.displayText}
             </div>
           </div>
@@ -176,7 +176,7 @@ export default function CateringProductCard({ product, featured }: CateringProdu
 
       {/* Product info — simple typography below image */}
       <div className="pt-3 sm:pt-4 flex flex-col flex-1">
-        <h3 className="font-oswald font-semibold text-[#363333] mb-1 text-sm sm:text-base line-clamp-2 tracking-wide">
+        <h3 className="font-oswald font-semibold text-[#383838] mb-1 text-sm sm:text-base line-clamp-2 tracking-wide">
           {product.title}
         </h3>
 
@@ -184,10 +184,10 @@ export default function CateringProductCard({ product, featured }: CateringProdu
 
         {/* Price + serving info */}
         <div className="mb-3">
-          <div className="text-lg sm:text-xl font-oswald font-bold text-[#363333]">
+          <div className="text-lg sm:text-xl font-oswald font-bold text-[#383838]">
             {formatCurrency(displayTotal)}
           </div>
-          <div className="text-xs text-[#8B7355] mt-0.5">
+          <div className="text-xs text-[#B0B0B0] mt-0.5">
             {itemQty > 1 ? `${itemQty} × ` : ''}{orderCalc.displayText}
           </div>
         </div>

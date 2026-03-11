@@ -17,13 +17,13 @@ const robotoCondensed = Roboto_Condensed({
 });
 
 export const metadata: Metadata = {
-  title: 'CaterSmith | The right food. The right amount. Every event.',
+  title: 'Lexington Betty Smokehouse | Best BBQ in Chicago',
   description:
-    'CaterSmith offers exceptional catering for corporate events, meetings, and special occasions. The right food, the right amount, every event.',
+    'Lexington Betty Smokehouse offers exceptional BBQ catering for corporate events, meetings, and special occasions. Best BBQ in Chicago.',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'CaterSmith',
+    title: 'Lexington Betty Smokehouse',
   },
 };
 
@@ -32,7 +32,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  themeColor: '#000000',
+  themeColor: '#383838',
 };
 
 export default function RootLayout({

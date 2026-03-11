@@ -79,7 +79,10 @@ export async function getProductsFromDB(eventType?: EventType | null): Promise<C
     return (data as ProductRow[]).map(rowToProduct);
   } catch (err) {
     console.warn('Supabase fetch failed, falling back to hardcoded products:', err);
-    return getProductsByEventType(eventType ?? null);
+    if (eventType) {
+      return getProductsByEventType(eventType);
+    }
+    return CATERING_PRODUCTS;
   }
 }
 
@@ -106,18 +109,27 @@ export async function getProductByIdFromDB(id: string): Promise<CateringProduct 
  * Fetch ALL products for admin (including inactive), using service role.
  */
 export async function getAllProductsForAdmin(): Promise<(CateringProduct & { is_active: boolean; sort_position: number })[]> {
-  const { data, error } = await supabaseAdmin
-    .from('products')
-    .select('*')
-    .order('sort_position', { ascending: true });
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('products')
+      .select('*')
+      .order('sort_position', { ascending: true });
 
-  if (error) throw error;
+    if (error) throw error;
 
-  return (data as ProductRow[]).map(row => ({
-    ...rowToProduct(row),
-    is_active: row.is_active,
-    sort_position: row.sort_position,
-  }));
+    return (data as ProductRow[]).map(row => ({
+      ...rowToProduct(row),
+      is_active: row.is_active,
+      sort_position: row.sort_position,
+    }));
+  } catch (err) {
+    console.warn('Supabase admin fetch failed, falling back to hardcoded products:', err);
+    return CATERING_PRODUCTS.map((p, i) => ({
+      ...p,
+      is_active: true,
+      sort_position: i,
+    }));
+  }
 }
 
 /**

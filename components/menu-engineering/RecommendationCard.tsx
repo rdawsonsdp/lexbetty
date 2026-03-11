@@ -107,7 +107,7 @@ export default function RecommendationCard({
 
         {/* Title */}
         <h3
-          className={`font-oswald font-semibold text-[#363333] text-base sm:text-lg mb-1 ${
+          className={`font-oswald font-semibold text-[#383838] text-base sm:text-lg mb-1 ${
             status === 'rejected' ? 'line-through text-gray-400' : ''
           }`}
         >
@@ -152,7 +152,7 @@ export default function RecommendationCard({
               value={noteText}
               onChange={(e) => setNoteText(e.target.value)}
               placeholder="Add your modifications or notes..."
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#dabb64] focus:border-transparent resize-none"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8621A] focus:border-transparent resize-none"
               rows={2}
             />
             <div className="flex gap-2 mt-2">
@@ -212,7 +212,7 @@ export default function RecommendationCard({
         {status !== 'pending' && (
           <button
             onClick={onUndo}
-            className="text-xs text-gray-500 hover:text-[#363333] transition-colors flex items-center gap-1"
+            className="text-xs text-gray-500 hover:text-[#383838] transition-colors flex items-center gap-1"
           >
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
