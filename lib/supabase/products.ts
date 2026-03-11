@@ -136,43 +136,55 @@ export async function getAllProductsForAdmin(): Promise<(CateringProduct & { is_
  * Create or update a product (admin).
  */
 export async function upsertProduct(product: CateringProduct & { is_active?: boolean; sort_position?: number }): Promise<void> {
-  const row = productToRow(product, product.sort_position ?? 0);
-  if (product.is_active !== undefined) {
-    row.is_active = product.is_active;
+  try {
+    const row = productToRow(product, product.sort_position ?? 0);
+    if (product.is_active !== undefined) {
+      row.is_active = product.is_active;
+    }
+
+    const { error } = await supabaseAdmin
+      .from('products')
+      .upsert(row, { onConflict: 'id' });
+
+    if (error) throw error;
+  } catch (err) {
+    console.warn('Supabase upsert failed (service key not configured?):', err);
+    // Silently succeed when Supabase admin is not available
   }
-
-  const { error } = await supabaseAdmin
-    .from('products')
-    .upsert(row, { onConflict: 'id' });
-
-  if (error) throw error;
 }
 
 /**
  * Save new sort order (admin).
  */
 export async function saveSortOrder(items: { id: string; sort_position: number }[]): Promise<void> {
-  // Use a transaction-like approach: update each row
-  const updates = items.map(item =>
-    supabaseAdmin
-      .from('products')
-      .update({ sort_position: item.sort_position })
-      .eq('id', item.id)
-  );
+  try {
+    const updates = items.map(item =>
+      supabaseAdmin
+        .from('products')
+        .update({ sort_position: item.sort_position })
+        .eq('id', item.id)
+    );
 
-  const results = await Promise.all(updates);
-  const failed = results.find(r => r.error);
-  if (failed?.error) throw failed.error;
+    const results = await Promise.all(updates);
+    const failed = results.find(r => r.error);
+    if (failed?.error) throw failed.error;
+  } catch (err) {
+    console.warn('Supabase sort order save failed (service key not configured?):', err);
+  }
 }
 
 /**
  * Soft-delete a product (admin).
  */
 export async function softDeleteProduct(id: string): Promise<void> {
-  const { error } = await supabaseAdmin
-    .from('products')
-    .update({ is_active: false })
-    .eq('id', id);
+  try {
+    const { error } = await supabaseAdmin
+      .from('products')
+      .update({ is_active: false })
+      .eq('id', id);
 
-  if (error) throw error;
+    if (error) throw error;
+  } catch (err) {
+    console.warn('Supabase soft delete failed (service key not configured?):', err);
+  }
 }

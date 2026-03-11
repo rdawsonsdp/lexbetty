@@ -1,19 +1,20 @@
 'use client';
 
 interface StepIndicatorProps {
-  currentStep: 1 | 2 | 3 | 4;
+  currentStep: 1 | 2 | 3 | 4 | 5;
   totalSteps?: number;
 }
 
 export default function StepIndicator({
   currentStep,
-  totalSteps = 4,
+  totalSteps = 5,
 }: StepIndicatorProps) {
   const steps = [
     { number: 1, label: 'Event Type' },
     { number: 2, label: 'Guests & Budget' },
     { number: 3, label: 'Order Type' },
     { number: 4, label: 'Build Order' },
+    { number: 5, label: 'Extras' },
   ];
 
   return (

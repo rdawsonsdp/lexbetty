@@ -180,7 +180,7 @@ function cateringReducer(state: CateringState, action: CateringAction): Catering
     }
 
     case 'GO_BACK': {
-      const prevStep = Math.max(1, state.currentStep - 1) as 1 | 2 | 3 | 4;
+      const prevStep = Math.max(1, state.currentStep - 1) as 1 | 2 | 3 | 4 | 5;
       return {
         ...state,
         currentStep: prevStep,

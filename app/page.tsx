@@ -10,6 +10,7 @@ import HeadcountBudgetStep from '@/components/catering/HeadcountBudgetStep';
 import OrderTypeStep from '@/components/catering/OrderTypeStep';
 import ProductSelectionStep from '@/components/catering/ProductSelectionStep';
 import PackageSelectionStep from '@/components/catering/PackageSelectionStep';
+import EquipmentStep from '@/components/catering/EquipmentStep';
 import ValueProposition from '@/components/marketing/ValueProposition';
 import TrustSignals from '@/components/marketing/TrustSignals';
 import ClientLogos from '@/components/marketing/ClientLogos';
@@ -200,6 +201,11 @@ export default function HomePage() {
             }
           />
         )
+      )}
+
+      {/* Step 5: Equipment & Extras (build-your-own only) */}
+      {state.currentStep >= 5 && state.orderType === 'build-your-own' && (
+        <EquipmentStep />
       )}
 
       {/* Testimonials Section */}

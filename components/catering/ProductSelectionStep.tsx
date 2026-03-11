@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { useCatering } from '@/context/CateringContext';
 import { getEventTypeName } from '@/lib/event-types';
 import { formatCurrency } from '@/lib/pricing';
@@ -25,7 +24,6 @@ export default function ProductSelectionStep({
   filterBar,
   recommendedSection,
 }: ProductSelectionStepProps) {
-  const router = useRouter();
   const { state, dispatch, perPersonCost, totalCost } = useCatering();
   const [searchTerm, setSearchTerm] = useState('');
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -71,8 +69,10 @@ export default function ProductSelectionStep({
     };
   }, [isCartOpen]);
 
-  // Get products filtered by event type, respecting active/inactive status
-  const products = getActiveByEventType(state.eventType);
+  // Get products filtered by event type, excluding equipment
+  const products = getActiveByEventType(state.eventType).filter(
+    p => !p.tags?.includes('equipment') && !p.tags?.includes('cutlery')
+  );
 
   // Filter products based on search term and dietary filters
   const filteredProducts = products.filter((product) => {
@@ -105,8 +105,8 @@ export default function ProductSelectionStep({
     return typeA - typeB;
   });
 
-  const handleCheckout = () => {
-    router.push('/checkout');
+  const handleContinueToExtras = () => {
+    dispatch({ type: 'SET_STEP', payload: 5 });
   };
 
   const handleBack = () => {
@@ -244,7 +244,7 @@ export default function ProductSelectionStep({
           {/* Cart Sidebar - Desktop Only */}
           <div className="hidden lg:block lg:col-span-1">
             <div className="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto rounded-xl">
-              <CateringCart onCheckout={handleCheckout} />
+              <CateringCart onCheckout={handleContinueToExtras} />
             </div>
           </div>
         </div>
@@ -303,7 +303,7 @@ export default function ProductSelectionStep({
               </div>
               {/* Cart Content */}
               <div className="p-4 pb-24">
-                <CateringCart onCheckout={() => { setIsCartOpen(false); handleCheckout(); }} />
+                <CateringCart onCheckout={() => { setIsCartOpen(false); handleContinueToExtras(); }} />
               </div>
             </div>
           </>

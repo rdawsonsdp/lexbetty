@@ -2,9 +2,8 @@
 
 const CATEGORIES = [
   { id: 'all', label: 'All' },
-  { id: 'breakfast', label: 'Breakfast' },
-  { id: 'lunch', label: 'Lunch' },
-  { id: 'dessert', label: 'Dessert' },
+  { id: 'lunch', label: 'BBQ Catering' },
+  { id: 'dessert', label: 'Desserts & Drinks' },
 ] as const;
 
 interface CategoryTabsProps {
