@@ -52,13 +52,13 @@ export const productSchema = z.object({
   image: z.string().min(1),
   categories: z.array(z.enum(['breakfast', 'lunch', 'dessert'])).min(1),
   pricing: pricingSchema,
-  tags: z.array(z.string()).optional(),
-  featured: z.boolean().optional(),
-  variantId: z.string().optional(),
-  slug: z.string().optional(),
-  inventory: z.number().optional(),
-  is_active: z.boolean().optional(),
-  sort_position: z.number().optional(),
+  tags: z.array(z.string()).nullish(),
+  featured: z.boolean().nullish(),
+  variantId: z.string().nullish(),
+  slug: z.string().nullish(),
+  inventory: z.number().nullish(),
+  is_active: z.boolean().nullish(),
+  sort_position: z.number().nullish(),
 });
 
 export type ProductFormData = z.infer<typeof productSchema>;
