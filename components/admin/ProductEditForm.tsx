@@ -42,7 +42,7 @@ export default function ProductEditForm({ product, onSave, onDelete, onCancel, i
   const featured = watch('featured');
   const isActive = watch('is_active');
 
-  const toggleCategory = (cat: 'breakfast' | 'lunch' | 'dessert') => {
+  const toggleCategory = (cat: 'breakfast' | 'lunch' | 'dessert' | 'other') => {
     const current = categories || [];
     if (current.includes(cat)) {
       if (current.length > 1) {
@@ -107,7 +107,7 @@ export default function ProductEditForm({ product, onSave, onDelete, onCancel, i
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-3">Categories</h3>
         <div className="flex gap-3">
-          {(['breakfast', 'lunch', 'dessert'] as const).map(cat => (
+          {(['breakfast', 'lunch', 'dessert', 'other'] as const).map(cat => (
             <button
               key={cat}
               type="button"

@@ -16,6 +16,7 @@ const PRICING_TYPES = [
   { value: 'per-dozen', label: 'Per Dozen' },
   { value: 'per-each', label: 'Per Each' },
   { value: 'per-container', label: 'Per Container' },
+  { value: 'flat', label: 'Flat Price' },
 ] as const;
 
 const DEFAULT_TRAY_SIZES = [
@@ -52,6 +53,9 @@ export default function PricingTypeFields({ register, setValue, watch }: Pricing
         break;
       case 'per-container':
         setValue('pricing', { type: 'per-container', pricePerContainer: 0, servesPerContainer: 1 });
+        break;
+      case 'flat':
+        setValue('pricing', { type: 'flat', flatPrice: 0 });
         break;
     }
   };
@@ -238,6 +242,18 @@ export default function PricingTypeFields({ register, setValue, watch }: Pricing
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base"
               />
             </div>
+          </div>
+        )}
+
+        {pricingType === 'flat' && (
+          <div className="max-w-xs">
+            <label className="block text-xs text-gray-500 mb-1">Flat Price ($) — per event, does not change with headcount</label>
+            <input
+              type="number"
+              step="0.01"
+              {...register('pricing.flatPrice' as const, { valueAsNumber: true })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base"
+            />
           </div>
         )}
       </div>

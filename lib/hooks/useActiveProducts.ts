@@ -5,11 +5,11 @@ import { CATERING_PRODUCTS } from '@/lib/products';
 import { CateringProduct } from '@/lib/types';
 
 /**
- * Fetches active product IDs from the database and returns CATERING_PRODUCTS
- * filtered to only active items. Falls back to showing all products on error.
+ * Fetches active products from the database sorted by sort_position.
+ * Falls back to showing all products (static order) on error.
  */
 export function useActiveProducts() {
-  const [activeIds, setActiveIds] = useState<Set<string> | null>(null);
+  const [sortedProducts, setSortedProducts] = useState<CateringProduct[] | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -21,14 +21,11 @@ export function useActiveProducts() {
       })
       .then((data) => {
         if (cancelled) return;
-        const ids = new Set<string>(
-          (data.products as CateringProduct[]).map((p) => p.id),
-        );
-        setActiveIds(ids);
+        setSortedProducts(data.products as CateringProduct[]);
       })
       .catch(() => {
         // Graceful degradation: show all products
-        if (!cancelled) setActiveIds(null);
+        if (!cancelled) setSortedProducts(null);
       });
 
     return () => {
@@ -37,9 +34,9 @@ export function useActiveProducts() {
   }, []);
 
   const activeProducts = useMemo(() => {
-    if (!activeIds) return CATERING_PRODUCTS;
-    return CATERING_PRODUCTS.filter((p) => activeIds.has(p.id));
-  }, [activeIds]);
+    if (!sortedProducts) return CATERING_PRODUCTS;
+    return sortedProducts;
+  }, [sortedProducts]);
 
   const getActiveByEventType = useMemo(() => {
     return (eventType: string | null): CateringProduct[] => {

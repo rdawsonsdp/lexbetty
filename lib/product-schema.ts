@@ -43,6 +43,10 @@ const pricingSchema = z.discriminatedUnion('type', [
     pricePerContainer: z.number().min(0),
     servesPerContainer: z.number().min(1),
   }),
+  z.object({
+    type: z.literal('flat'),
+    flatPrice: z.number().min(0),
+  }),
 ]);
 
 export const productSchema = z.object({
@@ -50,7 +54,7 @@ export const productSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
   image: z.string().min(1),
-  categories: z.array(z.enum(['breakfast', 'lunch', 'dessert', 'alacarte'])).min(1),
+  categories: z.array(z.enum(['breakfast', 'lunch', 'dessert', 'alacarte', 'other'])).min(1),
   pricing: pricingSchema,
   tags: z.array(z.string()).nullish(),
   featured: z.boolean().nullish(),

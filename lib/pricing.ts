@@ -181,6 +181,19 @@ export function calculateProductOrder(
       };
     }
 
+    case 'flat': {
+      return {
+        product,
+        quantity: 1,
+        unitPrice: pricing.flatPrice,
+        totalPrice: pricing.flatPrice,
+        servesMin: headcount,
+        servesMax: headcount,
+        displayText: `${formatCurrency(pricing.flatPrice)} flat rate`,
+        itemQuantity: 1,
+      };
+    }
+
     default:
       return {
         product,
@@ -294,6 +307,8 @@ export function getDisplayPrice(product: CateringProduct): string {
       return `${formatCurrency(pricing.priceEach)} each`;
     case 'per-container':
       return `${formatCurrency(pricing.pricePerContainer)}/container`;
+    case 'flat':
+      return formatCurrency(pricing.flatPrice);
     default:
       return 'Price varies';
   }
@@ -318,6 +333,8 @@ export function getPricingTypeLabel(product: CateringProduct): string {
       return 'Per item';
     case 'per-container':
       return `Serves ${pricing.servesPerContainer}`;
+    case 'flat':
+      return 'Flat rate per event';
     default:
       return '';
   }

@@ -10,13 +10,14 @@ import Card from '@/components/ui/Card';
 import DietaryFilterBar from '@/components/catering/DietaryFilterBar';
 import { useActiveProducts } from '@/lib/hooks/useActiveProducts';
 
-type Category = 'all' | 'breakfast' | 'lunch' | 'dessert';
+type Category = 'all' | 'breakfast' | 'lunch' | 'dessert' | 'other';
 
 const CATEGORIES: { id: Category; name: string; description: string }[] = [
   { id: 'all', name: 'All Products', description: 'Browse our complete menu' },
   { id: 'breakfast', name: 'Breakfast', description: 'Start your day right' },
   { id: 'lunch', name: 'Lunch & Dinner', description: 'Hearty meals for any occasion' },
   { id: 'dessert', name: 'Desserts', description: 'Sweet treats and delicious endings' },
+  { id: 'other', name: 'Other', description: 'Additional items and services' },
 ];
 
 function ProductCard({ product }: { product: CateringProduct }) {
@@ -101,6 +102,7 @@ export default function ProductsPage() {
     breakfast: filteredProducts.filter((p) => p.categories.includes('breakfast')),
     lunch: filteredProducts.filter((p) => p.categories.includes('lunch') && !p.categories.includes('breakfast')),
     dessert: filteredProducts.filter((p) => p.categories.includes('dessert') && !p.categories.includes('breakfast') && !p.categories.includes('lunch')),
+    other: filteredProducts.filter((p) => p.categories.includes('other') && !p.categories.includes('breakfast') && !p.categories.includes('lunch') && !p.categories.includes('dessert')),
   };
 
   return (
@@ -269,6 +271,26 @@ export default function ProductsPage() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {groupedProducts.dessert.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Other Section */}
+            {groupedProducts.other.length > 0 && (
+              <section>
+                <div className="flex items-center gap-4 mb-6">
+                  <h2 className="font-oswald text-2xl sm:text-3xl font-bold text-[#383838]">
+                    Other
+                  </h2>
+                  <div className="flex-1 h-px bg-[#E8621A]" />
+                  <span className="text-sm text-gray-500">
+                    {groupedProducts.other.length} items
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {groupedProducts.other.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
                 </div>

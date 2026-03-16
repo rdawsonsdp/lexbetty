@@ -99,7 +99,7 @@ export default function ProductSelectionStep({
 
   // Sort regular products by pricing type to group similar items
   const sortedProducts = [...regularProducts].sort((a, b) => {
-    const typeOrder = { 'tray': 0, 'pan': 1, 'per-person': 2, 'per-dozen': 3, 'per-each': 4, 'per-container': 5 };
+    const typeOrder: Record<string, number> = { 'tray': 0, 'pan': 1, 'per-person': 2, 'per-dozen': 3, 'per-each': 4, 'per-container': 5, 'flat': 6 };
     const typeA = typeOrder[a.pricing.type] ?? 99;
     const typeB = typeOrder[b.pricing.type] ?? 99;
     return typeA - typeB;

@@ -4,6 +4,7 @@ const CATEGORIES = [
   { id: 'all', label: 'All' },
   { id: 'lunch', label: 'BBQ Catering' },
   { id: 'dessert', label: 'Desserts & Drinks' },
+  { id: 'other', label: 'Other' },
 ] as const;
 
 interface CategoryTabsProps {

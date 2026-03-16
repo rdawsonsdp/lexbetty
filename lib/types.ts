@@ -1,8 +1,8 @@
 // Event Types
-export type EventType = 'breakfast' | 'lunch' | 'dessert' | 'alacarte';
+export type EventType = 'breakfast' | 'lunch' | 'dessert' | 'alacarte' | 'other';
 
 // Pricing Types
-export type PricingType = 'tray' | 'pan' | 'per-person' | 'per-dozen' | 'per-each' | 'per-container';
+export type PricingType = 'tray' | 'pan' | 'per-person' | 'per-dozen' | 'per-each' | 'per-container' | 'flat';
 
 // Size options for tray-based pricing
 export interface TraySizeOption {
@@ -55,13 +55,19 @@ export interface PerContainerPricing {
   servesPerContainer: number;
 }
 
+export interface FlatPricing {
+  type: 'flat';
+  flatPrice: number;
+}
+
 export type ProductPricing =
   | TrayPricing
   | PanPricing
   | PerPersonPricing
   | PerDozenPricing
   | PerEachPricing
-  | PerContainerPricing;
+  | PerContainerPricing
+  | FlatPricing;
 
 // Budget Range
 export interface BudgetRange {

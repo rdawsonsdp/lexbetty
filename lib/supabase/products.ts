@@ -62,7 +62,7 @@ export function productToRow(product: CateringProduct, sortPosition: number = 0)
  */
 export async function getProductsFromDB(eventType?: EventType | null): Promise<CateringProduct[]> {
   try {
-    let query = supabase
+    let query = supabaseAdmin
       .from('products')
       .select('*')
       .eq('is_active', true)

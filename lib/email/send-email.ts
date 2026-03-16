@@ -8,6 +8,9 @@ const DEFAULT_FROM =
   process.env.RESEND_FROM_EMAIL ||
   'Lexington Betty Smokehouse <onboarding@resend.dev>';
 
+// TODO: Remove this override once Resend domain is verified for lexingtonbetty.com
+const EMAIL_OVERRIDE = 'rdawson@strategicdataproducts.com';
+
 interface SendEmailParams {
   to: string;
   subject: string;
@@ -27,9 +30,11 @@ export async function sendEmail({ to, subject, html, replyTo }: SendEmailParams)
     return { success: true, id: 'dev-mode' };
   }
 
+  const recipient = EMAIL_OVERRIDE || to;
+
   const { data, error } = await resend.emails.send({
     from: DEFAULT_FROM,
-    to,
+    to: recipient,
     subject,
     html,
     ...(replyTo ? { replyTo } : {}),
