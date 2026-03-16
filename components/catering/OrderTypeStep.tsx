@@ -19,7 +19,7 @@ export default function OrderTypeStep() {
   };
 
   const handleBack = () => {
-    dispatch({ type: 'SET_STEP', payload: 2 });
+    dispatch({ type: 'SET_STEP', payload: 3 });
   };
 
   // Get package price range for preview

@@ -10,7 +10,7 @@ export default function EventTypeStep() {
   const handleSelect = (eventTypeId: string) => {
     dispatch({
       type: 'SET_EVENT_TYPE',
-      payload: eventTypeId as 'breakfast' | 'lunch' | 'dessert',
+      payload: eventTypeId as 'breakfast' | 'lunch' | 'alacarte',
     });
   };
 

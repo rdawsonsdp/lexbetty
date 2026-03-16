@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { useCatering } from '@/context/CateringContext';
+import ProductImagePlaceholder from '@/components/ui/ProductImagePlaceholder';
 import { getPackagesByBudget } from '@/lib/packages';
 import { useActivePackages } from '@/lib/hooks/useActivePackages';
 import { formatCurrency } from '@/lib/pricing';
@@ -43,7 +43,7 @@ export default function PackageSelectionStep() {
   };
 
   const handleBack = () => {
-    dispatch({ type: 'SET_STEP', payload: 3 });
+    dispatch({ type: 'SET_STEP', payload: 4 });
   };
 
   const meetsMinHeadcount = (pkg: CateringPackage) => {
@@ -101,13 +101,7 @@ export default function PackageSelectionStep() {
 
                     {/* Package Image */}
                     <div className="relative h-40 -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 mb-4 rounded-t-xl overflow-hidden">
-                      <Image
-                        src={pkg.image}
-                        alt={pkg.title}
-                        fill
-                        className="object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                      <ProductImagePlaceholder title={pkg.title} />
                     </div>
 
                     {/* Title & Price */}

@@ -3,17 +3,17 @@ import { EventTypeConfig } from './types';
 export const EVENT_TYPES: EventTypeConfig[] = [
   {
     id: 'lunch',
-    name: 'BBQ Catering',
+    name: 'Order Catering',
     description: 'Smoked meats, soulful sides, and everything BBQ',
     icon: '🔥',
     suggestedItems: ['rib tips', 'brisket', 'pulled pork', 'smoked chicken', 'mac n cheese'],
   },
   {
-    id: 'dessert',
-    name: 'Desserts & Drinks',
-    description: 'Sweet endings and refreshing beverages',
-    icon: '🍰',
-    suggestedItems: ['banana pudding', 'peach cobbler', 'lemonade', 'cookies'],
+    id: 'alacarte',
+    name: 'Order A La Carte',
+    description: 'Pick exactly what you want from the full menu',
+    icon: '🍽️',
+    suggestedItems: ['brisket', 'pulled pork', 'rib tips', 'mac n cheese', 'banana pudding'],
   },
 ];
 

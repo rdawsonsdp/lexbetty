@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
+import ProductImagePlaceholder from '@/components/ui/ProductImagePlaceholder';
 import { useCatering } from '@/context/CateringContext';
 import { CateringProduct } from '@/lib/types';
 import { getDisplayPrice, getPricingTypeLabel } from '@/lib/pricing';
@@ -30,14 +30,9 @@ function ProductCard({ product }: { product: CateringProduct }) {
   return (
     <Card className="overflow-hidden" hover>
       <div className="relative h-40 -mx-4 -mt-4 mb-4">
-        <Image
-          src={product.image}
-          alt={product.title}
-          fill
-          className="object-cover"
-        />
+        <ProductImagePlaceholder title={product.title} />
         {inCart && (
-          <div className="absolute top-2 right-2 bg-[#E8621A] text-[#383838] text-xs font-bold px-2 py-1 rounded-full">
+          <div className="absolute top-2 right-2 bg-[#E8621A] text-[#383838] text-xs font-bold px-2 py-1 rounded-full z-10">
             In Cart
           </div>
         )}
@@ -76,7 +71,7 @@ export default function ProductsPage() {
   const [activeCategory, setActiveCategory] = useState<Category>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
-  const { state } = useCatering();
+  const { state, dispatch } = useCatering();
   const { activeProducts } = useActiveProducts();
 
   const handleToggleFilter = (tag: string) => {
@@ -120,7 +115,7 @@ export default function ProductsPage() {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Back to Order Builder
+            Back to Home
           </Link>
           <h1 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#FAFAFA] tracking-wider mb-2">
             FULL MENU
@@ -187,16 +182,30 @@ export default function ProductsPage() {
       {/* Cart Summary Bar */}
       {state.selectedItems.length > 0 && (
         <div className="bg-[#E8621A] py-3">
-          <div className="container mx-auto px-4 flex items-center justify-between">
+          <div className="container mx-auto px-4 flex items-center justify-between gap-4">
             <p className="font-oswald font-semibold text-[#383838]">
               {state.selectedItems.length} item{state.selectedItems.length !== 1 ? 's' : ''} in cart
             </p>
-            <Link
-              href="/#catering"
-              className="bg-[#383838] text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-[#4a4646] transition-colors"
-            >
-              View Cart
-            </Link>
+            <div className="flex items-center gap-3">
+              {state.orderMode === 'alacarte' && (
+                <div className="flex items-center gap-2 bg-white/20 rounded-lg px-3 py-1">
+                  <label className="text-[#383838] text-xs font-semibold whitespace-nowrap">Guests:</label>
+                  <input
+                    type="number"
+                    value={state.headcount}
+                    onChange={(e) => dispatch({ type: 'SET_HEADCOUNT', payload: parseInt(e.target.value) || 1 })}
+                    min="1"
+                    className="w-16 px-2 py-1 text-sm text-center border border-white/30 rounded bg-white/90 text-[#383838] font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+              )}
+              <Link
+                href={state.orderMode === 'alacarte' ? '/checkout' : '/#catering'}
+                className="bg-[#383838] text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-[#4a4646] transition-colors"
+              >
+                {state.orderMode === 'alacarte' ? 'Checkout' : 'View Cart'}
+              </Link>
+            </div>
           </div>
         </div>
       )}
@@ -302,17 +311,17 @@ export default function ProductsPage() {
         )}
       </div>
 
-      {/* Back to Order Builder CTA */}
+      {/* Bottom CTA */}
       <div className="bg-[#383838] py-12">
         <div className="container mx-auto px-4 text-center">
           <h3 className="font-oswald text-2xl sm:text-3xl font-bold text-[#FAFAFA] mb-4">
-            Ready to finalize your order?
+            {state.orderMode === 'alacarte' ? 'Ready to check out?' : 'Ready to finalize your order?'}
           </h3>
           <Link
-            href="/#catering"
+            href={state.orderMode === 'alacarte' ? '/checkout' : '/#catering'}
             className="inline-block bg-[#E8621A] text-[#383838] font-oswald font-bold px-8 py-3 rounded-lg hover:bg-[#FAFAFA] transition-colors"
           >
-            Return to Order Builder
+            {state.orderMode === 'alacarte' ? 'Proceed to Checkout' : 'Return to Order Builder'}
           </Link>
         </div>
       </div>

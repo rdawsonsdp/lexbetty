@@ -23,7 +23,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     id: 'rib-tips',
     title: 'Rib Tips',
     description: 'Smoked to perfection rib tips. Half pan (4 lbs) or full pan (8 lbs).',
-    image: '/images/chef-dominique-ribs.jpg',
+    image: '/images/special_rib_tips_chicken.jpg',
     categories: ['lunch'],
     pricing: panPricing(55, 105),
     tags: ['popular', 'bbq', 'pork'],
@@ -43,7 +43,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     id: 'pulled-pork',
     title: 'Pulled Pork',
     description: 'Tender slow-smoked pulled pork, sold by the pound.',
-    image: '/images/bbq_brisket.jpg',
+    image: '/images/platter_pulled_pork.jpg',
     categories: ['lunch'],
     pricing: { type: 'per-each', priceEach: 25, minOrder: 2 },
     tags: ['bbq', 'pork', 'popular'],
@@ -63,7 +63,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     id: 'smoked-chicken-quarters-wing-mix',
     title: 'Smoked Chicken Quarters & Wing Mix',
     description: 'Smoked chicken quarters and wings. 5 pounds ($95) or 10 pounds ($190).',
-    image: '/images/Garlic Butter Chicken Breast Hi Res Image.png',
+    image: '/images/special_rib_tips_chicken.jpg',
     categories: ['lunch'],
     pricing: panPricing(95, 190),
     tags: ['bbq', 'poultry', 'popular'],
@@ -93,7 +93,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     id: 'brisket',
     title: 'Brisket',
     description: 'Premium smoked brisket, sold by the pound.',
-    image: '/images/brisket-sauce-pour.jpg',
+    image: '/images/meat_smoked_brisket.jpg',
     categories: ['lunch'],
     pricing: { type: 'per-each', priceEach: 34, minOrder: 2 },
     tags: ['bbq', 'beef', 'popular', 'premium'],
@@ -103,7 +103,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     id: 'beef-rib-tips',
     title: 'Beef Rib Tips',
     description: 'Smoked beef rib tips, sold by the pound. Market price.',
-    image: '/images/brisket-sauce-pour.jpg',
+    image: '/images/meat_smoked_brisket.jpg',
     categories: ['lunch'],
     pricing: { type: 'per-each', priceEach: 30, minOrder: 2 },
     tags: ['bbq', 'beef', 'premium'],
@@ -112,7 +112,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     id: 'beef-wagyu-sausage',
     title: 'Beef Wagyu Sausage',
     description: 'Premium wagyu beef sausage, sold by the pound.',
-    image: '/images/bbq_brisket.jpg',
+    image: '/images/wagyu_dog_chicago_style.jpg',
     categories: ['lunch'],
     pricing: { type: 'per-each', priceEach: 24, minOrder: 2 },
     tags: ['bbq', 'beef', 'premium'],
@@ -132,7 +132,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     id: 'pulled-pork-sliders',
     title: 'Pulled Pork Sliders (24 ct)',
     description: 'Smoked to perfection on brioche buns with pickles & coleslaw on the side. Original or spicy BBQ sauce.',
-    image: '/images/Stacked Sandwiches Hi Res Shot.png',
+    image: '/images/sandwich_pulled_pork.jpg',
     categories: ['lunch'],
     pricing: { type: 'per-container', pricePerContainer: 180, servesPerContainer: 24 },
     tags: ['bbq', 'pork', 'sliders', 'popular'],
@@ -141,7 +141,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     id: 'brisket-sliders',
     title: 'Brisket Sliders (24 ct)',
     description: 'Smoked to perfection on brioche buns with pickles & coleslaw on the side. Original or spicy BBQ sauce.',
-    image: '/images/Stacked Sandwiches Hi Res Shot.png',
+    image: '/images/sandwich_brisket.jpg',
     categories: ['lunch'],
     pricing: { type: 'per-container', pricePerContainer: 180, servesPerContainer: 24 },
     tags: ['bbq', 'beef', 'sliders', 'popular'],
@@ -171,7 +171,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     id: 'collard-greens',
     title: 'Greens',
     description: 'Slow-cooked collard greens.',
-    image: '/images/Collard Greens with Smoked Turkey High End Shot.png',
+    image: '/images/side_collard_greens.jpg',
     categories: ['lunch'],
     pricing: panPricing(45, 80),
     tags: ['sides', 'southern'],
@@ -180,7 +180,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     id: 'brisket-baked-beans',
     title: 'Brisket Baked Beans',
     description: 'Hearty baked beans with smoked brisket.',
-    image: '/images/Red Beans and Rice Hi Res Shot.png',
+    image: '/images/side_baked_beans.jpg',
     categories: ['lunch'],
     pricing: panPricing(60, 120),
     tags: ['sides', 'bbq', 'popular'],
@@ -222,7 +222,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     id: 'candy-yams',
     title: 'Candy Yams',
     description: 'Sweet candied yams. Vegetarian.',
-    image: '/images/Southern Breakfast Potatoes High Res Shot.png',
+    image: '/images/side_candy_yams.jpg',
     categories: ['lunch'],
     pricing: panPricing(60, 120),
     tags: ['vegetarian', 'vegan', 'sides', 'southern'],
@@ -260,7 +260,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     id: 'banana-pudding',
     title: 'Banana Pudding',
     description: 'Homemade banana pudding. Vegetarian.',
-    image: '/images/BSB Strawberry Cheesecake Slice Hi Res Shot.png',
+    image: '/images/dessert_banana_pudding.jpg',
     categories: ['dessert'],
     pricing: panPricing(30, 60),
     tags: ['vegetarian', 'dessert', 'popular', 'southern'],
@@ -342,6 +342,17 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     tags: ['beverage', 'vegan'],
   },
 
+  // ==================== CATERING SERVICES ====================
+  {
+    id: 'full-setup',
+    title: 'Full Setup Service',
+    description: 'Our team will set up your complete catering spread — chafing dishes, serving stations, table linens, and cleanup.',
+    image: '/images/bbq_brisket.jpg',
+    categories: ['breakfast', 'lunch', 'dessert', 'alacarte'],
+    pricing: { type: 'per-person', pricePerPerson: 5 },
+    tags: ['service'],
+  },
+
   // ==================== CATERING EQUIPMENT & EXTRAS ====================
   {
     id: 'sterno',
@@ -384,7 +395,8 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
 // Helper functions
 
 export function getProductsByEventType(eventType: string): CateringProduct[] {
-  return CATERING_PRODUCTS.filter((p) => p.categories.includes(eventType as 'breakfast' | 'lunch' | 'dessert'));
+  if (eventType === 'alacarte') return CATERING_PRODUCTS;
+  return CATERING_PRODUCTS.filter((p) => p.categories.includes(eventType as 'breakfast' | 'lunch'));
 }
 
 export function getProductById(id: string): CateringProduct | undefined {
@@ -400,9 +412,9 @@ export function getRecommendedProducts(
     (p) => !p.tags?.includes('equipment') && !p.tags?.includes('cutlery') && !p.tags?.includes('condiments')
   );
 
-  if (eventType) {
+  if (eventType && eventType !== 'alacarte') {
     products = products.filter((p) =>
-      p.categories.includes(eventType as 'breakfast' | 'lunch' | 'dessert')
+      p.categories.includes(eventType as 'breakfast' | 'lunch')
     );
   }
 

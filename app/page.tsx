@@ -3,36 +3,50 @@
 import { useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import ProductImagePlaceholder from '@/components/ui/ProductImagePlaceholder';
+import { useRouter } from 'next/navigation';
 import { useCatering } from '@/context/CateringContext';
 import { useEnabledEventTypes } from '@/lib/hooks/useEnabledEventTypes';
 import StepIndicator from '@/components/catering/StepIndicator';
+import EventInfoStep from '@/components/catering/EventInfoStep';
 import HeadcountBudgetStep from '@/components/catering/HeadcountBudgetStep';
 import OrderTypeStep from '@/components/catering/OrderTypeStep';
 import ProductSelectionStep from '@/components/catering/ProductSelectionStep';
 import PackageSelectionStep from '@/components/catering/PackageSelectionStep';
 import EquipmentStep from '@/components/catering/EquipmentStep';
 import ValueProposition from '@/components/marketing/ValueProposition';
-import TrustSignals from '@/components/marketing/TrustSignals';
 import ClientLogos from '@/components/marketing/ClientLogos';
-import TestimonialsSection from '@/components/marketing/TestimonialsSection';
+
 import DietaryFilterBar from '@/components/catering/DietaryFilterBar';
 import RecommendedItems from '@/components/catering/RecommendedItems';
 
 export default function HomePage() {
+  const router = useRouter();
   const { state, dispatch } = useCatering();
   const { eventTypes: EVENT_TYPES } = useEnabledEventTypes();
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [showEventTypes, setShowEventTypes] = useState(!!state.orderMode);
+
+  const handlePlanEvent = () => {
+    dispatch({ type: 'SET_ORDER_MODE', payload: 'wizard' });
+    setShowEventTypes(true);
+  };
+
+  const handleQuickOrder = () => {
+    dispatch({ type: 'SET_ORDER_MODE', payload: 'alacarte' });
+    router.push('/products');
+  };
 
   const handleSelectEventType = (eventTypeId: string) => {
     dispatch({
       type: 'SET_EVENT_TYPE',
-      payload: eventTypeId as 'breakfast' | 'lunch' | 'dessert',
+      payload: eventTypeId as 'breakfast' | 'lunch' | 'alacarte',
     });
   };
 
   const eventImages: Record<string, string> = {
-    lunch: '/images/brisket-sauce-pour.jpg',
-    dessert: '/images/BSB Chocolate Chip Cookies Hi Res Shot.png',
+    lunch: '/images/Macaroni and Cheese Shot Hi Res.png',
+    alacarte: '/images/bbq_brisket.jpg',
   };
 
   const handleToggleFilter = (tag: string) => {
@@ -42,6 +56,9 @@ export default function HomePage() {
         : [...prev, tag]
     );
   };
+
+  // Show the wizard step indicator only after entering the wizard path
+  const inWizard = showEventTypes || state.orderMode === 'wizard' || state.currentStep > 1;
 
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
@@ -123,90 +140,146 @@ export default function HomePage() {
       {/* Value Proposition */}
       <ValueProposition />
 
-      {/* How It Works */}
-      <TrustSignals />
+      {/* Breadcrumb Navigation (shown when in wizard) */}
+      {inWizard && (
+        <StepIndicator
+          currentStep={state.currentStep}
+          onNavigate={(step) => dispatch({ type: 'SET_STEP', payload: step as 1 | 2 | 3 | 4 | 5 | 6 })}
+        />
+      )}
 
       {/* Client Logos */}
       <ClientLogos />
 
-      {/* Step Indicator */}
-      <section id="catering" className="bg-[#FAFAFA] pt-12 sm:pt-16">
-        <div className="container mx-auto px-4">
-          <StepIndicator currentStep={state.currentStep} />
-        </div>
-      </section>
+      {/* Two-Path Entry (shown when not yet in wizard and no event type selected) */}
+      {!inWizard && (
+        <section id="catering" className="bg-[#FAFAFA] py-12 sm:py-16">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-10">
+              <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#383838] tracking-wider mb-4">
+                HOW CAN WE HELP?
+              </h2>
+              <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
+                Planning a full event or just need to place an order? We&apos;ve got you either way.
+              </p>
+            </div>
 
-      {/* Step 1: Event Type Selection */}
-      <section className="bg-[#FAFAFA] pb-12 sm:pb-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-10">
-            <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#383838] tracking-wider mb-4">
-              WHAT ARE YOU PLANNING?
-            </h2>
-            <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
-              No wrong choices here — pick what fits and we&apos;ll show you the best options.
-            </p>
-          </div>
+            <div className="flex flex-wrap justify-center gap-6 max-w-4xl mx-auto">
+              {/* Plan Your Event */}
+              <div className="animate-scale-in w-full sm:w-[calc(50%-0.75rem)] max-w-[400px]">
+                <div
+                  onClick={handlePlanEvent}
+                  className="relative overflow-hidden rounded-xl cursor-pointer transition-all duration-300 shadow-md h-[180px] sm:h-[240px] md:h-[320px] hover:scale-105"
+                >
+                  <ProductImagePlaceholder title="Plan Your Event" className="text-lg sm:text-xl md:text-2xl" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-end p-6 text-center">
+                    <h3 className="font-oswald text-2xl sm:text-3xl font-bold text-white mb-2 tracking-wide drop-shadow-lg">
+                      PLAN YOUR EVENT
+                    </h3>
+                    <p className="text-white/90 text-sm sm:text-base drop-shadow">
+                      Full-service catering with guided setup
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-              <div className="flex flex-wrap justify-center gap-6 max-w-4xl mx-auto">
-                {EVENT_TYPES.map((eventType, index) => {
-                  const isSelected = state.eventType === eventType.id;
-                  const isUnselected = state.eventType && state.eventType !== eventType.id;
-
-                  return (
-                    <div
-                      key={eventType.id}
-                      className="animate-scale-in w-full sm:w-[calc(50%-0.75rem)] max-w-[400px]"
-                      style={{ animationDelay: `${index * 0.1}s` }}
-                    >
-                      <div
-                        onClick={() => handleSelectEventType(eventType.id)}
-                        className={`
-                          relative overflow-hidden rounded-xl cursor-pointer
-                          transition-all duration-300 shadow-md
-                          h-[180px] sm:h-[240px] md:h-[320px]
-                          ${isSelected
-                            ? 'ring-4 ring-[#E8621A] scale-[1.02]'
-                            : 'hover:scale-105'
-                          }
-                          ${isUnselected ? 'opacity-50 grayscale' : ''}
-                        `}
-                      >
-                        <Image
-                          src={eventImages[eventType.id] || '/images/Yogurt Parfait Shot High Res.png'}
-                          alt={eventType.name}
-                          fill
-                          className="object-cover"
-                        />
-                        <div className={`absolute inset-0 ${isSelected ? 'bg-gradient-to-t from-black/70 via-black/30 to-transparent' : 'bg-gradient-to-t from-black/80 via-black/40 to-transparent'}`} />
-                        <div className="absolute inset-0 flex flex-col items-center justify-end p-6 text-center">
-                          <h3 className="font-oswald text-2xl sm:text-3xl font-bold text-white mb-2 tracking-wide drop-shadow-lg">
-                            {eventType.name.toUpperCase()}
-                          </h3>
-                          <p className="text-white/90 text-sm sm:text-base drop-shadow">
-                            {eventType.description}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+              {/* Order A La Carte */}
+              <div className="animate-scale-in w-full sm:w-[calc(50%-0.75rem)] max-w-[400px]" style={{ animationDelay: '0.1s' }}>
+                <div
+                  onClick={handleQuickOrder}
+                  className="relative overflow-hidden rounded-xl cursor-pointer transition-all duration-300 shadow-md h-[180px] sm:h-[240px] md:h-[320px] hover:scale-105"
+                >
+                  <ProductImagePlaceholder title="Order A La Carte" className="text-lg sm:text-xl md:text-2xl" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-end p-6 text-center">
+                    <h3 className="font-oswald text-2xl sm:text-3xl font-bold text-white mb-2 tracking-wide drop-shadow-lg">
+                      ORDER A LA CARTE
+                    </h3>
+                    <p className="text-white/90 text-sm sm:text-base drop-shadow">
+                      Skip the wizard — go straight to the menu
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
+      )}
 
-      {/* Step 2: Headcount & Budget */}
+      {/* Step 1: Event Type Selection (shown after clicking "Plan Your Event") */}
+      {inWizard && (
+        <section className="bg-[#FAFAFA] pb-12 sm:pb-16">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-10">
+              <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#383838] tracking-wider mb-4">
+                LET US HELP YOU ORDER
+              </h2>
+              <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
+                No wrong choices here — pick what fits and we&apos;ll show you the best options.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap justify-center gap-6 max-w-4xl mx-auto">
+              {EVENT_TYPES.map((eventType, index) => {
+                const isSelected = state.eventType === eventType.id;
+                const isUnselected = state.eventType && state.eventType !== eventType.id;
+
+                return (
+                  <div
+                    key={eventType.id}
+                    className="animate-scale-in w-full sm:w-[calc(50%-0.75rem)] max-w-[400px]"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <div
+                      onClick={() => handleSelectEventType(eventType.id)}
+                      className={`
+                        relative overflow-hidden rounded-xl cursor-pointer
+                        transition-all duration-300 shadow-md
+                        h-[180px] sm:h-[240px] md:h-[320px]
+                        ${isSelected
+                          ? 'ring-4 ring-[#E8621A] scale-[1.02]'
+                          : 'hover:scale-105'
+                        }
+                        ${isUnselected ? 'opacity-50 grayscale' : ''}
+                      `}
+                    >
+                      <ProductImagePlaceholder title={eventType.name} className="text-lg sm:text-xl md:text-2xl" />
+                      <div className={`absolute inset-0 ${isSelected ? 'bg-gradient-to-t from-black/70 via-black/30 to-transparent' : 'bg-gradient-to-t from-black/80 via-black/40 to-transparent'}`} />
+                      <div className="absolute inset-0 flex flex-col items-center justify-end p-6 text-center">
+                        <h3 className="font-oswald text-2xl sm:text-3xl font-bold text-white mb-2 tracking-wide drop-shadow-lg">
+                          {eventType.name.toUpperCase()}
+                        </h3>
+                        <p className="text-white/90 text-sm sm:text-base drop-shadow">
+                          {eventType.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Step 2: Event Info */}
       {state.currentStep >= 2 && (
+        <EventInfoStep />
+      )}
+
+      {/* Step 3: Headcount & Budget */}
+      {state.currentStep >= 3 && (
         <HeadcountBudgetStep />
       )}
 
-      {/* Step 3: Order Type */}
-      {state.currentStep >= 3 && (
+      {/* Step 4: Order Type */}
+      {state.currentStep >= 4 && (
         <OrderTypeStep />
       )}
 
-      {/* Step 4: Product or Package Selection */}
-      {state.currentStep >= 4 && (
+      {/* Step 5: Product or Package Selection */}
+      {state.currentStep >= 5 && (
         state.orderType === 'packages' ? (
           <PackageSelectionStep />
         ) : (
@@ -226,13 +299,10 @@ export default function HomePage() {
         )
       )}
 
-      {/* Step 5: Equipment & Extras (build-your-own only) */}
-      {state.currentStep >= 5 && state.orderType === 'build-your-own' && (
+      {/* Step 6: Equipment & Extras (build-your-own only) */}
+      {state.currentStep >= 6 && state.orderType === 'build-your-own' && (
         <EquipmentStep />
       )}
-
-      {/* Testimonials Section */}
-      <TestimonialsSection />
 
       {/* Browse Full Menu Link */}
       <section className="bg-[#383838] py-12 sm:py-16">

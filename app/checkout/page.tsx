@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCatering } from '@/context/CateringContext';
 import { formatCurrency } from '@/lib/pricing';
+import { getProductById } from '@/lib/products';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 
@@ -26,7 +27,9 @@ interface FormData {
   // Event Details
   eventDate: string;
   deliveryTime: string;
-  setupRequired: boolean;
+
+  // Delivery
+  deliveryInstructions: string;
 
   // Additional
   specialInstructions: string;
@@ -114,25 +117,38 @@ const DELIVERY_TIMES = [
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { state, dispatch, calculatedItems, totalCost } = useCatering();
+  const { state, dispatch, calculatedItems, totalCost, isItemInCart } = useCatering();
   const [currentStep, setCurrentStep] = useState(1); // 1 = details, 2 = confirmation
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState<'quote' | 'order' | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const hasEventInfo = !!state.eventInfo;
+  const fullSetupProduct = getProductById('full-setup');
+  const setupInCart = isItemInCart('full-setup');
+
+  const handleToggleSetup = (checked: boolean) => {
+    if (!fullSetupProduct) return;
+    if (checked) {
+      dispatch({ type: 'ADD_ITEM', payload: fullSetupProduct });
+    } else {
+      dispatch({ type: 'REMOVE_ITEM', payload: 'full-setup' });
+    }
+  };
+
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
     company: '',
-    address: '',
+    address: state.eventInfo?.address || '',
     address2: '',
-    city: '',
-    state: '',
-    zip: '',
-    eventDate: '',
-    deliveryTime: '',
-    setupRequired: true,
-    specialInstructions: '',
+    city: state.eventInfo?.city || '',
+    state: state.eventInfo?.state || '',
+    zip: state.eventInfo?.zip || '',
+    eventDate: state.eventInfo?.eventDate || '',
+    deliveryTime: state.eventInfo?.eventTime || '',
+    deliveryInstructions: '',
+    specialInstructions: state.eventInfo?.specialInstructions || '',
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
 
@@ -188,6 +204,7 @@ export default function CheckoutPage() {
     if (!formData.email.trim()) newErrors.email = 'Email is required';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Invalid email format';
     if (!formData.phone.trim()) newErrors.phone = 'Phone is required';
+    if (!formData.company.trim()) newErrors.company = 'Company/Organization is required';
     if (!formData.address.trim()) newErrors.address = 'Address is required';
     if (!formData.city.trim()) newErrors.city = 'City is required';
     if (!formData.state.trim()) newErrors.state = 'State is required';
@@ -206,8 +223,8 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleSubmitOrder = async () => {
-    setIsSubmitting(true);
+  const handleSubmitOrder = async (orderType: 'quote' | 'order') => {
+    setIsSubmitting(orderType);
     setSubmitError(null);
 
     try {
@@ -215,6 +232,7 @@ export default function CheckoutPage() {
       const orderNumber = `SD-${String(Math.floor(1000 + Math.random() * 9000))}`;
       const orderDetails = {
         orderNumber,
+        orderType,
         items: calculatedItems.map(item => ({
           title: item.product.title,
           displayText: item.displayText,
@@ -243,7 +261,7 @@ export default function CheckoutPage() {
         event: {
           date: formData.eventDate,
           time: formData.deliveryTime,
-          setupRequired: formData.setupRequired,
+          setupRequired: setupInCart,
           specialInstructions: formData.specialInstructions,
         },
       };
@@ -266,6 +284,8 @@ export default function CheckoutPage() {
           })),
           headcount: state.headcount,
           eventType: state.eventType,
+          orderType,
+          orderNumber,
           buyerInfo: {
             name: `${formData.firstName} ${formData.lastName}`,
             email: formData.email,
@@ -276,7 +296,14 @@ export default function CheckoutPage() {
             deliveryAddress: `${formData.address}${formData.address2 ? ', ' + formData.address2 : ''}, ${formData.city}, ${formData.state} ${formData.zip}`,
             notes: formData.specialInstructions,
           },
-          setupRequired: formData.setupRequired,
+          delivery: {
+            address: formData.address,
+            address2: formData.address2,
+            city: formData.city,
+            state: formData.state,
+            zip: formData.zip,
+          },
+          setupRequired: setupInCart,
           deliveryFee,
           orderTotal,
         }),
@@ -293,7 +320,7 @@ export default function CheckoutPage() {
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'Something went wrong. Please try again.');
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(null);
     }
   };
 
@@ -460,27 +487,30 @@ export default function CheckoutPage() {
 
                     <div className="sm:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Company/Organization
+                        Company/Organization <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         name="company"
                         value={formData.company}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50"
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 ${
+                          errors.company ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       />
+                      {errors.company && <p className="text-red-500 text-xs mt-1">{errors.company}</p>}
                     </div>
                   </div>
                 </Card>
 
-                {/* Delivery Address */}
+                {/* Delivery / Billing Address — always editable */}
                 <Card>
                   <h2 className="font-oswald text-xl font-bold text-[#383838] mb-4 flex items-center gap-2">
                     <svg className="w-5 h-5 text-[#E8621A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    Delivery Address
+                    Delivery / Billing Address
                   </h2>
 
                   <div className="space-y-4">
@@ -567,6 +597,20 @@ export default function CheckoutPage() {
                         {errors.zip && <p className="text-red-500 text-xs mt-1">{errors.zip}</p>}
                       </div>
                     </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Delivery Instructions
+                      </label>
+                      <input
+                        type="text"
+                        name="deliveryInstructions"
+                        value={formData.deliveryInstructions}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Dock drop off, use side entrance, call on arrival"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50"
+                      />
+                    </div>
                   </div>
                 </Card>
 
@@ -578,7 +622,9 @@ export default function CheckoutPage() {
                     </svg>
                     Event Details
                   </h2>
-                  <p className="text-sm text-gray-500 mb-4">Almost there — just a few details so we can deliver everything perfectly.</p>
+                  {hasEventInfo && (
+                    <p className="text-sm text-gray-500 mb-4">Pre-filled from event planning. Update if needed.</p>
+                  )}
 
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
@@ -622,13 +668,17 @@ export default function CheckoutPage() {
                       <label className="flex items-center gap-3 cursor-pointer">
                         <input
                           type="checkbox"
-                          name="setupRequired"
-                          checked={formData.setupRequired}
-                          onChange={handleInputChange}
+                          checked={setupInCart}
+                          onChange={(e) => handleToggleSetup(e.target.checked)}
                           className="w-5 h-5 rounded border-gray-300 text-[#E8621A] focus:ring-[#E8621A]"
                         />
                         <span className="text-sm text-gray-700">
-                          <strong>Full Setup Service</strong> — Our team will set up your catering spread
+                          <strong>Full Setup Service</strong> — Our team will set up your catering spread, serving stations, and cleanup
+                          {fullSetupProduct && (
+                            <span className="text-[#E8621A] font-semibold ml-1">
+                              ({formatCurrency(fullSetupProduct.pricing.type === 'per-person' ? fullSetupProduct.pricing.pricePerPerson : 0)}/person)
+                            </span>
+                          )}
                         </span>
                       </label>
                     </div>
@@ -696,7 +746,7 @@ export default function CheckoutPage() {
                       </div>
                     </div>
                     <p className="text-sm text-gray-600 mt-2">
-                      {state.headcount} guests • {formData.setupRequired ? 'Full setup included' : 'Drop-off only'}
+                      {state.headcount} guests • {setupInCart ? 'Full setup included' : 'Drop-off only'}
                     </p>
                     {formData.specialInstructions && (
                       <p className="text-sm text-gray-500 mt-2 italic">"{formData.specialInstructions}"</p>
@@ -734,22 +784,41 @@ export default function CheckoutPage() {
                 <div className="flex gap-4">
                   <button
                     onClick={() => setCurrentStep(1)}
-                    disabled={isSubmitting}
+                    disabled={!!isSubmitting}
                     className="flex-1 px-6 py-3 border-2 border-[#383838] text-[#383838] font-oswald font-bold rounded-lg hover:bg-[#383838] hover:text-white transition-colors disabled:opacity-50"
                   >
                     Edit Details
                   </button>
-                  <Button onClick={handleSubmitOrder} className="flex-1" disabled={isSubmitting}>
-                    {isSubmitting ? (
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                  <button
+                    onClick={() => handleSubmitOrder('quote')}
+                    disabled={!!isSubmitting}
+                    className="flex-1 px-6 py-3 border-2 border-[#E8621A] text-[#E8621A] font-oswald font-bold rounded-lg hover:bg-[#E8621A]/10 transition-colors disabled:opacity-50"
+                  >
+                    {isSubmitting === 'quote' ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Sending Quote...
+                      </span>
+                    ) : (
+                      'Request a Quote'
+                    )}
+                  </button>
+                  <Button onClick={() => handleSubmitOrder('order')} className="flex-1" disabled={!!isSubmitting}>
+                    {isSubmitting === 'order' ? (
                       <span className="flex items-center gap-2">
                         <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                         </svg>
-                        Submitting...
+                        Placing Order...
                       </span>
                     ) : (
-                      'Submit Order'
+                      'Place Order'
                     )}
                   </Button>
                 </div>

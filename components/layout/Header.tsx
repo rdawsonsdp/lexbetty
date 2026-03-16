@@ -27,6 +27,7 @@ export default function Header() {
   const adminLinks = [
     { href: '/admin/menu', label: 'MENU MANAGEMENT' },
     { href: '/menu-engineering', label: 'MENU ENGINEERING' },
+    { href: '/admin/email', label: 'EMAIL SETTINGS' },
   ];
 
   return (
@@ -46,21 +47,21 @@ export default function Header() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
+          <nav className="hidden lg:flex items-center gap-5 xl:gap-7 flex-nowrap">
             {navLinks.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
-                className="font-oswald text-sm xl:text-base tracking-wider text-[#383838] hover:text-[#E8621A] transition-colors"
+                className="font-oswald text-sm xl:text-base tracking-wider text-[#383838] hover:text-[#E8621A] transition-colors whitespace-nowrap"
               >
                 {link.label}
               </Link>
             ))}
             {/* Admin Dropdown */}
-            <div ref={dropdownRef} className="relative">
+            <div ref={dropdownRef} className="relative flex items-center">
               <button
                 onClick={() => setAdminDropdownOpen(!adminDropdownOpen)}
-                className="font-oswald text-sm xl:text-base tracking-wider text-[#383838] hover:text-[#E8621A] transition-colors flex items-center gap-1"
+                className="font-oswald text-sm xl:text-base tracking-wider text-[#383838] hover:text-[#E8621A] transition-colors flex items-center gap-1 whitespace-nowrap"
               >
                 ADMIN
                 <svg className={`w-4 h-4 transition-transform ${adminDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,7 +111,7 @@ export default function Header() {
             {/* Order CTA */}
             <Link
               href="/#catering"
-              className="ml-2 bg-[#E8621A] text-white font-oswald text-sm xl:text-base tracking-wider px-5 py-2 hover:opacity-90 transition-opacity"
+              className="ml-2 bg-[#E8621A] text-white font-oswald text-sm xl:text-base tracking-wider px-5 py-2 hover:opacity-90 transition-opacity whitespace-nowrap"
             >
               ORDER CATERING
             </Link>

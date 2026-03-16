@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import jsPDF from 'jspdf';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { formatCurrency } from '@/lib/pricing';
 
 interface OrderDetails {
   orderNumber: string;
+  orderType?: 'quote' | 'order';
   items: Array<{
     title: string;
     displayText: string;
@@ -126,8 +128,189 @@ export default function OrderConfirmationPage() {
     );
   }
 
-  const handlePrint = () => {
-    window.print();
+  const isQuote = orderDetails.orderType === 'quote';
+
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    const contentWidth = pageWidth - margin * 2;
+    let y = 20;
+
+    // Brand colors
+    const orange: [number, number, number] = [232, 98, 26];
+    const dark: [number, number, number] = [56, 56, 56];
+    const gray: [number, number, number] = [128, 128, 128];
+
+    // Header bar
+    doc.setFillColor(...dark);
+    doc.rect(0, 0, pageWidth, 35, 'F');
+    doc.setFontSize(22);
+    doc.setTextColor(250, 250, 250);
+    doc.setFont('helvetica', 'bold');
+    doc.text('LEXINGTON BETTY SMOKEHOUSE', margin, 15);
+    doc.setFontSize(10);
+    doc.setTextColor(...orange);
+    doc.text(`${isQuote ? 'Quote' : 'Order'} #${orderDetails.orderNumber}`, margin, 25);
+    doc.setTextColor(200, 200, 200);
+    doc.text(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }), pageWidth - margin, 25, { align: 'right' });
+
+    y = 45;
+
+    // Document title
+    doc.setFontSize(16);
+    doc.setTextColor(...dark);
+    doc.setFont('helvetica', 'bold');
+    doc.text(isQuote ? 'CATERING QUOTE' : 'CATERING ORDER RECEIPT', margin, y);
+    y += 12;
+
+    // Order items
+    doc.setFillColor(245, 245, 245);
+    doc.rect(margin, y - 5, contentWidth, 8, 'F');
+    doc.setFontSize(9);
+    doc.setTextColor(...gray);
+    doc.setFont('helvetica', 'bold');
+    doc.text('ITEM', margin + 2, y);
+    doc.text('DETAILS', margin + 80, y);
+    doc.text('AMOUNT', pageWidth - margin - 2, y, { align: 'right' });
+    y += 8;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...dark);
+    orderDetails.items.forEach((item) => {
+      if (y > 260) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text(item.title, margin + 2, y);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(...gray);
+      doc.text(item.displayText, margin + 80, y);
+      doc.setFontSize(10);
+      doc.setTextColor(...dark);
+      doc.text(formatCurrency(item.totalPrice), pageWidth - margin - 2, y, { align: 'right' });
+      y += 8;
+    });
+
+    // Divider
+    y += 2;
+    doc.setDrawColor(220, 220, 220);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 8;
+
+    // Totals
+    doc.setFontSize(10);
+    doc.setTextColor(...gray);
+    doc.text('Subtotal', margin + 2, y);
+    doc.setTextColor(...dark);
+    doc.text(formatCurrency(orderDetails.subtotal), pageWidth - margin - 2, y, { align: 'right' });
+    y += 7;
+
+    doc.setTextColor(...gray);
+    doc.text('Delivery', margin + 2, y);
+    doc.setTextColor(...dark);
+    doc.text(formatCurrency(orderDetails.deliveryFee), pageWidth - margin - 2, y, { align: 'right' });
+    y += 7;
+
+    doc.setDrawColor(220, 220, 220);
+    doc.line(margin + 100, y - 3, pageWidth - margin, y - 3);
+
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...dark);
+    doc.text('Total', margin + 2, y + 4);
+    doc.setTextColor(...orange);
+    doc.text(formatCurrency(orderDetails.orderTotal), pageWidth - margin - 2, y + 4, { align: 'right' });
+    y += 10;
+
+    doc.setFontSize(9);
+    doc.setTextColor(...gray);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Per Person (${orderDetails.headcount} guests): ${formatCurrency(orderDetails.perPerson)}`, margin + 2, y + 2);
+    y += 16;
+
+    // Delivery Details section
+    if (y > 230) { doc.addPage(); y = 20; }
+    doc.setFillColor(...dark);
+    doc.rect(margin, y, contentWidth, 8, 'F');
+    doc.setFontSize(10);
+    doc.setTextColor(250, 250, 250);
+    doc.setFont('helvetica', 'bold');
+    doc.text('DELIVERY DETAILS', margin + 4, y + 6);
+    y += 16;
+
+    // Contact
+    doc.setFontSize(8);
+    doc.setTextColor(...gray);
+    doc.setFont('helvetica', 'bold');
+    doc.text('CONTACT', margin + 2, y);
+    doc.text('DELIVERY ADDRESS', pageWidth / 2 + 5, y);
+    y += 6;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...dark);
+    doc.text(`${orderDetails.contact.firstName} ${orderDetails.contact.lastName}`, margin + 2, y);
+    doc.text(orderDetails.delivery.address, pageWidth / 2 + 5, y);
+    y += 5;
+    doc.setFontSize(9);
+    doc.setTextColor(...gray);
+    doc.text(orderDetails.contact.email, margin + 2, y);
+    if (orderDetails.delivery.address2) {
+      doc.text(orderDetails.delivery.address2, pageWidth / 2 + 5, y);
+    }
+    y += 5;
+    doc.text(orderDetails.contact.phone, margin + 2, y);
+    doc.text(`${orderDetails.delivery.city}, ${orderDetails.delivery.state} ${orderDetails.delivery.zip}`, pageWidth / 2 + 5, y);
+    y += 5;
+    if (orderDetails.contact.company) {
+      doc.text(orderDetails.contact.company, margin + 2, y);
+      y += 5;
+    }
+    y += 8;
+
+    // Date & Details
+    doc.setFontSize(8);
+    doc.setTextColor(...gray);
+    doc.setFont('helvetica', 'bold');
+    doc.text('DATE & TIME', margin + 2, y);
+    doc.text('DETAILS', pageWidth / 2 + 5, y);
+    y += 6;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...dark);
+    if (orderDetails.event.date) {
+      doc.text(new Date(orderDetails.event.date + 'T00:00:00').toLocaleDateString('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      }), margin + 2, y);
+    }
+    doc.text(`${orderDetails.headcount} guests`, pageWidth / 2 + 5, y);
+    y += 5;
+    doc.setFontSize(9);
+    doc.setTextColor(...gray);
+    doc.text(orderDetails.event.time || '', margin + 2, y);
+    doc.text(orderDetails.event.setupRequired ? 'Full setup included' : 'Drop-off only', pageWidth / 2 + 5, y);
+    y += 12;
+
+    // Footer
+    doc.setDrawColor(...orange);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 8;
+    doc.setFontSize(9);
+    doc.setTextColor(...gray);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Lexington Betty Smokehouse  |  (312) 600-8155  |  orders@souldelivered.com', pageWidth / 2, y, { align: 'center' });
+    y += 5;
+    doc.text('Thank you for choosing Lexington Betty Smokehouse!', pageWidth / 2, y, { align: 'center' });
+
+    // Save
+    const filename = `LexBetty-${isQuote ? 'Quote' : 'Order'}-${orderDetails.orderNumber}.pdf`;
+    doc.save(filename);
   };
 
   return (
@@ -141,10 +324,10 @@ export default function OrderConfirmationPage() {
             </svg>
           </div>
           <h1 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#FAFAFA] tracking-wider mb-3">
-            YOU DID IT — THE FOOD IS PLANNED!
+            {isQuote ? 'YOUR QUOTE IS READY!' : 'YOU DID IT — THE FOOD IS PLANNED!'}
           </h1>
           <p className="text-[#E8621A] text-lg sm:text-xl font-oswald font-bold">
-            Order #{orderDetails.orderNumber}
+            {isQuote ? 'Quote' : 'Order'} #{orderDetails.orderNumber}
           </p>
         </div>
       </div>
@@ -153,7 +336,9 @@ export default function OrderConfirmationPage() {
       <div className="bg-[#E8621A] py-3">
         <div className="container mx-auto px-4 text-center">
           <p className="font-oswald font-bold text-[#383838] text-sm sm:text-base tracking-wide">
-            NOW YOU CAN FOCUS ON THE FUN PART — WE&apos;VE GOT THE FOOD HANDLED.
+            {isQuote
+              ? 'WE\'LL REVIEW YOUR QUOTE AND GET BACK TO YOU WITHIN 1 BUSINESS DAY.'
+              : 'NOW YOU CAN FOCUS ON THE FUN PART — WE\'VE GOT THE FOOD HANDLED.'}
           </p>
         </div>
       </div>
@@ -162,7 +347,9 @@ export default function OrderConfirmationPage() {
         <div className="grid gap-6">
           {/* Warm Paragraph */}
           <p className="text-center text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
-            Our team will reach out to confirm payment and delivery details. All that&apos;s left for you is to enjoy the event.
+            {isQuote
+              ? 'We\'ve sent a copy of this quote to your email. Our team will reach out to finalize details and confirm your event. This quote is valid for 7 days.'
+              : 'Our team will reach out to confirm payment and delivery details. All that\'s left for you is to enjoy the event.'}
           </p>
 
           {/* Order Summary Card */}
@@ -327,8 +514,8 @@ export default function OrderConfirmationPage() {
                 Start New Order
               </Button>
             </Link>
-            <Button variant="outline" onClick={handlePrint} className="w-full sm:w-auto px-8">
-              Print Receipt
+            <Button variant="outline" onClick={handleDownloadPDF} className="w-full sm:w-auto px-8">
+              Download Receipt
             </Button>
             <a href="tel:3126008155">
               <Button variant="secondary" className="w-full sm:w-auto px-8">

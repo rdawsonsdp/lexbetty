@@ -71,7 +71,7 @@ export default function ProductSelectionStep({
 
   // Get products filtered by event type, excluding equipment
   const products = getActiveByEventType(state.eventType).filter(
-    p => !p.tags?.includes('equipment') && !p.tags?.includes('cutlery')
+    p => !p.tags?.includes('equipment') && !p.tags?.includes('cutlery') && !p.tags?.includes('service')
   );
 
   // Filter products based on search term and dietary filters
@@ -106,11 +106,11 @@ export default function ProductSelectionStep({
   });
 
   const handleContinueToExtras = () => {
-    dispatch({ type: 'SET_STEP', payload: 5 });
+    dispatch({ type: 'SET_STEP', payload: 6 });
   };
 
   const handleBack = () => {
-    dispatch({ type: 'SET_STEP', payload: 3 });
+    dispatch({ type: 'SET_STEP', payload: 4 });
   };
 
   return (
@@ -120,7 +120,7 @@ export default function ProductSelectionStep({
         <div className="text-center mb-6">
           <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
             {state.eventType && (
-              <Badge variant={state.eventType as 'breakfast' | 'lunch' | 'dessert'}>
+              <Badge variant={state.eventType as 'breakfast' | 'lunch' | 'alacarte'}>
                 {getEventTypeName(state.eventType)}
               </Badge>
             )}

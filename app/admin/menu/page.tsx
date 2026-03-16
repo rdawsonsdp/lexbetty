@@ -7,7 +7,7 @@ import CategoryTabs from '@/components/admin/CategoryTabs';
 import SortableProductList from '@/components/admin/SortableProductList';
 import ProductEditModal from '@/components/admin/ProductEditModal';
 import ProductEditForm from '@/components/admin/ProductEditForm';
-import { CateringProduct } from '@/lib/types';
+import { CateringProduct, EventType } from '@/lib/types';
 import { ProductFormData } from '@/lib/product-schema';
 
 interface AdminProduct extends CateringProduct {
@@ -113,7 +113,7 @@ function AdminMenuPage() {
     let result = products;
 
     if (activeCategory !== 'all') {
-      result = result.filter(p => p.categories.includes(activeCategory as 'breakfast' | 'lunch' | 'dessert'));
+      result = result.filter(p => p.categories.includes(activeCategory as EventType));
     }
 
     if (searchTerm) {

@@ -12,6 +12,7 @@ import {
   CateringState,
   CateringAction,
   EventType,
+  EventInfo,
   BudgetRange,
   CateringProduct,
   CateringPackage,
@@ -31,6 +32,8 @@ const STORAGE_KEY = 'catering-state';
 const initialState: CateringState = {
   currentStep: 1,
   eventType: null,
+  eventInfo: null,
+  orderMode: null,
   budgetRange: null,
   customBudget: null,
   orderType: null,
@@ -65,7 +68,22 @@ function cateringReducer(state: CateringState, action: CateringAction): Catering
       return {
         ...state,
         eventType: action.payload,
-        currentStep: 2,
+        currentStep: 2, // advance to Event Info step
+      };
+    }
+
+    case 'SET_EVENT_INFO': {
+      return {
+        ...state,
+        eventInfo: action.payload,
+        currentStep: 3, // advance to Headcount & Budget step
+      };
+    }
+
+    case 'SET_ORDER_MODE': {
+      return {
+        ...state,
+        orderMode: action.payload,
       };
     }
 
@@ -88,7 +106,9 @@ function cateringReducer(state: CateringState, action: CateringAction): Catering
       return {
         ...state,
         orderType: action.payload,
-        currentStep: 4,
+        currentStep: 5, // advance to product/package selection
+        // Clear the opposite selection type to prevent stale totals
+        ...(action.payload === 'build-your-own' ? { selectedPackage: null } : { selectedItems: [] }),
       };
     }
 
@@ -110,11 +130,12 @@ function cateringReducer(state: CateringState, action: CateringAction): Catering
           ...updated[existingIndex],
           quantity: updated[existingIndex].quantity + 1,
         };
-        return { ...state, selectedItems: updated };
+        return { ...state, selectedItems: updated, selectedPackage: null };
       }
 
       return {
         ...state,
+        selectedPackage: null, // Clear any stale package so totalCost uses individual items
         selectedItems: [
           ...state.selectedItems,
           { product: action.payload, quantity: 1 },
@@ -136,6 +157,7 @@ function cateringReducer(state: CateringState, action: CateringAction): Catering
       if (quantity <= 0) {
         return {
           ...state,
+          selectedPackage: null,
           selectedItems: state.selectedItems.filter(
             (item) => item.product.id !== productId
           ),
@@ -144,6 +166,7 @@ function cateringReducer(state: CateringState, action: CateringAction): Catering
 
       return {
         ...state,
+        selectedPackage: null,
         selectedItems: state.selectedItems.map((item) =>
           item.product.id === productId ? { ...item, quantity } : item
         ),
@@ -180,7 +203,7 @@ function cateringReducer(state: CateringState, action: CateringAction): Catering
     }
 
     case 'GO_BACK': {
-      const prevStep = Math.max(1, state.currentStep - 1) as 1 | 2 | 3 | 4 | 5;
+      const prevStep = Math.max(1, state.currentStep - 1) as 1 | 2 | 3 | 4 | 5 | 6;
       return {
         ...state,
         currentStep: prevStep,
@@ -272,6 +295,9 @@ export function CateringProvider({ children }: { children: ReactNode }) {
 
   const canProceedToCheckout = (): boolean => {
     const hasSelection = state.selectedPackage !== null || state.selectedItems.length > 0;
+    if (state.orderMode === 'alacarte') {
+      return hasSelection && state.headcount > 0;
+    }
     return (
       state.eventType !== null &&
       hasSelection &&

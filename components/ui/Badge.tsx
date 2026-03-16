@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface BadgeProps {
-  variant?: 'default' | 'breakfast' | 'lunch' | 'dessert' | 'success' | 'warning';
+  variant?: 'default' | 'breakfast' | 'lunch' | 'alacarte' | 'success' | 'warning';
   children: React.ReactNode;
   className?: string;
 }
@@ -11,7 +11,7 @@ export default function Badge({ variant = 'default', children, className = '' }:
     default: 'bg-[#E8621A]/30 text-[#383838] border border-[#E8621A]',
     breakfast: 'bg-[#E8621A]/20 text-[#383838] border border-[#E8621A]',
     lunch: 'bg-[#E8621A]/20 text-[#383838] border border-[#E8621A]',
-    dessert: 'bg-[#E8621A]/20 text-[#383838] border border-[#E8621A]',
+    alacarte: 'bg-[#E8621A]/20 text-[#383838] border border-[#E8621A]',
     success: 'bg-green-100 text-green-800 border border-green-200',
     warning: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
   };

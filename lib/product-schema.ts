@@ -50,7 +50,7 @@ export const productSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
   image: z.string().min(1),
-  categories: z.array(z.enum(['breakfast', 'lunch', 'dessert'])).min(1),
+  categories: z.array(z.enum(['breakfast', 'lunch', 'dessert', 'alacarte'])).min(1),
   pricing: pricingSchema,
   tags: z.array(z.string()).nullish(),
   featured: z.boolean().nullish(),

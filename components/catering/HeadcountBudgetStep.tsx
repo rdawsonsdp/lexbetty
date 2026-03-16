@@ -23,11 +23,11 @@ export default function HeadcountBudgetStep() {
   };
 
   const handleContinue = () => {
-    dispatch({ type: 'SET_STEP', payload: 3 });
+    dispatch({ type: 'SET_STEP', payload: 4 });
   };
 
   const handleSkipBudget = () => {
-    dispatch({ type: 'SET_STEP', payload: 3 });
+    dispatch({ type: 'SET_STEP', payload: 4 });
   };
 
   const handleBack = () => {
@@ -136,7 +136,7 @@ export default function HeadcountBudgetStep() {
             onClick={handleBack}
             className="font-oswald text-gray-500 hover:text-[#383838] transition-colors tracking-wide mt-2"
           >
-            ← BACK TO EVENT TYPE
+            ← BACK TO EVENT INFO
           </button>
         </div>
       </div>

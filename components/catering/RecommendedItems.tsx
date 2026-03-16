@@ -5,7 +5,7 @@ import { getProductsByEventType } from '@/lib/products';
 import { getEventTypeName } from '@/lib/event-types';
 import { formatCurrency, calculateProductOrder } from '@/lib/pricing';
 import { CateringProduct } from '@/lib/types';
-import Image from 'next/image';
+import ProductImagePlaceholder from '@/components/ui/ProductImagePlaceholder';
 
 export default function RecommendedItems() {
   const { state, dispatch, isItemInCart } = useCatering();
@@ -52,13 +52,7 @@ export default function RecommendedItems() {
               className="bg-white rounded-lg overflow-hidden"
             >
               <div className="relative aspect-square">
-                <Image
-                  src={product.image}
-                  alt={product.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 640px) 50vw, 33vw"
-                />
+                <ProductImagePlaceholder title={product.title} />
               </div>
               <div className="pt-3 pb-2">
                 <h4 className="font-oswald font-semibold text-[#383838] text-sm sm:text-base line-clamp-1">

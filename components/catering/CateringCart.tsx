@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { useCatering } from '@/context/CateringContext';
 import { formatCurrency, hasEnoughServings, calculateServingCoverage } from '@/lib/pricing';
@@ -29,6 +30,11 @@ export default function CateringCart({ onCheckout }: CateringCartProps) {
 
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showFoodModal, setShowFoodModal] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleHeadcountChange = (value: number) => {
     dispatch({ type: 'SET_HEADCOUNT', payload: Math.max(1, value) });
@@ -338,22 +344,24 @@ export default function CateringCart({ onCheckout }: CateringCartProps) {
         </div>
       </Card>
 
-      {/* Have Enough Food Modal */}
-      <HaveEnoughFoodModal
-        isOpen={showFoodModal}
-        onClose={() => setShowFoodModal(false)}
-        onAddMore={() => setShowFoodModal(false)}
-        onReduceGuests={() => {
-          setShowFoodModal(false);
-          // Reduce headcount to match servings
-          const newHeadcount = Math.max(1, totalServings);
-          dispatch({ type: 'SET_HEADCOUNT', payload: newHeadcount });
-        }}
-        onContinue={() => {
-          setShowFoodModal(false);
-          onCheckout();
-        }}
-      />
+      {/* Have Enough Food Modal — portaled to body to escape overflow containers */}
+      {mounted && createPortal(
+        <HaveEnoughFoodModal
+          isOpen={showFoodModal}
+          onClose={() => setShowFoodModal(false)}
+          onAddMore={() => setShowFoodModal(false)}
+          onReduceGuests={() => {
+            setShowFoodModal(false);
+            const newHeadcount = Math.max(1, totalServings);
+            dispatch({ type: 'SET_HEADCOUNT', payload: newHeadcount });
+          }}
+          onContinue={() => {
+            setShowFoodModal(false);
+            onCheckout();
+          }}
+        />,
+        document.body
+      )}
     </>
   );
 }

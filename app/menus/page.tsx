@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import ProductImagePlaceholder from '@/components/ui/ProductImagePlaceholder';
 import { CateringProduct } from '@/lib/types';
 import { getDisplayPrice, getPricingTypeLabel } from '@/lib/pricing';
 import DietaryFilterBar from '@/components/catering/DietaryFilterBar';
@@ -75,19 +76,14 @@ function MenuItemCard({ product }: { product: CateringProduct }) {
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       <div className="relative h-32 sm:h-40">
-        <Image
-          src={product.image}
-          alt={product.title}
-          fill
-          className="object-cover"
-        />
+        <ProductImagePlaceholder title={product.title} />
         {isFeatured && (
-          <div className="absolute top-2 left-2 bg-[#E8621A] text-white px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide">
+          <div className="absolute top-2 left-2 bg-[#E8621A] text-white px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide z-10">
             FEATURED
           </div>
         )}
         {!isFeatured && isPopular && (
-          <div className="absolute top-2 left-2 bg-[#383838] text-white px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide">
+          <div className="absolute top-2 left-2 bg-[#383838] text-white px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide z-10">
             POPULAR
           </div>
         )}
@@ -99,11 +95,11 @@ function MenuItemCard({ product }: { product: CateringProduct }) {
         <p className="text-xs text-gray-500 mb-2 line-clamp-2">
           {product.description}
         </p>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
           <span className="font-oswald font-bold text-[#E8621A]">
             {getDisplayPrice(product)}
           </span>
-          <span className="text-[10px] text-gray-400 uppercase">
+          <span className="text-sm text-gray-400">
             {getPricingTypeLabel(product)}
           </span>
         </div>
@@ -116,14 +112,8 @@ function PackageCard({ pkg }: { pkg: { id: string; title: string; description: s
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-100">
       <div className="relative h-40 sm:h-48">
-        <Image
-          src={pkg.image}
-          alt={pkg.title}
-          fill
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <div className="absolute bottom-3 left-3">
+        <ProductImagePlaceholder title={pkg.title} />
+        <div className="absolute bottom-3 left-3 z-10">
           <span className="bg-[#E8621A] text-white font-oswald font-bold px-3 py-1 rounded text-sm">
             ${pkg.pricePerPerson}/PP
           </span>

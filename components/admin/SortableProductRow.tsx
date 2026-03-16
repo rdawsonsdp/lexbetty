@@ -2,8 +2,8 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import Image from 'next/image';
 import { CateringProduct } from '@/lib/types';
+import ProductImagePlaceholder from '@/components/ui/ProductImagePlaceholder';
 
 interface AdminProduct extends CateringProduct {
   is_active: boolean;
@@ -58,14 +58,8 @@ export default function SortableProductRow({ product, onEdit, onToggleFeatured, 
       </button>
 
       {/* Thumbnail */}
-      <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-        <Image
-          src={product.image}
-          alt={product.title}
-          fill
-          className="object-cover"
-          sizes="48px"
-        />
+      <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+        <ProductImagePlaceholder title={product.title} className="text-[8px] sm:text-[8px] p-1" />
       </div>
 
       {/* Info */}

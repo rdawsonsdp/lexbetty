@@ -56,7 +56,7 @@ export default function EquipmentStep() {
   };
 
   const handleBack = () => {
-    dispatch({ type: 'SET_STEP', payload: 4 });
+    dispatch({ type: 'SET_STEP', payload: 5 });
   };
 
   return (

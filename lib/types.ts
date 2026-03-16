@@ -1,5 +1,5 @@
 // Event Types
-export type EventType = 'breakfast' | 'lunch' | 'dessert';
+export type EventType = 'breakfast' | 'lunch' | 'dessert' | 'alacarte';
 
 // Pricing Types
 export type PricingType = 'tray' | 'pan' | 'per-person' | 'per-dozen' | 'per-each' | 'per-container';
@@ -108,6 +108,20 @@ export interface SelectedCateringItem {
   quantity: number;
 }
 
+// Event info collected during wizard
+export interface EventInfo {
+  eventName?: string;
+  eventDate: string;
+  eventTime: string;
+  specialInstructions?: string;
+  venue?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  setupRequired?: boolean;
+}
+
 // Buyer/Contact information
 export interface BuyerInfo {
   name: string;
@@ -144,8 +158,10 @@ export interface SelectedPackage {
 
 // Main application state
 export interface CateringState {
-  currentStep: 1 | 2 | 3 | 4 | 5;
+  currentStep: 1 | 2 | 3 | 4 | 5 | 6;
   eventType: EventType | null;
+  eventInfo: EventInfo | null;
+  orderMode: 'wizard' | 'alacarte' | null;
   budgetRange: BudgetRange | null;
   customBudget: number | null;
   orderType: OrderType | null;
@@ -158,6 +174,8 @@ export interface CateringState {
 // Action types for reducer
 export type CateringAction =
   | { type: 'SET_EVENT_TYPE'; payload: EventType }
+  | { type: 'SET_EVENT_INFO'; payload: EventInfo }
+  | { type: 'SET_ORDER_MODE'; payload: 'wizard' | 'alacarte' }
   | { type: 'SET_BUDGET_RANGE'; payload: BudgetRange }
   | { type: 'SET_CUSTOM_BUDGET'; payload: number }
   | { type: 'SET_ORDER_TYPE'; payload: OrderType }
@@ -168,7 +186,7 @@ export type CateringAction =
   | { type: 'CLEAR_ITEMS' }
   | { type: 'SELECT_PACKAGE'; payload: CateringPackage }
   | { type: 'CLEAR_PACKAGE' }
-  | { type: 'SET_STEP'; payload: 1 | 2 | 3 | 4 | 5 }
+  | { type: 'SET_STEP'; payload: 1 | 2 | 3 | 4 | 5 | 6 }
   | { type: 'GO_BACK' }
   | { type: 'SET_BUYER_INFO'; payload: BuyerInfo }
   | { type: 'HYDRATE'; payload: CateringState }
