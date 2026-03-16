@@ -25,6 +25,7 @@ function getPricingBadge(pricing: CateringProduct['pricing']): string {
     case 'per-dozen': return `$${pricing.pricePerDozen}/dozen`;
     case 'per-each': return `$${pricing.priceEach}/each`;
     case 'per-container': return `$${pricing.pricePerContainer}/container`;
+    case 'flat': return `$${pricing.flatPrice} flat`;
   }
 }
 
