@@ -28,6 +28,7 @@ export default function Header() {
     { href: '/admin/menu', label: 'MENU MANAGEMENT' },
     { href: '/menu-engineering', label: 'MENU ENGINEERING' },
     { href: '/admin/email', label: 'EMAIL SETTINGS' },
+    { href: '/admin/quickbooks', label: 'QUICKBOOKS' },
   ];
 
   return (

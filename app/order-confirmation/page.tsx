@@ -41,6 +41,7 @@ interface OrderDetails {
     setupRequired: boolean;
     specialInstructions: string;
   };
+  paymentLink?: string | null;
 }
 
 const TIMELINE_STEPS = [
@@ -332,24 +333,47 @@ export default function OrderConfirmationPage() {
         </div>
       </div>
 
-      {/* Delivery Guarantee Banner */}
-      <div className="bg-[#E8621A] py-3">
-        <div className="container mx-auto px-4 text-center">
-          <p className="font-oswald font-bold text-[#383838] text-sm sm:text-base tracking-wide">
-            {isQuote
-              ? 'WE\'LL REVIEW YOUR QUOTE AND GET BACK TO YOU WITHIN 1 BUSINESS DAY.'
-              : 'NOW YOU CAN FOCUS ON THE FUN PART — WE\'VE GOT THE FOOD HANDLED.'}
-          </p>
+      {/* Payment Link / Guarantee Banner */}
+      {orderDetails.paymentLink ? (
+        <div className="bg-[#E8621A] py-4">
+          <div className="container mx-auto px-4 text-center">
+            <p className="font-oswald font-bold text-[#383838] text-sm sm:text-base tracking-wide mb-3">
+              YOUR INVOICE IS READY — PAY SECURELY ONLINE
+            </p>
+            <a
+              href={orderDetails.paymentLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-[#383838] text-white font-oswald font-bold px-8 py-3 rounded-lg hover:bg-[#4a4747] transition-colors text-lg"
+            >
+              Pay Now
+            </a>
+            <p className="text-[#383838]/70 text-xs mt-2">
+              A payment link has also been sent to {orderDetails.contact.email}
+            </p>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="bg-[#E8621A] py-3">
+          <div className="container mx-auto px-4 text-center">
+            <p className="font-oswald font-bold text-[#383838] text-sm sm:text-base tracking-wide">
+              {isQuote
+                ? "WE'LL REVIEW YOUR QUOTE AND GET BACK TO YOU WITHIN 1 BUSINESS DAY."
+                : "NOW YOU CAN FOCUS ON THE FUN PART — WE'VE GOT THE FOOD HANDLED."}
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="container mx-auto px-4 py-8 sm:py-12 max-w-4xl">
         <div className="grid gap-6">
           {/* Warm Paragraph */}
           <p className="text-center text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
-            {isQuote
-              ? 'We\'ve sent a copy of this quote to your email. Our team will reach out to finalize details and confirm your event. This quote is valid for 7 days.'
-              : 'Our team will reach out to confirm payment and delivery details. All that\'s left for you is to enjoy the event.'}
+            {orderDetails.paymentLink
+              ? 'Your invoice has been created and a payment link sent to your email. Pay online anytime before your event.'
+              : isQuote
+              ? "We've sent a copy of this quote to your email. Our team will reach out to finalize details and confirm your event. This quote is valid for 7 days."
+              : "Our team will reach out to confirm payment and delivery details. All that's left for you is to enjoy the event."}
           </p>
 
           {/* Order Summary Card */}

@@ -1,12 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createCateringDraftOrder } from '@/lib/shopify';
+import { supabaseAdmin } from '@/lib/supabase/server';
+import { findOrCreateCustomer } from '@/lib/quickbooks/customers';
+import { createInvoice, sendInvoiceEmail } from '@/lib/quickbooks/invoices';
+import { isQBConnected } from '@/lib/quickbooks/client';
 import { sendEmail } from '@/lib/email/send-email';
 import { buildQuoteEmailHtml } from '@/lib/email/quote-template';
 import { getEmailSettings } from '@/lib/email/email-settings';
 
+interface OrderItem {
+  productId: string;
+  title: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  selectedSize: string;
+  displayText: string;
+}
+
 interface CreateOrderRequest {
-  items?: Array<{ productId: string; title: string; quantity: number; unitPrice: number; totalPrice: number; selectedSize: string; displayText: string }>;
-  lineItems?: Array<{ variantId: string; quantity: number }>;
+  items?: OrderItem[];
   headcount: number;
   eventType: string;
   orderType?: 'quote' | 'order';
@@ -37,9 +49,8 @@ export async function POST(request: NextRequest) {
   try {
     const body: CreateOrderRequest = await request.json();
 
-    // Validate required fields — checkout sends `items`, Shopify path uses `lineItems`
-    const hasItems = (body.items && body.items.length > 0) || (body.lineItems && body.lineItems.length > 0);
-    if (!hasItems) {
+    // Validate required fields
+    if (!body.items || body.items.length === 0) {
       return NextResponse.json(
         { success: false, error: 'No items in order' },
         { status: 400 }
@@ -60,42 +71,53 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if Shopify is configured
-    const shopifyConfigured =
-      process.env.SHOPIFY_STORE_DOMAIN &&
-      process.env.SHOPIFY_ADMIN_API_ACCESS_TOKEN;
+    // Generate order number
+    const orderNumber = body.orderNumber || `LB-${String(Math.floor(1000 + Math.random() * 9000))}`;
+    const deliveryFee = body.deliveryFee || 0;
+    const subtotal = body.items.reduce((sum, item) => sum + item.totalPrice, 0);
+    const orderTotal = body.orderTotal || (subtotal + deliveryFee);
+    const orderType = body.orderType || 'order';
 
-    let result;
-    if (!shopifyConfigured) {
-      // Return mock response for development
-      console.log('Mock order created (Shopify not configured):', body);
-      result = {
-        draftOrderId: 'mock-order-123',
-        draftOrderNumber: '#MOCK-1001',
-        invoiceUrl: 'https://example.com/mock-invoice',
-      };
-    } else {
-      // Create the draft order in Shopify
-      const lineItems = body.lineItems ?? (body.items || []).map(item => ({
-        variantId: item.productId,
-        quantity: item.quantity,
-      }));
-      result = await createCateringDraftOrder(
-        lineItems,
-        body.headcount,
-        body.eventType,
-        body.buyerInfo
-      );
+    // Save order to Supabase
+    let orderId: string | null = null;
+    try {
+      const { data: order, error: orderError } = await supabaseAdmin
+        .from('orders')
+        .insert({
+          order_number: orderNumber,
+          status: 'pending',
+          customer_name: body.buyerInfo.name,
+          customer_email: body.buyerInfo.email,
+          customer_phone: body.buyerInfo.phone || null,
+          customer_company: body.buyerInfo.company || null,
+          delivery_address: body.buyerInfo.deliveryAddress || null,
+          event_date: body.buyerInfo.eventDate || null,
+          event_time: body.buyerInfo.eventTime || null,
+          headcount: body.headcount,
+          event_type: body.eventType || null,
+          setup_required: body.setupRequired ?? true,
+          special_instructions: body.buyerInfo.notes || null,
+          items: body.items,
+          subtotal,
+          delivery_fee: deliveryFee,
+          order_total: orderTotal,
+        })
+        .select('id')
+        .single();
+
+      if (!orderError && order) {
+        orderId = order.id;
+      } else {
+        console.warn('Failed to save order to DB:', orderError?.message);
+      }
+    } catch (dbErr) {
+      console.warn('DB order save failed (continuing):', dbErr);
     }
 
     // Send confirmation email (non-blocking)
     try {
       const emailSettings = await getEmailSettings();
       if (emailSettings.email_enabled) {
-        const orderType = body.orderType || 'order';
-        const orderNumber = body.orderNumber || 'SD-0000';
-        const subtotal = (body.items || []).reduce((sum, i) => sum + i.totalPrice, 0);
-
         const nameParts = body.buyerInfo.name.split(' ');
         const firstName = nameParts[0] || '';
         const lastName = nameParts.slice(1).join(' ') || '';
@@ -131,9 +153,9 @@ export async function POST(request: NextRequest) {
           headcount: body.headcount,
           eventType: body.eventType,
           subtotal,
-          deliveryFee: body.deliveryFee || 0,
-          orderTotal: body.orderTotal || subtotal + (body.deliveryFee || 0),
-          perPerson: (body.orderTotal || subtotal + (body.deliveryFee || 0)) / body.headcount,
+          deliveryFee,
+          orderTotal,
+          perPerson: orderTotal / body.headcount,
           companyPhone: emailSettings.company_phone,
           companyEmail: emailSettings.company_email,
           companyAddress: emailSettings.company_address,
@@ -155,9 +177,90 @@ export async function POST(request: NextRequest) {
       console.error('Email sending failed (non-blocking):', emailError);
     }
 
+    // For quotes, skip QB invoice creation
+    if (orderType === 'quote') {
+      return NextResponse.json({
+        success: true,
+        orderNumber,
+        orderId,
+        paymentLink: null,
+      });
+    }
+
+    // Check if QuickBooks is connected
+    const qbStatus = await isQBConnected();
+
+    if (!qbStatus.connected) {
+      // QB not connected — return success without invoice
+      console.log('Order created without QB invoice (QB not connected):', orderNumber);
+      return NextResponse.json({
+        success: true,
+        orderNumber,
+        orderId,
+        paymentLink: null,
+        message: 'Order saved. QuickBooks not connected — no invoice created.',
+      });
+    }
+
+    // Create QB customer
+    const customerId = await findOrCreateCustomer({
+      name: body.buyerInfo.name,
+      email: body.buyerInfo.email,
+      phone: body.buyerInfo.phone || undefined,
+      company: body.buyerInfo.company || undefined,
+    });
+
+    // Create QB invoice
+    const lineItems = body.items.map((item) => ({
+      description: `${item.title} — ${item.displayText}`,
+      amount: item.totalPrice,
+      quantity: item.quantity,
+    }));
+
+    const { invoiceId, invoiceNumber, paymentLink } = await createInvoice({
+      orderNumber,
+      customerId,
+      customerEmail: body.buyerInfo.email,
+      lineItems,
+      deliveryFee,
+      eventDate: body.buyerInfo.eventDate,
+      eventTime: body.buyerInfo.eventTime,
+      headcount: body.headcount,
+      specialInstructions: body.buyerInfo.notes,
+    });
+
+    // Update order with QB details
+    if (orderId) {
+      try {
+        await supabaseAdmin
+          .from('orders')
+          .update({
+            qb_invoice_id: invoiceId,
+            qb_invoice_number: invoiceNumber,
+            qb_customer_id: customerId,
+            payment_link: paymentLink,
+            status: 'invoiced',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', orderId);
+      } catch (updateErr) {
+        console.warn('Failed to update order with QB details:', updateErr);
+      }
+    }
+
+    // Send invoice email via QB
+    try {
+      await sendInvoiceEmail(invoiceId);
+    } catch (emailErr) {
+      console.warn('Failed to send QB invoice email:', emailErr);
+    }
+
     return NextResponse.json({
       success: true,
-      ...result,
+      orderNumber,
+      orderId,
+      invoiceNumber,
+      paymentLink,
     });
   } catch (error) {
     console.error('Error creating catering order:', error);

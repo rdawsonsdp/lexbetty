@@ -207,6 +207,9 @@ export interface EventTypeConfig {
   suggestedItems: string[];
 }
 
+// Order status
+export type OrderStatus = 'pending' | 'invoiced' | 'paid' | 'cancelled';
+
 // API Response types
 export interface ProductsResponse {
   products: CateringProduct[];
@@ -215,8 +218,10 @@ export interface ProductsResponse {
 
 export interface CreateOrderResponse {
   success: boolean;
-  draftOrderId?: string;
-  draftOrderNumber?: string;
-  invoiceUrl?: string;
+  orderNumber?: string;
+  orderId?: string;
+  invoiceNumber?: string;
+  paymentLink?: string | null;
   error?: string;
+  message?: string;
 }

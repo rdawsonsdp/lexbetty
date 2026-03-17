@@ -264,9 +264,8 @@ export default function CheckoutPage() {
           setupRequired: setupInCart,
           specialInstructions: formData.specialInstructions,
         },
+        paymentLink: null as string | null,
       };
-
-      sessionStorage.setItem('last-order-details', JSON.stringify(orderDetails));
 
       // Call the API endpoint
       const response = await fetch('/api/create-catering-order', {
@@ -313,6 +312,15 @@ export default function CheckoutPage() {
         const data = await response.json().catch(() => ({}));
         throw new Error(data.error || 'Failed to submit order');
       }
+
+      const result = await response.json();
+
+      // Use server-generated order number if available
+      const finalOrderNumber = result.orderNumber || orderNumber;
+      orderDetails.orderNumber = finalOrderNumber;
+      orderDetails.paymentLink = result.paymentLink || null;
+
+      sessionStorage.setItem('last-order-details', JSON.stringify(orderDetails));
 
       // Reset the catering state and redirect
       dispatch({ type: 'RESET' });
