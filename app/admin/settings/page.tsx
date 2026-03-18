@@ -357,7 +357,7 @@ function SettingsPage() {
 
             {/* Group rules by category */}
             {(() => {
-              const categories = [...new Set(rules.map(r => r.category || 'General'))];
+              const categories = Array.from(new Set(rules.map(r => r.category || 'General')));
               return categories.map(category => {
                 const categoryRules = rules.filter(r => (r.category || 'General') === category);
                 return (
