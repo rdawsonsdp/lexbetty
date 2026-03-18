@@ -15,6 +15,7 @@ const PRICING_TYPES = [
   { value: 'per-person', label: 'Per Person' },
   { value: 'per-dozen', label: 'Per Dozen' },
   { value: 'per-each', label: 'Per Each' },
+  { value: 'per-lb', label: 'Per Pound (lb)' },
   { value: 'per-container', label: 'Per Container' },
   { value: 'flat', label: 'Flat Price' },
 ] as const;
@@ -50,6 +51,9 @@ export default function PricingTypeFields({ register, setValue, watch }: Pricing
         break;
       case 'per-each':
         setValue('pricing', { type: 'per-each', priceEach: 0 });
+        break;
+      case 'per-lb':
+        setValue('pricing', { type: 'per-lb', pricePerLb: 0 });
         break;
       case 'per-container':
         setValue('pricing', { type: 'per-container', pricePerContainer: 0, servesPerContainer: 1 });
@@ -214,6 +218,28 @@ export default function PricingTypeFields({ register, setValue, watch }: Pricing
             </div>
             <div>
               <label className="block text-xs text-gray-500 mb-1">Min Order (optional)</label>
+              <input
+                type="number"
+                {...register('pricing.minOrder' as const, { valueAsNumber: true })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base"
+              />
+            </div>
+          </div>
+        )}
+
+        {pricingType === 'per-lb' && (
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Price Per Pound ($)</label>
+              <input
+                type="number"
+                step="0.01"
+                {...register('pricing.pricePerLb' as const, { valueAsNumber: true })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Min Order in lbs (optional)</label>
               <input
                 type="number"
                 {...register('pricing.minOrder' as const, { valueAsNumber: true })}

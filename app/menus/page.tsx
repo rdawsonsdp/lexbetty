@@ -476,7 +476,7 @@ export default function MenusPage() {
               SMOKIN&apos; GOOD THINGS TO KNOW
             </h4>
             <ul className="space-y-2 text-sm text-gray-600">
-              <li>&#8226; We can accommodate most dietary restrictions — just let us know.</li>
+              <li>&#8226; Most dietary restrictions can be accommodated — just tell us what you need.</li>
               <li>&#8226; A la carte / Party Deals / Betty Box orders must be placed <strong>72 hours in advance</strong>.</li>
               <li>&#8226; Food truck rentals need to be reserved <strong>14 days in advance</strong>.</li>
               <li>&#8226; All orders must be paid in full <strong>48 hours in advance</strong>.</li>

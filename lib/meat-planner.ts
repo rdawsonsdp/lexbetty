@@ -2,13 +2,28 @@ import { CateringProduct } from './types';
 import { formatCurrency } from './pricing';
 
 /**
- * Meat Planner — guided protein selection with transparent 3oz math
+ * Meat Planner — guided protein selection
+ *
+ * Portion sizing by event type:
+ *   Light (lunch/appetizer):  6 oz per person
+ *   Standard (dinner/corp):   9 oz per person (default)
+ *   Heavy (big event/BBQ):   12 oz per person
+ *
+ * Split evenly across selected meats:
+ *   1 meat  → full portion each
+ *   2 meats → half portion each
+ *   3 meats → third portion each
+ *
+ * Formula: served lbs per meat = (ozPerPerson ÷ numberOfMeats × headcount) ÷ 16
  *
  * Uses the 'meats' tag to identify products, then categorizes by pricing type:
- *   per-each  → by the pound (3oz rule applies)
- *   pan       → half/full pan sizing
- *   per-container → container count
+ *   per-each / per-lb → by the pound
+ *   pan               → half/full pan sizing
+ *   per-container     → container count
  */
+
+// Default to standard event portion — editable in Admin > Settings > Business Rules
+export const TOTAL_OZ_PER_PERSON = 9;
 
 export const MEAT_TAG = 'meats';
 
@@ -31,7 +46,7 @@ export function isMeatTagged(product: CateringProduct): boolean {
 }
 
 export function isPerLbMeat(product: CateringProduct): boolean {
-  return isMeatTagged(product) && product.pricing.type === 'per-each';
+  return isMeatTagged(product) && (product.pricing.type === 'per-each' || product.pricing.type === 'per-lb');
 }
 
 export function isPanMeat(product: CateringProduct): boolean {
@@ -69,10 +84,11 @@ export function calculateMeatRecommendation(
   product: CateringProduct,
   headcount: number,
   selectedSize?: 'half' | 'full',
+  numberOfMeats: number = 1,
 ): MeatRecommendation {
-  if (isPerLbMeat(product)) return calcPerLb(product, headcount);
-  if (isPanMeat(product)) return calcPan(product, headcount, selectedSize);
-  return calcContainer(product, headcount);
+  if (isPerLbMeat(product)) return calcPerLb(product, headcount, numberOfMeats);
+  if (isPanMeat(product)) return calcPan(product, headcount, selectedSize, numberOfMeats);
+  return calcContainer(product, headcount, numberOfMeats);
 }
 
 // --- per-lb meats (per-each pricing = $/lb) ---------------------------------
@@ -86,8 +102,9 @@ function getMinimum(product: CateringProduct): number {
   );
 }
 
-function calcPerLb(product: CateringProduct, headcount: number): MeatRecommendation {
-  const rawLbs = (headcount * 3) / 16;
+function calcPerLb(product: CateringProduct, headcount: number, numberOfMeats: number): MeatRecommendation {
+  const ozPerMeat = TOTAL_OZ_PER_PERSON / Math.max(1, numberOfMeats);
+  const rawLbs = (headcount * ozPerMeat) / 16;
   let recommended: number;
   let panDisplay: string | undefined;
 
@@ -106,11 +123,15 @@ function calcPerLb(product: CateringProduct, headcount: number): MeatRecommendat
   const minimum = getMinimum(product);
   const enforced = Math.max(recommended, minimum);
 
-  const priceEach = product.pricing.type === 'per-each' ? product.pricing.priceEach : 0;
+  const priceEach = product.pricing.type === 'per-each' ? product.pricing.priceEach
+    : product.pricing.type === 'per-lb' ? product.pricing.pricePerLb : 0;
   const step = minimum >= 5 || product.id === BRISKET_ID ? 5 : 1;
 
+  // Format oz display cleanly
+  const ozStr = parseFloat(ozPerMeat.toFixed(2)).toString();
+
   // Transparent math string
-  let mathString = `${headcount} guests \u00d7 3 oz = ${rawLbs.toFixed(1)} lbs`;
+  let mathString = `${headcount} guests \u00d7 ${ozStr} oz = ${rawLbs.toFixed(1)} lbs`;
   if (product.id === BRISKET_ID) {
     mathString += ` \u2192 ${enforced} lbs (${panDisplay})`;
   } else if (enforced > recommended) {
@@ -138,6 +159,7 @@ function calcPan(
   product: CateringProduct,
   headcount: number,
   selectedSize?: 'half' | 'full',
+  numberOfMeats: number = 1,
 ): MeatRecommendation {
   if (product.pricing.type !== 'pan') {
     return emptyRec('pan');
@@ -167,15 +189,27 @@ function calcPan(
 
   const useSize = selectedSize || recSize;
   const sizeOpt = sizes.find(s => s.size === useSize) || sizes[0];
-  const qty = selectedSize
-    ? Math.max(1, Math.ceil(headcount / sizeOpt.servesMin))
-    : recQty;
 
+  // Use 9oz formula if estimated weight is available
+  let qty: number;
+  let mathString: string;
   const sizeLabel = useSize === 'half' ? 'Half Pan' : 'Full Pan';
-  const mathString =
-    qty === 1
+
+  if (sizeOpt.estimatedWeightOz) {
+    const ozPerMeat = TOTAL_OZ_PER_PERSON / Math.max(1, numberOfMeats);
+    const totalOzNeeded = headcount * ozPerMeat;
+    qty = Math.max(1, Math.ceil(totalOzNeeded / sizeOpt.estimatedWeightOz));
+    const ozStr = parseFloat(ozPerMeat.toFixed(2)).toString();
+    const totalOzStr = parseFloat(totalOzNeeded.toFixed(1)).toString();
+    mathString = `${headcount} guests \u00d7 ${ozStr} oz = ${totalOzStr} oz \u2192 ${qty} ${sizeLabel}${qty !== 1 ? 's' : ''} (~${sizeOpt.estimatedWeightOz} oz each)`;
+  } else {
+    qty = selectedSize
+      ? Math.max(1, Math.ceil(headcount / sizeOpt.servesMin))
+      : recQty;
+    mathString = qty === 1
       ? `${sizeLabel} (serves ${sizeOpt.servesMin}-${sizeOpt.servesMax})`
       : `${qty} ${sizeLabel}s (serves ${sizeOpt.servesMin * qty}-${sizeOpt.servesMax * qty})`;
+  }
 
   return {
     recommendedQty: qty,
@@ -195,19 +229,31 @@ function calcPan(
 function calcContainer(
   product: CateringProduct,
   headcount: number,
+  numberOfMeats: number = 1,
 ): MeatRecommendation {
   if (product.pricing.type !== 'per-container') {
     return emptyRec('container');
   }
 
-  const { pricePerContainer, servesPerContainer } = product.pricing;
-  const qty = Math.ceil(headcount / servesPerContainer);
-  const totalServes = qty * servesPerContainer;
+  const { pricePerContainer, servesPerContainer, estimatedWeightOz } = product.pricing;
 
-  const mathString =
-    qty === 1
+  let qty: number;
+  let mathString: string;
+
+  if (estimatedWeightOz) {
+    const ozPerMeat = TOTAL_OZ_PER_PERSON / Math.max(1, numberOfMeats);
+    const totalOzNeeded = headcount * ozPerMeat;
+    qty = Math.max(1, Math.ceil(totalOzNeeded / estimatedWeightOz));
+    const ozStr = parseFloat(ozPerMeat.toFixed(2)).toString();
+    const totalOzStr = parseFloat(totalOzNeeded.toFixed(1)).toString();
+    mathString = `${headcount} guests \u00d7 ${ozStr} oz = ${totalOzStr} oz \u2192 ${qty} container${qty !== 1 ? 's' : ''} (~${estimatedWeightOz} oz each)`;
+  } else {
+    qty = Math.ceil(headcount / servesPerContainer);
+    const totalServes = qty * servesPerContainer;
+    mathString = qty === 1
       ? `1 container (serves ${servesPerContainer})`
       : `${qty} containers (serves ${totalServes})`;
+  }
 
   return {
     recommendedQty: qty,
@@ -239,6 +285,8 @@ export function calculatePlannerTotal(
 
     if (product.pricing.type === 'per-each') {
       total += product.pricing.priceEach * sel.quantity;
+    } else if (product.pricing.type === 'per-lb') {
+      total += product.pricing.pricePerLb * sel.quantity;
     } else if (product.pricing.type === 'pan') {
       const sizeOpt =
         product.pricing.sizes.find(s => s.size === sel.size) ||

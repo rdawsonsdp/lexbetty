@@ -1,38 +1,17 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { FEATURES } from '@/lib/feature-flags';
+
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [adminDropdownOpen, setAdminDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setAdminDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const navLinks = [
     { href: '/', label: 'HOME' },
     { href: '/menus', label: 'MENU' },
     ...(FEATURES.BETTY_AI_ENABLED ? [{ href: '/concierge', label: 'ASK BETTY' }] : []),
-  ];
-
-  const adminLinks = [
-    { href: '/admin/menu', label: 'MENU MANAGEMENT' },
-    { href: '/menu-engineering', label: 'MENU ENGINEERING' },
-    { href: '/admin/email', label: 'EMAIL SETTINGS' },
-    { href: '/admin/quickbooks', label: 'QUICKBOOKS' },
-    { href: '/admin/analytics', label: 'ANALYTICS' },
-    ...(FEATURES.BETTY_AI_ENABLED ? [{ href: '/admin/concierge-rules', label: "BETTY'S RULES" }] : []),
   ];
 
   return (
@@ -62,32 +41,13 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
-            {/* Admin Dropdown */}
-            <div ref={dropdownRef} className="relative flex items-center">
-              <button
-                onClick={() => setAdminDropdownOpen(!adminDropdownOpen)}
-                className="font-oswald text-sm xl:text-base tracking-wider text-[#1A1A1A] hover:text-[#E8621A] transition-colors flex items-center gap-1 whitespace-nowrap"
-              >
-                ADMIN
-                <svg className={`w-4 h-4 transition-transform ${adminDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {adminDropdownOpen && (
-                <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-[200px] z-50">
-                  {adminLinks.map((link) => (
-                    <Link
-                      key={link.label}
-                      href={link.href}
-                      className="block px-4 py-2 font-oswald text-sm tracking-wider text-[#1A1A1A] hover:bg-gray-50 hover:text-[#E8621A] transition-colors"
-                      onClick={() => setAdminDropdownOpen(false)}
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* Admin Link */}
+            <Link
+              href="/admin/menu"
+              className="font-oswald text-sm xl:text-base tracking-wider text-[#1A1A1A] hover:text-[#E8621A] transition-colors whitespace-nowrap"
+            >
+              ADMIN
+            </Link>
             {/* Social Icons */}
             <div className="flex items-center gap-3 ml-2">
               <a
@@ -118,7 +78,7 @@ export default function Header() {
               href="/#catering"
               className="ml-2 bg-[#E8621A] text-white font-oswald text-sm xl:text-base tracking-wider px-5 py-2 hover:opacity-90 transition-opacity whitespace-nowrap"
             >
-              LET'S BUILD YOUR MENU
+              BUILD YOUR MENU
             </Link>
           </nav>
 
@@ -167,26 +127,19 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
-            {/* Admin sub-section */}
-            <div className="border-t border-gray-200 mt-2 pt-2">
-              <p className="py-2 font-oswald text-xs tracking-widest text-gray-400 uppercase">Admin</p>
-              {adminLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className="block py-3 pl-4 font-oswald tracking-wider text-[#1A1A1A] hover:text-[#E8621A] transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
+            <Link
+              href="/admin/menu"
+              className="block py-3 font-oswald tracking-wider text-[#1A1A1A] hover:text-[#E8621A] transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              ADMIN
+            </Link>
             <Link
               href="/#catering"
               className="block mt-3 bg-[#E8621A] text-white font-oswald tracking-wider px-5 py-3 text-center hover:opacity-90 transition-opacity"
               onClick={() => setMobileMenuOpen(false)}
             >
-              LET'S BUILD YOUR MENU
+              BUILD YOUR MENU
             </Link>
             <div className="flex items-center gap-4 mt-4 pt-3 border-t border-gray-200">
               <a

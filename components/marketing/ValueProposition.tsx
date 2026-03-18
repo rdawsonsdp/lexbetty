@@ -8,7 +8,7 @@ const VALUE_PROPS = [
       </svg>
     ),
     title: 'Plan.',
-    description: 'Tell us the basics — guest count, date, and any dietary needs. We\'ll take it from there.',
+    description: 'Share your guest count, date, and dietary needs — your menu starts taking shape instantly.',
   },
   {
     icon: (
@@ -17,7 +17,7 @@ const VALUE_PROPS = [
       </svg>
     ),
     title: 'Order.',
-    description: 'We calculate the right amount of food for your group. No guessing, no waste, no stress.',
+    description: 'The right amount of food for your group, calculated automatically. No guessing, no waste, no stress.',
   },
   {
     icon: (
@@ -26,7 +26,7 @@ const VALUE_PROPS = [
       </svg>
     ),
     title: 'Enjoy.',
-    description: 'Your food arrives on time, set up and ready. Everyone eats well — and you look like a hero.',
+    description: 'Your food arrives on time, set up and ready to serve. Your guests eat well — and you look like a hero.',
   },
 ];
 

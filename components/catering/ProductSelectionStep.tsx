@@ -114,6 +114,7 @@ export default function ProductSelectionStep({
   const meatTotal = meatItems.reduce((sum, item) => {
     const p = item.product.pricing;
     if (p.type === 'per-each') return sum + p.priceEach * item.quantity;
+    if (p.type === 'per-lb') return sum + p.pricePerLb * item.quantity;
     if (p.type === 'per-container') return sum + p.pricePerContainer * item.quantity;
     if (p.type === 'pan') {
       const sizeOpt = p.sizes.find(s => s.size === item.selectedSize) || p.sizes[0];
@@ -147,7 +148,7 @@ export default function ProductSelectionStep({
 
   // Sort regular products by pricing type to group similar items
   const sortedProducts = [...regularProducts].sort((a, b) => {
-    const typeOrder: Record<string, number> = { 'tray': 0, 'pan': 1, 'per-person': 2, 'per-dozen': 3, 'per-each': 4, 'per-container': 5, 'flat': 6 };
+    const typeOrder: Record<string, number> = { 'tray': 0, 'pan': 1, 'per-person': 2, 'per-dozen': 3, 'per-each': 4, 'per-lb': 4, 'per-container': 5, 'flat': 6 };
     const typeA = typeOrder[a.pricing.type] ?? 99;
     const typeB = typeOrder[b.pricing.type] ?? 99;
     return typeA - typeB;
@@ -177,7 +178,7 @@ export default function ProductSelectionStep({
             BUILD YOUR {state.eventType?.toUpperCase() || 'EVENT'}
           </h2>
           <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto mb-6">
-            No wrong choices here — everything&apos;s crowd-tested and loved. Sizes adjust automatically for your {state.headcount} guests.
+            Everything here is crowd-tested and loved. Sizes adjust automatically for your {state.headcount} guests.
           </p>
         </div>
 

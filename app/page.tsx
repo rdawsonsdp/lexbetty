@@ -164,10 +164,10 @@ export default function HomePage() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-10">
               <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#1A1A1A] tracking-wider mb-4">
-                LET US HELP YOU ORDER
+                ORDER WHAT YOUR EVENT NEEDS
               </h2>
               <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
-                No wrong choices here — pick what fits and we&apos;ll show you the best options.
+                Tell us what you&apos;re planning — we&apos;ll make sure the food handles itself.
               </p>
             </div>
 

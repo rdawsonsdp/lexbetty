@@ -2,7 +2,7 @@
 export type EventType = 'breakfast' | 'lunch' | 'dessert' | 'alacarte' | 'other';
 
 // Pricing Types
-export type PricingType = 'tray' | 'pan' | 'per-person' | 'per-dozen' | 'per-each' | 'per-container' | 'flat';
+export type PricingType = 'tray' | 'pan' | 'per-person' | 'per-dozen' | 'per-each' | 'per-lb' | 'per-container' | 'flat';
 
 // Size options for tray-based pricing
 export interface TraySizeOption {
@@ -18,6 +18,7 @@ export interface PanSizeOption {
   price: number;
   servesMin: number;
   servesMax: number;
+  estimatedWeightOz?: number;
 }
 
 // Pricing configuration based on type
@@ -47,12 +48,20 @@ export interface PerEachPricing {
   type: 'per-each';
   priceEach: number;
   minOrder?: number;
+  unit?: 'each' | 'lb';
+}
+
+export interface PerLbPricing {
+  type: 'per-lb';
+  pricePerLb: number;
+  minOrder?: number;
 }
 
 export interface PerContainerPricing {
   type: 'per-container';
   pricePerContainer: number;
   servesPerContainer: number;
+  estimatedWeightOz?: number;
 }
 
 export interface FlatPricing {
@@ -66,6 +75,7 @@ export type ProductPricing =
   | PerPersonPricing
   | PerDozenPricing
   | PerEachPricing
+  | PerLbPricing
   | PerContainerPricing
   | FlatPricing;
 

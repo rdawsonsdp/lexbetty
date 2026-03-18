@@ -8,6 +8,7 @@ import { formatCurrency } from '@/lib/pricing';
 import { CateringProduct } from '@/lib/types';
 import {
   MEAT_TAG,
+  TOTAL_OZ_PER_PERSON,
   isMeatTagged,
   isPerLbMeat,
   isPanMeat,
@@ -78,28 +79,50 @@ export default function MeatPlannerPopup({
   const toggleMeat = (productId: string) => {
     setSelections(prev => {
       const current = prev[productId];
+      const updated = { ...prev };
+
       if (current?.selected) {
-        return { ...prev, [productId]: { ...current, selected: false } };
+        // Deselecting — mark as unselected
+        updated[productId] = { ...current, selected: false };
+      } else {
+        // Selecting — placeholder, will be recalculated below
+        updated[productId] = { selected: true, quantity: 0, size: current?.size };
       }
-      const product = meatProducts.find(p => p.id === productId)!;
-      const rec = calculateMeatRecommendation(product, headcount, current?.size);
-      return {
-        ...prev,
-        [productId]: {
-          selected: true,
+
+      // Count selected meats and recalculate all quantities
+      const selectedIds = Object.entries(updated)
+        .filter(([, sel]) => sel.selected)
+        .map(([id]) => id);
+      const meatCount = selectedIds.length;
+
+      if (meatCount === 0) return updated;
+
+      selectedIds.forEach(id => {
+        const product = meatProducts.find(p => p.id === id)!;
+        const sel = updated[id];
+        const rec = calculateMeatRecommendation(product, headcount, sel.size, meatCount);
+        updated[id] = {
+          ...sel,
           quantity: rec.enforcedQty,
-          size: rec.defaultSize || current?.size,
-        },
-      };
+          size: rec.defaultSize || sel.size,
+        };
+      });
+
+      return updated;
     });
   };
+
+  // Helper to get current selected count
+  const getSelectedCount = (sels: Record<string, MeatSelection>) =>
+    Object.values(sels).filter(s => s.selected).length;
 
   const adjustQuantity = (productId: string, delta: number) => {
     setSelections(prev => {
       const current = prev[productId];
       if (!current?.selected) return prev;
       const product = meatProducts.find(p => p.id === productId)!;
-      const rec = calculateMeatRecommendation(product, headcount, current.size);
+      const selectedCount = getSelectedCount(prev);
+      const rec = calculateMeatRecommendation(product, headcount, current.size, selectedCount);
       const newQty = Math.max(rec.minimum, current.quantity + delta * rec.step);
       return { ...prev, [productId]: { ...current, quantity: newQty } };
     });
@@ -110,7 +133,8 @@ export default function MeatPlannerPopup({
       const current = prev[productId];
       if (!current?.selected) return prev;
       const product = meatProducts.find(p => p.id === productId)!;
-      const rec = calculateMeatRecommendation(product, headcount, size);
+      const selectedCount = getSelectedCount(prev);
+      const rec = calculateMeatRecommendation(product, headcount, size, selectedCount);
       return {
         ...prev,
         [productId]: { ...current, size, quantity: rec.enforcedQty },
@@ -155,6 +179,36 @@ export default function MeatPlannerPopup({
     headcount,
   );
 
+  // Check if all selected meats meet their protein target
+  const allTargetsMet = count > 0 && Object.entries(selections).every(([id, sel]) => {
+    if (!sel.selected) return true;
+    const product = meatProducts.find(p => p.id === id);
+    if (!product) return true;
+    const rec = calculateMeatRecommendation(product, headcount, sel.size, count);
+    return sel.quantity >= rec.recommendedQty;
+  });
+
+  // Check if any meat is over its recommended amount
+  const anyOverTarget = count > 0 && Object.entries(selections).some(([id, sel]) => {
+    if (!sel.selected) return false;
+    const product = meatProducts.find(p => p.id === id);
+    if (!product) return false;
+    const rec = calculateMeatRecommendation(product, headcount, sel.size, count);
+    return sel.quantity > rec.recommendedQty;
+  });
+
+  // Check if any meat is under its recommended amount
+  const anyUnderTarget = count > 0 && Object.entries(selections).some(([id, sel]) => {
+    if (!sel.selected) return false;
+    const product = meatProducts.find(p => p.id === id);
+    if (!product) return false;
+    const rec = calculateMeatRecommendation(product, headcount, sel.size, count);
+    return sel.quantity < rec.recommendedQty;
+  });
+
+  // Per-meat oz calculation for header display
+  const ozPerMeat = count > 0 ? parseFloat((TOTAL_OZ_PER_PERSON / count).toFixed(2)) : 0;
+
   // --- render ---------------------------------------------------------------
 
   return createPortal(
@@ -194,10 +248,15 @@ export default function MeatPlannerPopup({
             </button>
           </div>
           <p className="text-sm text-gray-500 mt-1">
-            We recommend 3 oz per person per meat for{' '}
+            {TOTAL_OZ_PER_PERSON} oz total protein per person for{' '}
             <span className="font-semibold text-[#1A1A1A]">
               {headcount} guests
             </span>
+            {count > 0 && (
+              <span className="text-[#E8621A] font-semibold">
+                {' '}&middot; {ozPerMeat} oz &times; {count} meat{count !== 1 ? 's' : ''}
+              </span>
+            )}
           </p>
         </div>
 
@@ -215,6 +274,7 @@ export default function MeatPlannerPopup({
                     key={product.id}
                     product={product}
                     headcount={headcount}
+                    selectedCount={count}
                     sel={selections[product.id]}
                     onToggle={() => toggleMeat(product.id)}
                     onAdjust={d => adjustQuantity(product.id, d)}
@@ -236,6 +296,7 @@ export default function MeatPlannerPopup({
                     key={product.id}
                     product={product}
                     headcount={headcount}
+                    selectedCount={count}
                     sel={selections[product.id]}
                     onToggle={() => toggleMeat(product.id)}
                     onAdjust={d => adjustQuantity(product.id, d)}
@@ -249,6 +310,32 @@ export default function MeatPlannerPopup({
 
         {/* ─── Footer ─── */}
         <div className="border-t border-gray-200 px-5 sm:px-6 py-4 space-y-3 bg-white rounded-b-2xl">
+          {/* Protein info box */}
+          {count > 0 && (allTargetsMet && !anyOverTarget) && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
+              Protein target met — {TOTAL_OZ_PER_PERSON} oz per person across {count} meat{count !== 1 ? 's' : ''}
+            </div>
+          )}
+          {count > 0 && anyUnderTarget && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-700">
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Below the recommended {ozPerMeat} oz per person — you may want to add more
+            </div>
+          )}
+          {count > 0 && anyOverTarget && !anyUnderTarget && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Extra protein — your guests will have plenty
+            </div>
+          )}
+
           {/* Stats */}
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-500">
@@ -352,20 +439,23 @@ function QtyStepper({
 function PerLbRow({
   product,
   headcount,
+  selectedCount,
   sel,
   onToggle,
   onAdjust,
 }: {
   product: CateringProduct;
   headcount: number;
+  selectedCount: number;
   sel: MeatSelection | undefined;
   onToggle: () => void;
   onAdjust: (d: number) => void;
 }) {
   const isSelected = sel?.selected || false;
-  const rec = calculateMeatRecommendation(product, headcount);
+  const rec = calculateMeatRecommendation(product, headcount, undefined, Math.max(1, selectedCount));
   const price =
     product.pricing.type === 'per-each' ? product.pricing.priceEach : 0;
+  const unitLabel = product.pricing.type === 'per-each' && product.pricing.unit === 'lb' ? 'lb' : 'each';
 
   return (
     <div
@@ -392,14 +482,23 @@ function PerLbRow({
           )}
         </div>
         <span className="font-oswald font-bold text-[#1A1A1A] text-sm whitespace-nowrap">
-          {formatCurrency(price)}/lb
+          {formatCurrency(price)}/{unitLabel}
         </span>
       </button>
 
       {/* Expanded controls */}
       {isSelected && sel && (
         <div className="px-4 pb-4 pl-12">
-          <p className="text-sm text-gray-500 mb-3">{rec.mathString}</p>
+          <div className="flex items-center gap-2 mb-3">
+            <p className="text-sm text-gray-500">{rec.mathString}</p>
+            {sel.quantity >= rec.recommendedQty && (
+              <span className="inline-flex items-center gap-1 bg-green-50 text-green-600 text-xs font-semibold px-2 py-0.5 rounded-full border border-green-200">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+              </span>
+            )}
+          </div>
           <div className="flex items-center justify-between">
             <QtyStepper
               value={sel.quantity}
@@ -422,6 +521,7 @@ function PerLbRow({
 function PanContainerRow({
   product,
   headcount,
+  selectedCount,
   sel,
   onToggle,
   onAdjust,
@@ -429,6 +529,7 @@ function PanContainerRow({
 }: {
   product: CateringProduct;
   headcount: number;
+  selectedCount: number;
   sel: MeatSelection | undefined;
   onToggle: () => void;
   onAdjust: (d: number) => void;
@@ -436,7 +537,7 @@ function PanContainerRow({
 }) {
   const isSelected = sel?.selected || false;
   const isPan = product.pricing.type === 'pan';
-  const rec = calculateMeatRecommendation(product, headcount, sel?.size);
+  const rec = calculateMeatRecommendation(product, headcount, sel?.size, Math.max(1, selectedCount));
 
   // Price label for the unselected state
   let priceLabel = '';
@@ -511,7 +612,16 @@ function PanContainerRow({
             </div>
           )}
 
-          <p className="text-sm text-gray-500 mb-3">{rec.mathString}</p>
+          <div className="flex items-center gap-2 mb-3">
+            <p className="text-sm text-gray-500">{rec.mathString}</p>
+            {sel.quantity >= rec.recommendedQty && (
+              <span className="inline-flex items-center gap-1 bg-green-50 text-green-600 text-xs font-semibold px-2 py-0.5 rounded-full border border-green-200">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+              </span>
+            )}
+          </div>
 
           <div className="flex items-center justify-between">
             <QtyStepper

@@ -109,10 +109,10 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
         <tr><td style="padding: 20px; font-family: Arial, Helvetica, sans-serif;">
           <h3 style="margin: 0 0 12px; font-size: 16px; color: #1A1A1A;">What Happens Next</h3>
           <ol style="margin: 0; padding-left: 20px; color: #555; font-size: 14px; line-height: 1.8;">
-            <li>Our team will confirm your order within 1 business day</li>
-            <li>We'll call 24 hours before to finalize details</li>
+            <li>Your order will be confirmed within 1 business day</li>
+            <li>You'll get a call 24 hours before to finalize details</li>
             <li>Your driver will text 30 minutes before arrival</li>
-            <li>We set up everything fresh and ready to serve</li>
+            <li>Everything arrives fresh, set up, and ready to serve</li>
           </ol>
         </td></tr>
       </table>

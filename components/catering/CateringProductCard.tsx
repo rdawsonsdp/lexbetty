@@ -40,6 +40,22 @@ function generateOptions(product: CateringProduct, headcount: number): QtyOption
       }
       return opts;
     }
+    case 'per-lb': {
+      const opts: QtyOption[] = [];
+      const startLb = Math.max(minQty, 1);
+      const stepLb = startLb >= 5 ? 5 : 1;
+      const maxLb = Math.max(startLb * 8, 50);
+      for (let qty = startLb; qty <= maxLb; qty += stepLb) {
+        const servesApprox = Math.floor((qty * 16) / 3);
+        opts.push({
+          value: qty,
+          label: `${qty} lbs — ${formatCurrency(p.pricePerLb * qty)}`,
+          price: p.pricePerLb * qty,
+          serves: `serves ~${servesApprox}`,
+        });
+      }
+      return opts;
+    }
     case 'per-container': {
       const opts: QtyOption[] = [];
       for (let qty = 1; qty <= 10; qty++) {
@@ -92,7 +108,7 @@ export default function CateringProductCard({ product, featured }: CateringProdu
   const selectedSize = cartItem?.selectedSize;
   const minQty = product.minOrderQuantity || 1;
   const hasSizes = product.pricing.type === 'pan' || product.pricing.type === 'tray';
-  const hasQtyDropdown = ['per-each', 'per-container', 'per-dozen'].includes(product.pricing.type);
+  const hasQtyDropdown = ['per-each', 'per-lb', 'per-container', 'per-dozen'].includes(product.pricing.type);
 
   // Local preview state for dropdown selection (before adding to cart)
   const defaultQty = getDefaultQty(product, state.headcount);
@@ -126,6 +142,7 @@ export default function CateringProductCard({ product, featured }: CateringProdu
     const qty = inCart ? itemQty : previewQty;
     switch (p.type) {
       case 'per-each': return p.priceEach * qty;
+      case 'per-lb': return p.pricePerLb * qty;
       case 'per-container': return p.pricePerContainer * qty;
       case 'per-dozen': return p.pricePerDozen * qty;
       case 'per-person': return p.pricePerPerson * state.headcount;
@@ -149,7 +166,8 @@ export default function CateringProductCard({ product, featured }: CateringProdu
       return `${cartQty > 1 ? cartQty + ' × ' : ''}${label} (serves ${sizeObj.servesMin * cartQty}-${sizeObj.servesMax * cartQty})`;
     }
     switch (p.type) {
-      case 'per-each': return `${qty} lbs — serves ~${Math.floor((qty * 16) / 3)}`;
+      case 'per-each': return `${qty} ${p.unit === 'lb' ? 'lbs' : ''} — serves ~${Math.floor((qty * 16) / 3)}`;
+      case 'per-lb': return `${qty} lbs — serves ~${Math.floor((qty * 16) / 3)}`;
       case 'per-container': return `${qty} container${qty > 1 ? 's' : ''} — serves ${p.servesPerContainer * qty}`;
       case 'per-dozen': return `${qty} dozen — serves ${p.servesPerDozen * qty}`;
       case 'per-person': return `${state.headcount} servings`;

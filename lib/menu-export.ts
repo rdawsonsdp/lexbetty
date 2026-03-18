@@ -28,7 +28,9 @@ function pricingDetail(product: CateringProduct): string {
     case 'per-dozen':
       return `$${p.pricePerDozen}/dozen (serves ${p.servesPerDozen})`;
     case 'per-each':
-      return `$${p.priceEach} each${p.minOrder ? ` (min ${p.minOrder})` : ''}`;
+      return `$${p.priceEach}/${p.unit === 'lb' ? 'lb' : 'each'}${p.minOrder ? ` (min ${p.minOrder})` : ''}`;
+    case 'per-lb':
+      return `$${p.pricePerLb}/lb${p.minOrder ? ` (min ${p.minOrder})` : ''}`;
     case 'per-container':
       return `$${p.pricePerContainer}/container (serves ${p.servesPerContainer})`;
     case 'flat':

@@ -35,7 +35,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/menus" className="text-gray-400 hover:text-white transition-colors">
-                  Our Menu
+                  Menu
                 </Link>
               </li>
               <li>

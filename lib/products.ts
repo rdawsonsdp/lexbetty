@@ -6,13 +6,13 @@ const STANDARD_PAN_SIZES = [
   { size: 'full' as const, servesMin: 20, servesMax: 25 },
 ];
 
-// Helper to create pan pricing
-function panPricing(halfPrice: number, fullPrice: number) {
+// Helper to create pan pricing with optional estimated weight per pan
+function panPricing(halfPrice: number, fullPrice: number, halfWeightOz?: number, fullWeightOz?: number) {
   return {
     type: 'pan' as const,
     sizes: [
-      { ...STANDARD_PAN_SIZES[0], price: halfPrice },
-      { ...STANDARD_PAN_SIZES[1], price: fullPrice },
+      { ...STANDARD_PAN_SIZES[0], price: halfPrice, ...(halfWeightOz ? { estimatedWeightOz: halfWeightOz } : {}) },
+      { ...STANDARD_PAN_SIZES[1], price: fullPrice, ...(fullWeightOz ? { estimatedWeightOz: fullWeightOz } : {}) },
     ],
   };
 }
@@ -25,7 +25,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     description: 'Tender, smoky pork rib tips slow-smoked over hickory until they pull apart. A Chicago BBQ favorite.',
     image: '/images/special_rib_tips_chicken.jpg',
     categories: ['lunch'],
-    pricing: panPricing(55, 105),
+    pricing: panPricing(55, 105, 80, 160),
     tags: ['popular', 'bbq', 'pork', 'meats'],
     featured: true,
   },
@@ -35,7 +35,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     description: 'Fall-off-the-bone ribs rubbed with our house blend and smoked low and slow for hours. Sold by the pound.',
     image: '/images/chef-dominique-ribs.jpg',
     categories: ['lunch'],
-    pricing: { type: 'per-each', priceEach: 18, minOrder: 3 },
+    pricing: { type: 'per-each', priceEach: 18, minOrder: 3, unit: 'lb' },
     tags: ['bbq', 'pork', 'popular', 'meats'],
     featured: true,
     minOrderQuantity: 10,
@@ -46,7 +46,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     description: 'Hand-pulled shoulder smoked for 14 hours until buttery tender. Piled high with our signature sauce.',
     image: '/images/platter_pulled_pork.jpg',
     categories: ['lunch'],
-    pricing: { type: 'per-each', priceEach: 25, minOrder: 2 },
+    pricing: { type: 'per-each', priceEach: 25, minOrder: 2, unit: 'lb' },
     tags: ['bbq', 'pork', 'popular', 'meats'],
     minOrderQuantity: 5,
   },
@@ -56,7 +56,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     description: 'Snappy, juicy hot links with a kick of heat, kissed with hickory smoke. A south side staple.',
     image: '/images/bbq_brisket.jpg',
     categories: ['lunch'],
-    pricing: { type: 'per-container', pricePerContainer: 60, servesPerContainer: 15 },
+    pricing: { type: 'per-container', pricePerContainer: 60, servesPerContainer: 15, estimatedWeightOz: 80 },
     tags: ['bbq', 'pork', 'spicy', 'meats'],
   },
 
@@ -67,7 +67,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     description: 'Juicy bone-in quarters and crispy wings smoked golden brown. Seasoned with Chef Dominique\'s signature rub.',
     image: '/images/special_rib_tips_chicken.jpg',
     categories: ['lunch'],
-    pricing: panPricing(95, 190),
+    pricing: panPricing(95, 190, 112, 224),
     tags: ['bbq', 'poultry', 'popular', 'meats'],
     featured: true,
   },
@@ -77,7 +77,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     description: 'Slow-smoked whole chicken, hand-shredded and tossed in our original BBQ sauce. Light, lean, and full of flavor.',
     image: '/images/Garlic Butter Chicken Breast Hi Res Image.png',
     categories: ['lunch'],
-    pricing: { type: 'per-each', priceEach: 15, minOrder: 2 },
+    pricing: { type: 'per-each', priceEach: 15, minOrder: 2, unit: 'lb' },
     tags: ['bbq', 'poultry', 'meats'],
     specialOrder: true,
     minOrderQuantity: 5,
@@ -88,7 +88,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     description: 'Hickory-smoked turkey tips seasoned and charred to perfection. A lighter take on BBQ that doesn\'t sacrifice flavor.',
     image: '/images/Garlic Butter Chicken Breast Hi Res Image.png',
     categories: ['lunch'],
-    pricing: { type: 'per-each', priceEach: 18, minOrder: 2 },
+    pricing: { type: 'per-each', priceEach: 18, minOrder: 2, unit: 'lb' },
     tags: ['bbq', 'poultry', 'meats'],
     specialOrder: true,
     minOrderQuantity: 5,
@@ -101,7 +101,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     description: 'Prime beef brisket smoked 16 hours over post oak until the bark shatters and the inside melts. Our pitmaster\'s pride.',
     image: '/images/meat_smoked_brisket.jpg',
     categories: ['lunch'],
-    pricing: { type: 'per-each', priceEach: 34, minOrder: 2 },
+    pricing: { type: 'per-each', priceEach: 34, minOrder: 2, unit: 'lb' },
     tags: ['bbq', 'beef', 'popular', 'premium', 'meats'],
     featured: true,
     minOrderQuantity: 5,
@@ -112,7 +112,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     description: 'Premium wagyu beef links with a buttery richness you won\'t find anywhere else. Smoked and snappy.',
     image: '/images/wagyu_dog_chicago_style.jpg',
     categories: ['lunch'],
-    pricing: { type: 'per-each', priceEach: 24, minOrder: 2 },
+    pricing: { type: 'per-each', priceEach: 24, minOrder: 2, unit: 'lb' },
     tags: ['bbq', 'beef', 'premium', 'meats'],
   },
 
@@ -362,7 +362,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
   {
     id: 'buffet-drop-off-setup',
     title: 'Buffet Drop Off Set Up',
-    description: 'We set up your chafing dishes and sternos so your food stays hot and ready to serve.',
+    description: 'Chafing dishes and sternos set up so your food stays hot and ready to serve.',
     image: '/images/bbq_brisket.jpg',
     categories: ['breakfast', 'lunch', 'dessert', 'alacarte'],
     pricing: { type: 'flat', flatPrice: 50 },

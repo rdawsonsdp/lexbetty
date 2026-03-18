@@ -45,7 +45,9 @@ function formatPricing(product: typeof CATERING_PRODUCTS[0]): string {
     case 'tray':
       return p.sizes.map(s => `${s.size} tray: $${s.price} (serves ${s.servesMin}-${s.servesMax})`).join(', ');
     case 'per-each':
-      return `$${p.priceEach}/lb (min ${p.minOrder || 1})`;
+      return `$${p.priceEach}/${p.unit === 'lb' ? 'lb' : 'each'} (min ${p.minOrder || 1})`;
+    case 'per-lb':
+      return `$${p.pricePerLb}/lb (min ${p.minOrder || 1})`;
     case 'per-person':
       return `$${p.pricePerPerson}/person`;
     case 'per-dozen':

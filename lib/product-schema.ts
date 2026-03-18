@@ -39,6 +39,11 @@ const pricingSchema = z.discriminatedUnion('type', [
     minOrder: z.number().min(1).optional(),
   }),
   z.object({
+    type: z.literal('per-lb'),
+    pricePerLb: z.number().min(0),
+    minOrder: z.number().min(1).optional(),
+  }),
+  z.object({
     type: z.literal('per-container'),
     pricePerContainer: z.number().min(0),
     servesPerContainer: z.number().min(1),

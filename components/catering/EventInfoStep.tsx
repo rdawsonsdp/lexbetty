@@ -193,7 +193,7 @@ export default function EventInfoStep() {
                         <svg className="w-5 h-5 flex-shrink-0 mt-0.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span>This date is less than 72 hours away. We kindly request at least <strong>72 hours</strong> advance notice for catering orders. Please give us a call at <strong>(312) 600-8155</strong> to check availability for rush orders.</span>
+                        <span>This date is less than 72 hours away. Catering orders need at least <strong>72 hours</strong> advance notice. For rush orders, call <strong>(312) 600-8155</strong> to check availability.</span>
                       </div>
                     );
                   }

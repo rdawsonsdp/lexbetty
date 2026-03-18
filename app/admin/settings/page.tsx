@@ -15,6 +15,16 @@ interface EmailSettings {
   company_address: string;
 }
 
+interface BusinessRule {
+  id: string;
+  name: string;
+  description: string;
+  value: number;
+  unit: string;
+  formula?: string;
+  category?: string;
+}
+
 function authHeaders() {
   const token = typeof window !== 'undefined' ? sessionStorage.getItem('admin_token') : null;
   return { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
@@ -29,6 +39,10 @@ function SettingsPage() {
   const [testSending, setTestSending] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
   const [disabledCategories, setDisabledCategories] = useState<string[]>([]);
+  const [rules, setRules] = useState<BusinessRule[]>([]);
+  const [editingRule, setEditingRule] = useState<string | null>(null);
+  const [ruleValue, setRuleValue] = useState<string>('');
+  const [savingRule, setSavingRule] = useState(false);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });
@@ -46,6 +60,15 @@ function SettingsPage() {
       .then(data => {
         if (Array.isArray(data.disabled_categories)) {
           setDisabledCategories(data.disabled_categories);
+        }
+      })
+      .catch(() => {});
+
+    fetch('/api/admin/rules', { headers: authHeaders() })
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data.rules)) {
+          setRules(data.rules);
         }
       })
       .catch(() => {});
@@ -102,6 +125,31 @@ function SettingsPage() {
     }
   };
 
+  const handleSaveRule = async (ruleId: string) => {
+    const numValue = parseFloat(ruleValue);
+    if (isNaN(numValue) || numValue <= 0) {
+      showToast('Value must be a positive number', 'error');
+      return;
+    }
+    setSavingRule(true);
+    const updated = rules.map(r => r.id === ruleId ? { ...r, value: numValue } : r);
+    try {
+      const res = await fetch('/api/admin/rules', {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ rules: updated }),
+      });
+      if (!res.ok) throw new Error();
+      setRules(updated);
+      setEditingRule(null);
+      showToast('Rule updated');
+    } catch {
+      showToast('Failed to save rule', 'error');
+    } finally {
+      setSavingRule(false);
+    }
+  };
+
   const ALL_CATEGORIES = ['breakfast', 'lunch', 'dessert', 'other'];
 
   const toggleCategory = async (cat: string) => {
@@ -139,7 +187,7 @@ function SettingsPage() {
 
       <div className="max-w-3xl mx-auto px-4 py-8">
         <h1 className="font-oswald text-3xl font-bold text-[#1A1A1A] tracking-wide mb-2">SETTINGS</h1>
-        <p className="text-gray-500 mb-8">Manage email, category visibility, and store configuration</p>
+        <p className="text-gray-500 mb-8">Manage email, category visibility, business rules, and store configuration</p>
 
         {/* ── Email Notifications ── */}
         <section className="mb-8">
@@ -294,6 +342,107 @@ function SettingsPage() {
                 );
               })}
             </div>
+          </Card>
+        </section>
+        {/* ── Business Rules ── */}
+        <section className="mb-8">
+          <h2 className="font-oswald text-lg font-bold text-[#1A1A1A] tracking-wide mb-4 flex items-center gap-2">
+            <svg className="w-5 h-5 text-[#E8621A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+            BUSINESS RULES
+          </h2>
+          <Card>
+            <p className="text-sm text-gray-500 mb-4">
+              Calculation rules used by the ordering system. These values drive the meat planner and portion recommendations.
+            </p>
+
+            {/* Group rules by category */}
+            {(() => {
+              const categories = [...new Set(rules.map(r => r.category || 'General'))];
+              return categories.map(category => {
+                const categoryRules = rules.filter(r => (r.category || 'General') === category);
+                return (
+                  <div key={category} className="mb-6 last:mb-0">
+                    <h3 className="font-oswald text-xs tracking-[0.2em] text-[#9B9189] uppercase mb-3">
+                      {category}
+                    </h3>
+                    <div className="space-y-3">
+                      {categoryRules.map(rule => {
+                        const isEditable = rule.unit !== '';
+                        const isInfoOnly = !isEditable;
+
+                        return (
+                          <div key={rule.id} className={`border rounded-lg p-4 ${isInfoOnly ? 'border-dashed border-gray-200 bg-gray-50/50' : 'border-gray-200'}`}>
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-[#1A1A1A] flex items-center gap-2 flex-wrap">
+                                  {rule.name}
+                                  {isEditable && (
+                                    <span className="text-xs bg-[#E8621A]/10 text-[#E8621A] px-2 py-0.5 rounded-full font-medium">
+                                      {rule.value} {rule.unit}
+                                    </span>
+                                  )}
+                                  {isInfoOnly && (
+                                    <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">
+                                      Info
+                                    </span>
+                                  )}
+                                </h4>
+                                <p className="text-sm text-gray-500 mt-1">{rule.description}</p>
+                                {rule.formula && (
+                                  <p className="text-xs text-gray-400 mt-2 font-mono bg-gray-50 px-2 py-1 rounded inline-block border border-gray-100">
+                                    {rule.formula}
+                                  </p>
+                                )}
+                              </div>
+                              {isEditable && (
+                                <>
+                                  {editingRule === rule.id ? (
+                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                      <input
+                                        type="number"
+                                        value={ruleValue}
+                                        onChange={e => setRuleValue(e.target.value)}
+                                        className="w-20 px-2 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50"
+                                        step="0.5"
+                                        min="0"
+                                      />
+                                      <span className="text-xs text-gray-400 hidden sm:inline">{rule.unit}</span>
+                                      <button
+                                        onClick={() => handleSaveRule(rule.id)}
+                                        disabled={savingRule}
+                                        className="px-3 py-1.5 bg-[#E8621A] text-white text-sm rounded-lg hover:bg-[#d4570f] disabled:opacity-50"
+                                      >
+                                        {savingRule ? '...' : 'Save'}
+                                      </button>
+                                      <button
+                                        onClick={() => setEditingRule(null)}
+                                        className="px-3 py-1.5 text-gray-500 text-sm hover:text-gray-700"
+                                      >
+                                        Cancel
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <button
+                                      onClick={() => { setEditingRule(rule.id); setRuleValue(String(rule.value)); }}
+                                      className="text-sm text-[#E8621A] hover:underline font-medium whitespace-nowrap flex-shrink-0"
+                                    >
+                                      Edit
+                                    </button>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              });
+            })()}
+            {rules.length === 0 && (
+              <p className="text-sm text-gray-400 text-center py-4">No rules configured</p>
+            )}
           </Card>
         </section>
       </div>

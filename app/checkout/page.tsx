@@ -81,7 +81,7 @@ const PROCESS_STEPS = [
   {
     id: 'delivery',
     label: 'Delivery',
-    description: 'We deliver!',
+    description: 'Delivered to your door!',
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
@@ -756,7 +756,7 @@ export default function CheckoutPage() {
                           className="w-5 h-5 rounded border-gray-300 text-[#E8621A] focus:ring-[#E8621A]"
                         />
                         <span className="text-sm text-gray-700">
-                          <strong>Buffet Drop Off Set Up</strong> — We set up chafing dishes and sternos for your event
+                          <strong>Buffet Drop Off Set Up</strong> — Chafing dishes and sternos set up for your event
                           <span className="text-[#E8621A] font-semibold ml-1">($50)</span>
                         </span>
                       </label>
@@ -890,7 +890,7 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                <p className="text-sm text-gray-500 text-center mb-4">Take your time. Look it over. We want this to be exactly right.</p>
+                <p className="text-sm text-gray-500 text-center mb-4">Take your time. Look it over. Make sure everything is exactly right.</p>
 
                 <div className="flex gap-4">
                   <button

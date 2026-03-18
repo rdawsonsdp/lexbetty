@@ -176,6 +176,7 @@ export function calculateProductOrder(
     case 'per-each': {
       const minOrder = pricing.minOrder || 1;
       const quantity = Math.max(minOrder, headcount);
+      const unitLabel = pricing.unit === 'lb' ? 'lb' : 'each';
       return {
         product,
         quantity,
@@ -183,7 +184,22 @@ export function calculateProductOrder(
         totalPrice: pricing.priceEach * quantity,
         servesMin: quantity,
         servesMax: quantity,
-        displayText: `${quantity} @ ${formatCurrency(pricing.priceEach)} each`,
+        displayText: `${quantity} @ ${formatCurrency(pricing.priceEach)}/${unitLabel}`,
+        itemQuantity: 1,
+      };
+    }
+
+    case 'per-lb': {
+      const minOrderLb = pricing.minOrder || 1;
+      const quantityLb = Math.max(minOrderLb, headcount);
+      return {
+        product,
+        quantity: quantityLb,
+        unitPrice: pricing.pricePerLb,
+        totalPrice: pricing.pricePerLb * quantityLb,
+        servesMin: quantityLb,
+        servesMax: quantityLb,
+        displayText: `${quantityLb} lbs @ ${formatCurrency(pricing.pricePerLb)}/lb`,
         itemQuantity: 1,
       };
     }
@@ -249,7 +265,8 @@ export function calculateAllOrderItems(
     // --- per-each: item.quantity = user's chosen count (lbs for meats, units otherwise)
     if (pt === 'per-each') {
       const meat = isMeatProduct(item.product.id);
-      const serves = meat
+      const isLb = item.product.pricing.type === 'per-each' && item.product.pricing.unit === 'lb';
+      const serves = (meat || isLb)
         ? Math.floor((item.quantity * 16) / 3)
         : item.quantity;
 
@@ -258,9 +275,24 @@ export function calculateAllOrderItems(
         itemQuantity: item.quantity,
         quantity: item.quantity,
         totalPrice: calc.unitPrice * item.quantity,
-        displayText: meat
+        displayText: (meat || isLb)
           ? `${item.quantity} lbs`
           : `${item.quantity} @ ${formatCurrency(calc.unitPrice)} each`,
+        servesMin: serves,
+        servesMax: serves,
+      };
+    }
+
+    // --- per-lb: item.quantity = lbs
+    if (pt === 'per-lb' && item.product.pricing.type === 'per-lb') {
+      const serves = Math.floor((item.quantity * 16) / 3);
+      return {
+        ...calc,
+        itemQuantity: item.quantity,
+        quantity: item.quantity,
+        unitPrice: item.product.pricing.pricePerLb,
+        totalPrice: item.product.pricing.pricePerLb * item.quantity,
+        displayText: `${item.quantity} lbs`,
         servesMin: serves,
         servesMax: serves,
       };
@@ -388,7 +420,9 @@ export function getDisplayPrice(product: CateringProduct): string {
     case 'per-dozen':
       return `${formatCurrency(pricing.pricePerDozen)}/dozen`;
     case 'per-each':
-      return `${formatCurrency(pricing.priceEach)} each`;
+      return `${formatCurrency(pricing.priceEach)}/${pricing.unit === 'lb' ? 'lb' : 'each'}`;
+    case 'per-lb':
+      return `${formatCurrency(pricing.pricePerLb)}/lb`;
     case 'per-container':
       return `${formatCurrency(pricing.pricePerContainer)}/container`;
     case 'flat':
@@ -414,7 +448,9 @@ export function getPricingTypeLabel(product: CateringProduct): string {
     case 'per-dozen':
       return 'Per dozen';
     case 'per-each':
-      return 'Per item';
+      return pricing.unit === 'lb' ? 'Per pound' : 'Per item';
+    case 'per-lb':
+      return 'Per pound';
     case 'per-container':
       return `Serves ${pricing.servesPerContainer}`;
     case 'flat':

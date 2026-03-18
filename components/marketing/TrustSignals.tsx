@@ -9,7 +9,7 @@ const PROCESS_STEPS = [
     ),
     step: '1',
     title: 'Order Online',
-    description: 'Browse our menu and build your order in minutes — no calls, no back-and-forth.',
+    description: 'Browse the menu and build your order in minutes — no calls, no back-and-forth.',
   },
   {
     icon: (
@@ -21,8 +21,8 @@ const PROCESS_STEPS = [
       </svg>
     ),
     step: '2',
-    title: 'We Confirm',
-    description: 'Our team personally reviews your order and reaches out to confirm every detail.',
+    title: 'Details Confirmed',
+    description: 'Your order is personally reviewed and every detail confirmed before your event.',
   },
   {
     icon: (
@@ -32,7 +32,7 @@ const PROCESS_STEPS = [
     ),
     step: '3',
     title: 'Pay & You\'re Set',
-    description: 'Finalize payment before your event and relax — we\'ve got it from here.',
+    description: 'Finalize payment before your event and relax — everything\'s handled from here.',
   },
 ];
 
@@ -44,7 +44,7 @@ export default function TrustSignals() {
           How It Works
         </h2>
         <p className="text-center text-sm sm:text-base text-[#1A1A1A]/60 mb-8 sm:mb-10">
-          We make it easy so you can focus on everything else.
+          Three steps. Zero stress. You focus on your event.
         </p>
         <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center gap-8 sm:gap-6 lg:gap-12 max-w-4xl mx-auto">
           {PROCESS_STEPS.map((step, index) => (

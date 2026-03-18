@@ -29,6 +29,8 @@ function getItemPrice(product: CateringProduct, item: ConciergeMatchedItem): num
     }
     case 'per-each':
       return p.priceEach * item.quantity;
+    case 'per-lb':
+      return p.pricePerLb * item.quantity;
     case 'per-person':
       return p.pricePerPerson * item.quantity;
     case 'per-dozen':

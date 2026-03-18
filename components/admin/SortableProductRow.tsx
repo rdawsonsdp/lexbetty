@@ -23,9 +23,11 @@ function getPricingBadge(pricing: CateringProduct['pricing']): string {
     case 'pan': return `$${pricing.sizes[0].price}–$${pricing.sizes[pricing.sizes.length - 1].price}`;
     case 'per-person': return `$${pricing.pricePerPerson}/person`;
     case 'per-dozen': return `$${pricing.pricePerDozen}/dozen`;
-    case 'per-each': return `$${pricing.priceEach}/each`;
+    case 'per-each': return `$${pricing.priceEach}/${pricing.unit === 'lb' ? 'lb' : 'each'}`;
+    case 'per-lb': return `$${pricing.pricePerLb}/lb`;
     case 'per-container': return `$${pricing.pricePerContainer}/container`;
     case 'flat': return `$${pricing.flatPrice} flat`;
+    default: return '';
   }
 }
 
