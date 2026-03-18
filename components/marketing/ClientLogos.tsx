@@ -22,7 +22,7 @@ export default function ClientLogos() {
           {USE_CASES.map((useCase, index) => (
             <span
               key={index}
-              className="px-4 py-1.5 rounded-full bg-[#FAFAFA] text-[#383838] text-xs sm:text-sm font-semibold"
+              className="px-4 py-1.5 rounded-full bg-[#F5EDE0] text-[#1A1A1A] text-xs sm:text-sm font-semibold"
             >
               {useCase}
             </span>

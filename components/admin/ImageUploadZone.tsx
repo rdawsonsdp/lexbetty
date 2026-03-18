@@ -120,7 +120,7 @@ export default function ImageUploadZone({ value, onChange }: ImageUploadZoneProp
 
         {isUploading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/70 rounded-lg">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#383838]" />
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1A1A1A]" />
           </div>
         )}
       </div>
@@ -133,7 +133,7 @@ export default function ImageUploadZone({ value, onChange }: ImageUploadZoneProp
       <button
         type="button"
         onClick={() => cameraInputRef.current?.click()}
-        className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#383838] transition-colors"
+        className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#1A1A1A] transition-colors"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />

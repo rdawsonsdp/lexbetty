@@ -48,10 +48,10 @@ function StarRating({ rating }: { rating: number }) {
 
 export default function TestimonialsSection() {
   return (
-    <section className="bg-[#FAFAFA] py-12 sm:py-16">
+    <section className="bg-[#F5EDE0] py-12 sm:py-16">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
-          <h2 className="font-oswald text-3xl sm:text-4xl font-bold text-[#383838] tracking-wider mb-3">
+          <h2 className="font-oswald text-3xl sm:text-4xl font-bold text-[#1A1A1A] tracking-wider mb-3">
             WHAT OUR CLIENTS SAY
           </h2>
           <p className="text-gray-600 max-w-xl mx-auto">
@@ -67,7 +67,7 @@ export default function TestimonialsSection() {
                 &ldquo;{testimonial.quote}&rdquo;
               </p>
               <div className="border-t border-gray-200 pt-3">
-                <p className="font-oswald font-bold text-[#383838] text-sm">
+                <p className="font-oswald font-bold text-[#1A1A1A] text-sm">
                   {testimonial.author}
                 </p>
                 <p className="text-xs text-gray-500">{testimonial.company}</p>

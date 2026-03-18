@@ -38,12 +38,12 @@ const PROCESS_STEPS = [
 
 export default function TrustSignals() {
   return (
-    <section className="bg-[#FAFAFA] py-10 sm:py-14 border-y border-[#E8621A]/30">
+    <section className="bg-[#F5EDE0] py-10 sm:py-14 border-y border-[#E8621A]/30">
       <div className="container mx-auto px-4">
-        <h2 className="text-center text-2xl sm:text-3xl font-bold text-[#383838] mb-2">
+        <h2 className="text-center text-2xl sm:text-3xl font-bold text-[#1A1A1A] mb-2">
           How It Works
         </h2>
-        <p className="text-center text-sm sm:text-base text-[#383838]/60 mb-8 sm:mb-10">
+        <p className="text-center text-sm sm:text-base text-[#1A1A1A]/60 mb-8 sm:mb-10">
           We make it easy so you can focus on everything else.
         </p>
         <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center gap-8 sm:gap-6 lg:gap-12 max-w-4xl mx-auto">
@@ -56,14 +56,14 @@ export default function TrustSignals() {
                   </svg>
                 </div>
               )}
-              <div className="w-16 h-16 rounded-full bg-[#383838] text-[#E8621A] flex items-center justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-[#1A1A1A] text-[#E8621A] flex items-center justify-center mb-4">
                 {step.icon}
               </div>
               <span className="text-xs font-bold text-[#E8621A] tracking-widest uppercase mb-1">
                 Step {step.step}
               </span>
-              <h3 className="text-lg font-bold text-[#383838] mb-2">{step.title}</h3>
-              <p className="text-sm text-[#383838]/70 leading-relaxed">{step.description}</p>
+              <h3 className="text-lg font-bold text-[#1A1A1A] mb-2">{step.title}</h3>
+              <p className="text-sm text-[#1A1A1A]/70 leading-relaxed">{step.description}</p>
             </div>
           ))}
         </div>

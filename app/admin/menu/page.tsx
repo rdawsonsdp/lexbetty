@@ -2,15 +2,22 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import AdminAuthGate from '@/components/admin/AdminAuthGate';
+import AdminNav from '@/components/admin/AdminNav';
 import AdminHeader from '@/components/admin/AdminHeader';
 import CategoryTabs from '@/components/admin/CategoryTabs';
 import SortableProductList from '@/components/admin/SortableProductList';
 import ProductEditModal from '@/components/admin/ProductEditModal';
 import ProductEditForm from '@/components/admin/ProductEditForm';
-import { CateringProduct, EventType } from '@/lib/types';
+import { CateringProduct, CateringPackage, EventType } from '@/lib/types';
 import { ProductFormData } from '@/lib/product-schema';
+import { exportMenuPDF, exportMenuXLS } from '@/lib/menu-export';
 
 interface AdminProduct extends CateringProduct {
+  is_active: boolean;
+  sort_position: number;
+}
+
+interface AdminPackage extends CateringPackage {
   is_active: boolean;
   sort_position: number;
 }
@@ -38,6 +45,12 @@ function AdminMenuPage() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [disabledCategories, setDisabledCategories] = useState<string[]>([]);
   const [dirtyIds, setDirtyIds] = useState<Set<string>>(new Set());
+  // Packages state
+  const [packages, setPackages] = useState<AdminPackage[]>([]);
+  const [editingPackage, setEditingPackage] = useState<AdminPackage | null>(null);
+  const [isCreatingPackage, setIsCreatingPackage] = useState(false);
+  const [pkgForm, setPkgForm] = useState({ id: '', title: '', description: '', pricePerPerson: '', image: '/images/bbq_brisket.jpg', items: '', categories: 'lunch', minHeadcount: '', maxHeadcount: '' });
+  const [activeTab, setActiveTab] = useState<'products' | 'packages'>('products');
   // Snapshot of products at last save/load, used to detect real changes
   const [cleanSnapshot, setCleanSnapshot] = useState<Map<string, { is_active: boolean; featured?: boolean }>>(new Map());
 
@@ -81,10 +94,22 @@ function AdminMenuPage() {
     }
   }, []);
 
+  const fetchPackages = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/packages', { headers: authHeaders() });
+      if (!res.ok) throw new Error();
+      const { packages: fetched } = await res.json();
+      setPackages(fetched || []);
+    } catch {
+      // Packages may not be in DB yet — fall back silently
+    }
+  }, []);
+
   useEffect(() => {
     fetchProducts();
     fetchDisabledCategories();
-  }, [fetchProducts, fetchDisabledCategories]);
+    fetchPackages();
+  }, [fetchProducts, fetchDisabledCategories, fetchPackages]);
 
   // Toggle category enabled/disabled on public pages
   const handleToggleCategory = async (category: string, currentlyDisabled: boolean) => {
@@ -283,6 +308,91 @@ function AdminMenuPage() {
     }
   };
 
+  // Package handlers
+  const handleSavePackage = async () => {
+    setIsSaving(true);
+    try {
+      const isEdit = !!editingPackage;
+      const payload = {
+        id: pkgForm.id,
+        title: pkgForm.title,
+        description: pkgForm.description,
+        pricePerPerson: parseFloat(pkgForm.pricePerPerson) || 0,
+        image: pkgForm.image,
+        items: pkgForm.items.split('\n').filter(s => s.trim()),
+        categories: [pkgForm.categories],
+        minHeadcount: pkgForm.minHeadcount ? parseInt(pkgForm.minHeadcount) : null,
+        maxHeadcount: pkgForm.maxHeadcount ? parseInt(pkgForm.maxHeadcount) : null,
+        is_active: true,
+        sort_position: isEdit ? editingPackage.sort_position : packages.length,
+      };
+
+      const res = await fetch('/api/admin/packages', {
+        method: isEdit ? 'PUT' : 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('Failed to save');
+
+      showToast(isEdit ? 'Package updated' : 'Package created');
+      setEditingPackage(null);
+      setIsCreatingPackage(false);
+      setPkgForm({ id: '', title: '', description: '', pricePerPerson: '', image: '/images/bbq_brisket.jpg', items: '', categories: 'lunch', minHeadcount: '', maxHeadcount: '' });
+      await fetchPackages();
+    } catch {
+      showToast('Failed to save package', 'error');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleTogglePackageActive = async (pkg: AdminPackage) => {
+    const newActive = !pkg.is_active;
+    // Optimistic update
+    setPackages(ps => ps.map(p => p.id === pkg.id ? { ...p, is_active: newActive } : p));
+
+    try {
+      const res = await fetch('/api/admin/packages', {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          id: pkg.id,
+          title: pkg.title,
+          description: pkg.description,
+          pricePerPerson: pkg.pricePerPerson,
+          image: pkg.image,
+          items: pkg.items,
+          categories: pkg.categories,
+          minHeadcount: pkg.minHeadcount,
+          maxHeadcount: pkg.maxHeadcount,
+          sort_position: pkg.sort_position,
+          is_active: newActive,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      showToast(newActive ? `${pkg.title} is now visible` : `${pkg.title} hidden from customers`);
+    } catch {
+      // Revert on failure
+      setPackages(ps => ps.map(p => p.id === pkg.id ? { ...p, is_active: pkg.is_active } : p));
+      showToast('Failed to update package', 'error');
+    }
+  };
+
+  const openEditPackage = (pkg: AdminPackage) => {
+    setEditingPackage(pkg);
+    setPkgForm({
+      id: pkg.id,
+      title: pkg.title,
+      description: pkg.description,
+      pricePerPerson: String(pkg.pricePerPerson),
+      image: pkg.image,
+      items: pkg.items.join('\n'),
+      categories: pkg.categories[0] || 'lunch',
+      minHeadcount: pkg.minHeadcount ? String(pkg.minHeadcount) : '',
+      maxHeadcount: pkg.maxHeadcount ? String(pkg.maxHeadcount) : '',
+    });
+  };
+
   const productToFormData = (product: AdminProduct): ProductFormData => ({
     id: product.id,
     title: product.title,
@@ -292,6 +402,7 @@ function AdminMenuPage() {
     pricing: product.pricing,
     tags: product.tags,
     featured: product.featured,
+    minOrderQuantity: product.minOrderQuantity,
     is_active: product.is_active,
     sort_position: product.sort_position,
   });
@@ -306,6 +417,7 @@ function AdminMenuPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <AdminNav />
       {/* Sticky Save Bar */}
       {dirtyIds.size > 0 && (
         <div className="sticky top-0 z-50 bg-amber-50 border-b-2 border-amber-300 shadow-md">
@@ -345,6 +457,164 @@ function AdminMenuPage() {
       )}
 
       <div className="max-w-4xl mx-auto px-4 py-6">
+        {/* Products / Packages Tab Switcher */}
+        <div className="flex items-center gap-2 mb-6">
+          <button
+            onClick={() => setActiveTab('products')}
+            className={`px-6 py-2.5 font-oswald font-bold tracking-wider rounded-lg transition-colors ${
+              activeTab === 'products' ? 'bg-[#1A1A1A] text-white' : 'bg-white border border-gray-200 text-gray-500 hover:bg-gray-50'
+            }`}
+          >
+            MENU ITEMS ({products.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('packages')}
+            className={`px-6 py-2.5 font-oswald font-bold tracking-wider rounded-lg transition-colors ${
+              activeTab === 'packages' ? 'bg-[#E8621A] text-white' : 'bg-white border border-gray-200 text-gray-500 hover:bg-gray-50'
+            }`}
+          >
+            PACKAGES ({packages.length})
+          </button>
+          <div className="ml-auto flex gap-2">
+            <button
+              onClick={() => exportMenuPDF(products, packages)}
+              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              title="Download menu as PDF"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              PDF
+            </button>
+            <button
+              onClick={() => exportMenuXLS(products, packages)}
+              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              title="Download menu as Excel"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" /></svg>
+              XLS
+            </button>
+          </div>
+        </div>
+
+        {activeTab === 'packages' ? (
+          /* ==================== PACKAGES TAB ==================== */
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-oswald text-2xl font-bold text-[#1A1A1A]">Package Deals</h2>
+              <button
+                onClick={() => { setIsCreatingPackage(true); setPkgForm({ id: '', title: '', description: '', pricePerPerson: '', image: '/images/bbq_brisket.jpg', items: '', categories: 'lunch', minHeadcount: '', maxHeadcount: '' }); }}
+                className="bg-[#E8621A] text-white font-oswald font-bold px-5 py-2 rounded-lg hover:opacity-90 flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                Add Package
+              </button>
+            </div>
+
+            {/* Package List */}
+            <div className="space-y-3">
+              {packages.map(pkg => (
+                <div key={pkg.id} className={`bg-white rounded-xl border p-4 flex items-center justify-between ${pkg.is_active ? 'border-gray-200' : 'border-gray-100 opacity-50'}`}>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-oswald font-bold text-[#1A1A1A] text-lg">{pkg.title}</h3>
+                    <p className="text-sm text-gray-500 line-clamp-1">{pkg.description}</p>
+                    <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
+                      <span className="text-[#E8621A] font-bold">${pkg.pricePerPerson}/person</span>
+                      {pkg.minHeadcount && <span>Min {pkg.minHeadcount} guests</span>}
+                      <span>{pkg.items.length} items included</span>
+                    </div>
+                  </div>
+                  <div className="ml-4 flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleTogglePackageActive(pkg)}
+                      className={`relative w-11 h-6 rounded-full transition-colors ${pkg.is_active ? 'bg-green-500' : 'bg-gray-300'}`}
+                      title={pkg.is_active ? 'Active — visible to customers' : 'Inactive — hidden from customers'}
+                    >
+                      <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow ${pkg.is_active ? 'translate-x-5' : ''}`} />
+                    </button>
+                    <button
+                      onClick={() => openEditPackage(pkg)}
+                      className="px-4 py-2 text-sm font-medium text-[#1A1A1A] border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {packages.length === 0 && (
+                <div className="text-center py-12 text-gray-400">No packages yet. Add your first package deal.</div>
+              )}
+            </div>
+
+            {/* Package Edit/Create Form Modal */}
+            {(editingPackage || isCreatingPackage) && (
+              <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
+                  <h2 className="font-oswald text-xl font-bold text-[#1A1A1A] mb-4">
+                    {editingPackage ? 'Edit Package' : 'New Package'}
+                  </h2>
+                  <div className="space-y-4">
+                    {!editingPackage && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">ID (slug)</label>
+                        <input value={pkgForm.id} onChange={e => setPkgForm(f => ({ ...f, id: e.target.value }))} placeholder="e.g., betty-party-deal-5" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]" />
+                      </div>
+                    )}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                      <input value={pkgForm.title} onChange={e => setPkgForm(f => ({ ...f, title: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                      <textarea value={pkgForm.description} onChange={e => setPkgForm(f => ({ ...f, description: e.target.value }))} rows={2} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A] resize-none" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Price Per Person ($)</label>
+                        <input type="number" step="0.01" value={pkgForm.pricePerPerson} onChange={e => setPkgForm(f => ({ ...f, pricePerPerson: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                        <select value={pkgForm.categories} onChange={e => setPkgForm(f => ({ ...f, categories: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]">
+                          <option value="lunch">Lunch</option>
+                          <option value="dessert">Dessert</option>
+                          <option value="breakfast">Breakfast</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Min Headcount</label>
+                        <input type="number" value={pkgForm.minHeadcount} onChange={e => setPkgForm(f => ({ ...f, minHeadcount: e.target.value }))} placeholder="e.g., 10" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Max Headcount</label>
+                        <input type="number" value={pkgForm.maxHeadcount} onChange={e => setPkgForm(f => ({ ...f, maxHeadcount: e.target.value }))} placeholder="Optional" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Image Path</label>
+                      <input value={pkgForm.image} onChange={e => setPkgForm(f => ({ ...f, image: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">What&apos;s Included (one item per line)</label>
+                      <textarea value={pkgForm.items} onChange={e => setPkgForm(f => ({ ...f, items: e.target.value }))} rows={4} placeholder={"Choice of 3 Betty Meats\nChoice of 3 Betty Soulful Sides"} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A] resize-none font-mono text-sm" />
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                      <button onClick={handleSavePackage} disabled={isSaving} className="flex-1 bg-[#1A1A1A] text-white py-3 rounded-lg font-semibold hover:bg-[#4a4747] disabled:opacity-50">
+                        {isSaving ? 'Saving...' : editingPackage ? 'Save Changes' : 'Create Package'}
+                      </button>
+                      <button onClick={() => { setEditingPackage(null); setIsCreatingPackage(false); }} className="px-6 py-3 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+        /* ==================== PRODUCTS TAB ==================== */
+        <>
         <AdminHeader
           itemCount={products.length}
           searchTerm={searchTerm}
@@ -371,6 +641,8 @@ function AdminMenuPage() {
             onToggleFeatured={handleToggleFeatured}
             onToggleActive={handleToggleActive}
           />
+        )}
+        </>
         )}
       </div>
 

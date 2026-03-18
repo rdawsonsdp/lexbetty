@@ -52,7 +52,7 @@ export default function StepIndicator({
                     ${isCompleted
                       ? 'text-[#E8621A] hover:bg-[#E8621A]/10 cursor-pointer font-medium'
                       : isCurrent
-                      ? 'text-[#383838] font-bold cursor-default'
+                      ? 'text-[#1A1A1A] font-bold cursor-default'
                       : 'text-gray-400 cursor-default'
                     }
                   `}

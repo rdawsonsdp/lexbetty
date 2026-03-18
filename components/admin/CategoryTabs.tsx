@@ -31,7 +31,7 @@ export default function CategoryTabs({
               onClick={() => onCategoryChange(cat.id)}
               className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                 activeCategory === cat.id
-                  ? 'bg-[#383838] text-white'
+                  ? 'bg-[#1A1A1A] text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >

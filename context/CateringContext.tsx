@@ -6,8 +6,10 @@ import React, {
   useReducer,
   useEffect,
   useState,
+  useCallback,
   ReactNode,
 } from 'react';
+import { useAnalytics } from './AnalyticsContext';
 import {
   CateringState,
   CateringAction,
@@ -133,12 +135,13 @@ function cateringReducer(state: CateringState, action: CateringAction): Catering
         return { ...state, selectedItems: updated, selectedPackage: null };
       }
 
+      const minQty = action.payload.minOrderQuantity || 1;
       return {
         ...state,
         selectedPackage: null, // Clear any stale package so totalCost uses individual items
         selectedItems: [
           ...state.selectedItems,
-          { product: action.payload, quantity: 1 },
+          { product: action.payload, quantity: minQty },
         ],
       };
     }
@@ -154,7 +157,9 @@ function cateringReducer(state: CateringState, action: CateringAction): Catering
 
     case 'UPDATE_ITEM_QUANTITY': {
       const { productId, quantity } = action.payload;
-      if (quantity <= 0) {
+      const existingItem = state.selectedItems.find(item => item.product.id === productId);
+      const minQty = existingItem?.product.minOrderQuantity || 1;
+      if (quantity < minQty) {
         return {
           ...state,
           selectedPackage: null,
@@ -169,6 +174,16 @@ function cateringReducer(state: CateringState, action: CateringAction): Catering
         selectedPackage: null,
         selectedItems: state.selectedItems.map((item) =>
           item.product.id === productId ? { ...item, quantity } : item
+        ),
+      };
+    }
+
+    case 'SET_ITEM_SIZE': {
+      const { productId, size } = action.payload;
+      return {
+        ...state,
+        selectedItems: state.selectedItems.map((item) =>
+          item.product.id === productId ? { ...item, selectedSize: size } : item
         ),
       };
     }
@@ -217,6 +232,18 @@ function cateringReducer(state: CateringState, action: CateringAction): Catering
       };
     }
 
+    case 'LOAD_CONCIERGE_ORDER': {
+      return {
+        ...initialState,
+        eventType: action.payload.eventType,
+        headcount: action.payload.headcount,
+        orderType: 'build-your-own',
+        orderMode: 'wizard',
+        selectedItems: action.payload.items,
+        currentStep: 6,
+      };
+    }
+
     case 'HYDRATE': {
       return action.payload;
     }
@@ -248,8 +275,44 @@ interface CateringContextType {
 const CateringContext = createContext<CateringContextType | undefined>(undefined);
 
 export function CateringProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(cateringReducer, initialState);
+  const [state, rawDispatch] = useReducer(cateringReducer, initialState);
   const [hydrated, setHydrated] = useState(false);
+  const { track } = useAnalytics();
+
+  // Wrap dispatch to auto-track analytics events
+  const dispatch = useCallback((action: CateringAction) => {
+    rawDispatch(action);
+
+    switch (action.type) {
+      case 'SET_EVENT_TYPE':
+        track('select_event_type', { event_type: action.payload }, 'wizard');
+        break;
+      case 'SET_ORDER_MODE':
+        track('plan_event_click', { mode: action.payload }, 'wizard');
+        break;
+      case 'SET_HEADCOUNT':
+        track('set_headcount', { headcount: action.payload }, 'wizard');
+        break;
+      case 'SET_ORDER_TYPE':
+        track('select_order_type', { order_type: action.payload }, 'wizard');
+        break;
+      case 'ADD_ITEM':
+        track('add_to_cart', { product_id: action.payload.id, title: action.payload.title }, 'cart');
+        break;
+      case 'REMOVE_ITEM':
+        track('remove_from_cart', { product_id: action.payload }, 'cart');
+        break;
+      case 'UPDATE_ITEM_QUANTITY':
+        track('update_quantity', { product_id: action.payload.productId, quantity: action.payload.quantity }, 'cart');
+        break;
+      case 'SELECT_PACKAGE':
+        track('select_package', { package_id: action.payload.id, title: action.payload.title }, 'cart');
+        break;
+      case 'SET_STEP':
+        track('wizard_step', { step: action.payload }, 'wizard');
+        break;
+    }
+  }, [track]);
 
   // Hydrate state from sessionStorage on mount
   useEffect(() => {

@@ -37,7 +37,7 @@ export default function SeasonalTrends({ products }: SeasonalTrendsProps) {
   return (
     <section className="mb-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-        <h2 className="text-xl sm:text-2xl font-oswald font-semibold text-[#383838]">
+        <h2 className="text-xl sm:text-2xl font-oswald font-semibold text-[#1A1A1A]">
           Seasonal Trends
         </h2>
         <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
@@ -47,8 +47,8 @@ export default function SeasonalTrends({ products }: SeasonalTrendsProps) {
               onClick={() => setView(v)}
               className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                 view === v
-                  ? 'bg-white text-[#383838] shadow-sm'
-                  : 'text-gray-500 hover:text-[#383838]'
+                  ? 'bg-white text-[#1A1A1A] shadow-sm'
+                  : 'text-gray-500 hover:text-[#1A1A1A]'
               }`}
             >
               {v === 'sparklines' ? 'Sparklines' : v === 'heatmap' ? 'Heatmap' : 'Rising / Declining'}
@@ -87,7 +87,7 @@ export default function SeasonalTrends({ products }: SeasonalTrendsProps) {
                       }`}
                     >
                       <td className="px-4 py-2">
-                        <div className="font-medium text-[#383838] truncate max-w-[180px]">
+                        <div className="font-medium text-[#1A1A1A] truncate max-w-[180px]">
                           {product.title}
                         </div>
                         <div className="text-xs text-gray-400">{product.category}</div>
@@ -163,7 +163,7 @@ export default function SeasonalTrends({ products }: SeasonalTrendsProps) {
                   const maxVal = Math.max(...row.values);
                   return (
                     <tr key={row.category} className="border-t border-gray-100">
-                      <td className="px-3 py-3 font-semibold text-[#383838] capitalize">
+                      <td className="px-3 py-3 font-semibold text-[#1A1A1A] capitalize">
                         {row.category}
                       </td>
                       {row.values.map((val, idx) => {
@@ -174,7 +174,7 @@ export default function SeasonalTrends({ products }: SeasonalTrendsProps) {
                               className="mx-auto rounded-lg w-full min-w-[50px] py-2 text-xs font-semibold transition-all"
                               style={{
                                 backgroundColor: `rgba(218, 187, 100, ${0.1 + intensity * 0.7})`,
-                                color: intensity > 0.5 ? '#383838' : '#B0B0B0',
+                                color: intensity > 0.5 ? '#1A1A1A' : '#9B9189',
                               }}
                               title={`${row.category} ${formatMonthShort(row.months[idx])}: ${formatCurrency(val)}`}
                             >
@@ -209,7 +209,7 @@ export default function SeasonalTrends({ products }: SeasonalTrendsProps) {
               {risingItems.map((item) => (
                 <div key={item.productId} className="px-4 py-2.5 flex items-center justify-between">
                   <div className="min-w-0 flex-1">
-                    <div className="font-medium text-sm text-[#383838] truncate">{item.title}</div>
+                    <div className="font-medium text-sm text-[#1A1A1A] truncate">{item.title}</div>
                     <div className="text-xs text-gray-400">{item.category}</div>
                   </div>
                   <span className="text-sm font-bold text-green-600 ml-2">
@@ -237,7 +237,7 @@ export default function SeasonalTrends({ products }: SeasonalTrendsProps) {
               {decliningItems.map((item) => (
                 <div key={item.productId} className="px-4 py-2.5 flex items-center justify-between">
                   <div className="min-w-0 flex-1">
-                    <div className="font-medium text-sm text-[#383838] truncate">{item.title}</div>
+                    <div className="font-medium text-sm text-[#1A1A1A] truncate">{item.title}</div>
                     <div className="text-xs text-gray-400">{item.category}</div>
                   </div>
                   <span className="text-sm font-bold text-red-600 ml-2">

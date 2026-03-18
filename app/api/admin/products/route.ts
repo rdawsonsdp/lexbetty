@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Validation failed', details: parsed.error.flatten() }, { status: 400 });
     }
 
-    const { tags, featured, variantId, slug, inventory, is_active, sort_position, ...rest } = parsed.data;
+    const { tags, featured, variantId, slug, inventory, minOrderQuantity, specialOrder, is_active, sort_position, ...rest } = parsed.data;
     await upsertProduct({
       ...rest,
       tags: tags ?? undefined,
@@ -38,6 +38,8 @@ export async function POST(request: NextRequest) {
       variantId: variantId ?? undefined,
       slug: slug ?? undefined,
       inventory: inventory ?? undefined,
+      minOrderQuantity: minOrderQuantity ?? undefined,
+      specialOrder: specialOrder ?? undefined,
       is_active: is_active ?? undefined,
       sort_position: sort_position ?? undefined,
     });

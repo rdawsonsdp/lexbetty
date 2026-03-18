@@ -29,6 +29,7 @@ interface FormData {
   deliveryTime: string;
 
   // Delivery
+  deliveryType: 'delivery' | 'pickup';
   deliveryInstructions: string;
 
   // Additional
@@ -121,16 +122,21 @@ export default function CheckoutPage() {
   const [currentStep, setCurrentStep] = useState(1); // 1 = details, 2 = confirmation
   const [isSubmitting, setIsSubmitting] = useState<'quote' | 'order' | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [specialOrderConfirmed, setSpecialOrderConfirmed] = useState(false);
   const hasEventInfo = !!state.eventInfo;
-  const fullSetupProduct = getProductById('full-setup');
-  const setupInCart = isItemInCart('full-setup');
+
+  // Check for special order items in the cart
+  const specialOrderItems = state.selectedItems.filter(item => item.product.specialOrder);
+  const hasSpecialOrderItems = specialOrderItems.length > 0;
+  const buffetSetupProduct = getProductById('buffet-drop-off-setup');
+  const setupInCart = isItemInCart('buffet-drop-off-setup');
 
   const handleToggleSetup = (checked: boolean) => {
-    if (!fullSetupProduct) return;
+    if (!buffetSetupProduct) return;
     if (checked) {
-      dispatch({ type: 'ADD_ITEM', payload: fullSetupProduct });
+      dispatch({ type: 'ADD_ITEM', payload: buffetSetupProduct });
     } else {
-      dispatch({ type: 'REMOVE_ITEM', payload: 'full-setup' });
+      dispatch({ type: 'REMOVE_ITEM', payload: 'buffet-drop-off-setup' });
     }
   };
 
@@ -147,32 +153,37 @@ export default function CheckoutPage() {
     zip: state.eventInfo?.zip || '',
     eventDate: state.eventInfo?.eventDate || '',
     deliveryTime: state.eventInfo?.eventTime || '',
+    deliveryType: 'delivery',
     deliveryInstructions: '',
     specialInstructions: state.eventInfo?.specialInstructions || '',
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
 
-  // Calculate delivery fee
-  const getDeliveryFee = (headcount: number): number => {
-    if (headcount <= 25) return 75;
-    if (headcount <= 50) return 125;
-    return 200;
+  // Calculate delivery fee based on order subtotal and delivery type
+  const getDeliveryFee = (subtotal: number, deliveryType: 'delivery' | 'pickup'): number => {
+    if (deliveryType === 'pickup') return 25; // Local Delivery / Pickup
+    if (subtotal >= 2000) return 250;          // Delivery over $2k
+    if (subtotal >= 1000) return 150;          // Delivery over $1k
+    return 100;                                // Standard Delivery Option
   };
 
-  const deliveryFee = getDeliveryFee(state.headcount);
-  const orderTotal = totalCost + deliveryFee;
+  const deliveryFee = getDeliveryFee(totalCost, formData.deliveryType);
+  const buffetSetupFee = isItemInCart('buffet-drop-off-setup') ? 50 : 0;
+  const SALES_TAX_RATE = 0.1025;
+  const salesTax = Math.round((totalCost + buffetSetupFee) * SALES_TAX_RATE * 100) / 100;
+  const orderTotal = totalCost + deliveryFee + buffetSetupFee + salesTax;
 
   // Redirect if cart is empty
   if (calculatedItems.length === 0) {
     return (
-      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#F5EDE0] flex items-center justify-center p-4">
         <Card className="max-w-md w-full text-center">
           <div className="text-5xl mb-4">🛒</div>
-          <h2 className="font-oswald text-2xl font-bold text-[#383838] mb-2">Your Cart is Empty</h2>
+          <h2 className="font-oswald text-2xl font-bold text-[#1A1A1A] mb-2">Your Cart is Empty</h2>
           <p className="text-gray-600 mb-6">Add some items to your order before checking out.</p>
           <Link
             href="/#catering"
-            className="inline-block bg-[#383838] text-white font-oswald font-bold px-6 py-3 rounded-lg hover:bg-[#E8621A] hover:text-[#383838] transition-colors"
+            className="inline-block bg-[#1A1A1A] text-white font-oswald font-bold px-6 py-3 rounded-lg hover:bg-[#E8621A] hover:text-[#1A1A1A] transition-colors"
           >
             Start Ordering
           </Link>
@@ -235,12 +246,18 @@ export default function CheckoutPage() {
         orderType,
         items: calculatedItems.map(item => ({
           title: item.product.title,
+          description: item.product.description,
           displayText: item.displayText,
           totalPrice: item.totalPrice,
+          servesMin: item.servesMin,
+          servesMax: item.servesMax,
         })),
         headcount: state.headcount,
         eventType: state.eventType,
         subtotal: totalCost,
+        buffetSetupFee,
+        salesTax,
+        deliveryType: formData.deliveryType,
         deliveryFee,
         orderTotal,
         perPerson: orderTotal / state.headcount,
@@ -275,11 +292,14 @@ export default function CheckoutPage() {
           items: calculatedItems.map(item => ({
             productId: item.product.id,
             title: item.product.title,
+            description: item.product.description,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
             totalPrice: item.totalPrice,
             selectedSize: item.selectedSize,
             displayText: item.displayText,
+            servesMin: item.servesMin,
+            servesMax: item.servesMax,
           })),
           headcount: state.headcount,
           eventType: state.eventType,
@@ -302,8 +322,11 @@ export default function CheckoutPage() {
             state: formData.state,
             zip: formData.zip,
           },
+          deliveryType: formData.deliveryType,
           setupRequired: setupInCart,
+          buffetSetupFee,
           deliveryFee,
+          salesTax,
           orderTotal,
         }),
       });
@@ -340,9 +363,9 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-[#F5EDE0]">
       {/* Header */}
-      <div className="bg-[#383838] py-6 sm:py-8">
+      <div className="bg-[#1A1A1A] py-6 sm:py-8">
         <div className="container mx-auto px-4">
           <Link
             href="/#catering"
@@ -353,7 +376,7 @@ export default function CheckoutPage() {
             </svg>
             Back to Order
           </Link>
-          <h1 className="font-oswald text-3xl sm:text-4xl font-bold text-[#FAFAFA] tracking-wider">
+          <h1 className="font-oswald text-3xl sm:text-4xl font-bold text-[#F5EDE0] tracking-wider">
             CHECKOUT
           </h1>
         </div>
@@ -384,9 +407,9 @@ export default function CheckoutPage() {
                   <div
                     className={`relative z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-colors ${
                       isCurrent
-                        ? 'bg-[#E8621A] text-[#383838]'
+                        ? 'bg-[#E8621A] text-[#1A1A1A]'
                         : isCompleted
-                        ? 'bg-[#383838] text-white'
+                        ? 'bg-[#1A1A1A] text-white'
                         : 'bg-gray-200 text-gray-400'
                     }`}
                   >
@@ -396,7 +419,7 @@ export default function CheckoutPage() {
                   {/* Label */}
                   <p
                     className={`mt-2 text-xs sm:text-sm font-oswald font-semibold ${
-                      isCurrent ? 'text-[#383838]' : isCompleted ? 'text-[#383838]' : 'text-gray-400'
+                      isCurrent ? 'text-[#1A1A1A]' : isCompleted ? 'text-[#1A1A1A]' : 'text-gray-400'
                     }`}
                   >
                     {step.label}
@@ -420,7 +443,7 @@ export default function CheckoutPage() {
               <div className="space-y-6">
                 {/* Contact Information */}
                 <Card>
-                  <h2 className="font-oswald text-xl font-bold text-[#383838] mb-4 flex items-center gap-2">
+                  <h2 className="font-oswald text-xl font-bold text-[#1A1A1A] mb-4 flex items-center gap-2">
                     <svg className="w-5 h-5 text-[#E8621A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
@@ -513,7 +536,7 @@ export default function CheckoutPage() {
 
                 {/* Delivery / Billing Address — always editable */}
                 <Card>
-                  <h2 className="font-oswald text-xl font-bold text-[#383838] mb-4 flex items-center gap-2">
+                  <h2 className="font-oswald text-xl font-bold text-[#1A1A1A] mb-4 flex items-center gap-2">
                     <svg className="w-5 h-5 text-[#E8621A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -624,7 +647,7 @@ export default function CheckoutPage() {
 
                 {/* Event Details */}
                 <Card>
-                  <h2 className="font-oswald text-xl font-bold text-[#383838] mb-4 flex items-center gap-2">
+                  <h2 className="font-oswald text-xl font-bold text-[#1A1A1A] mb-4 flex items-center gap-2">
                     <svg className="w-5 h-5 text-[#E8621A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
@@ -672,6 +695,58 @@ export default function CheckoutPage() {
                       {errors.deliveryTime && <p className="text-red-500 text-xs mt-1">{errors.deliveryTime}</p>}
                     </div>
 
+                    {/* Delivery Type */}
+                    <div className="sm:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        How would you like to receive your order? <span className="text-red-500">*</span>
+                      </label>
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        <label
+                          className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
+                            formData.deliveryType === 'delivery'
+                              ? 'border-[#E8621A] bg-[#E8621A]/5'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="deliveryType"
+                            value="delivery"
+                            checked={formData.deliveryType === 'delivery'}
+                            onChange={handleInputChange}
+                            className="text-[#E8621A] focus:ring-[#E8621A]"
+                          />
+                          <div>
+                            <span className="text-sm font-medium text-[#1A1A1A]">Delivery</span>
+                            <p className="text-xs text-gray-500">
+                              {totalCost >= 2000 ? '$250' : totalCost >= 1000 ? '$150' : '$100'} delivery fee
+                            </p>
+                          </div>
+                        </label>
+                        <label
+                          className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
+                            formData.deliveryType === 'pickup'
+                              ? 'border-[#E8621A] bg-[#E8621A]/5'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="deliveryType"
+                            value="pickup"
+                            checked={formData.deliveryType === 'pickup'}
+                            onChange={handleInputChange}
+                            className="text-[#E8621A] focus:ring-[#E8621A]"
+                          />
+                          <div>
+                            <span className="text-sm font-medium text-[#1A1A1A]">Local Pickup</span>
+                            <p className="text-xs text-gray-500">$25 — 756 E. 111th St, Chicago</p>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Buffet Drop Off Set Up */}
                     <div className="sm:col-span-2">
                       <label className="flex items-center gap-3 cursor-pointer">
                         <input
@@ -681,12 +756,8 @@ export default function CheckoutPage() {
                           className="w-5 h-5 rounded border-gray-300 text-[#E8621A] focus:ring-[#E8621A]"
                         />
                         <span className="text-sm text-gray-700">
-                          <strong>Full Setup Service</strong> — Our team will set up your catering spread, serving stations, and cleanup
-                          {fullSetupProduct && (
-                            <span className="text-[#E8621A] font-semibold ml-1">
-                              ({formatCurrency(fullSetupProduct.pricing.type === 'per-person' ? fullSetupProduct.pricing.pricePerPerson : 0)}/person)
-                            </span>
-                          )}
+                          <strong>Buffet Drop Off Set Up</strong> — We set up chafing dishes and sternos for your event
+                          <span className="text-[#E8621A] font-semibold ml-1">($50)</span>
                         </span>
                       </label>
                     </div>
@@ -715,14 +786,14 @@ export default function CheckoutPage() {
               /* Confirmation Step */
               <div className="space-y-6">
                 <Card>
-                  <h2 className="font-oswald text-xl font-bold text-[#383838] mb-4">
+                  <h2 className="font-oswald text-xl font-bold text-[#1A1A1A] mb-4">
                     Review Your Order
                   </h2>
 
                   {/* Contact Summary */}
                   <div className="mb-6 pb-6 border-b border-gray-200">
                     <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Contact</h3>
-                    <p className="text-[#383838] font-medium">{formData.firstName} {formData.lastName}</p>
+                    <p className="text-[#1A1A1A] font-medium">{formData.firstName} {formData.lastName}</p>
                     <p className="text-gray-600 text-sm">{formData.email}</p>
                     <p className="text-gray-600 text-sm">{formData.phone}</p>
                     {formData.company && <p className="text-gray-600 text-sm">{formData.company}</p>}
@@ -731,15 +802,15 @@ export default function CheckoutPage() {
                   {/* Delivery Summary */}
                   <div className="mb-6 pb-6 border-b border-gray-200">
                     <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Delivery</h3>
-                    <p className="text-[#383838]">{formData.address}</p>
-                    {formData.address2 && <p className="text-[#383838]">{formData.address2}</p>}
-                    <p className="text-[#383838]">{formData.city}, {formData.state} {formData.zip}</p>
+                    <p className="text-[#1A1A1A]">{formData.address}</p>
+                    {formData.address2 && <p className="text-[#1A1A1A]">{formData.address2}</p>}
+                    <p className="text-[#1A1A1A]">{formData.city}, {formData.state} {formData.zip}</p>
                   </div>
 
                   {/* Event Summary */}
                   <div className="mb-6 pb-6 border-b border-gray-200">
                     <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Event</h3>
-                    <div className="flex items-center gap-4 text-[#383838]">
+                    <div className="flex items-center gap-4 text-[#1A1A1A]">
                       <div className="flex items-center gap-2">
                         <svg className="w-5 h-5 text-[#E8621A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -754,7 +825,7 @@ export default function CheckoutPage() {
                       </div>
                     </div>
                     <p className="text-sm text-gray-600 mt-2">
-                      {state.headcount} guests • {setupInCart ? 'Full setup included' : 'Drop-off only'}
+                      {state.headcount} guests • {formData.deliveryType === 'pickup' ? 'Local Pickup' : 'Delivery'}{setupInCart ? ' • Buffet setup included' : ''}
                     </p>
                     {formData.specialInstructions && (
                       <p className="text-sm text-gray-500 mt-2 italic">"{formData.specialInstructions}"</p>
@@ -766,12 +837,13 @@ export default function CheckoutPage() {
                     <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Order Items</h3>
                     <div className="space-y-3">
                       {calculatedItems.map(item => (
-                        <div key={item.product.id} className="flex justify-between text-sm">
-                          <div>
-                            <p className="font-medium text-[#383838]">{item.product.title}</p>
-                            <p className="text-gray-500 text-xs">{item.displayText}</p>
+                        <div key={item.product.id} className="flex justify-between text-sm gap-4">
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-[#1A1A1A]">{item.product.title}</p>
+                            <p className="text-gray-400 text-xs line-clamp-2">{item.product.description}</p>
+                            <p className="text-gray-500 text-xs mt-0.5">{item.displayText}</p>
                           </div>
-                          <p className="font-semibold text-[#383838]">{formatCurrency(item.totalPrice)}</p>
+                          <p className="font-semibold text-[#1A1A1A] flex-shrink-0">{formatCurrency(item.totalPrice)}</p>
                         </div>
                       ))}
                     </div>
@@ -787,13 +859,44 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
+                {/* Special Order Gate */}
+                {hasSpecialOrderItems && !specialOrderConfirmed && (
+                  <div className="bg-red-50 border-2 border-red-300 rounded-xl p-4 mb-4">
+                    <div className="flex items-start gap-3">
+                      <svg className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.072 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                      <div className="flex-1">
+                        <h3 className="font-oswald font-bold text-red-700 text-base mb-1">SPECIAL ORDER ITEMS REQUIRE CONFIRMATION</h3>
+                        <p className="text-sm text-red-600 mb-2">
+                          The following items are not on our regular menu and require advance preparation:
+                        </p>
+                        <ul className="text-sm text-red-700 font-medium mb-3 space-y-1">
+                          {specialOrderItems.map(item => (
+                            <li key={item.product.id}>- {item.product.title}</li>
+                          ))}
+                        </ul>
+                        <p className="text-xs text-red-500 mb-3">
+                          Please confirm you understand these items need extra lead time and are subject to availability.
+                        </p>
+                        <button
+                          onClick={() => setSpecialOrderConfirmed(true)}
+                          className="bg-red-600 text-white font-oswald font-bold px-6 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm"
+                        >
+                          I CONFIRM — PROCEED WITH SPECIAL ORDER
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <p className="text-sm text-gray-500 text-center mb-4">Take your time. Look it over. We want this to be exactly right.</p>
 
                 <div className="flex gap-4">
                   <button
                     onClick={() => setCurrentStep(1)}
                     disabled={!!isSubmitting}
-                    className="flex-1 px-6 py-3 border-2 border-[#383838] text-[#383838] font-oswald font-bold rounded-lg hover:bg-[#383838] hover:text-white transition-colors disabled:opacity-50"
+                    className="flex-1 px-6 py-3 border-2 border-[#1A1A1A] text-[#1A1A1A] font-oswald font-bold rounded-lg hover:bg-[#1A1A1A] hover:text-white transition-colors disabled:opacity-50"
                   >
                     Edit Details
                   </button>
@@ -801,7 +904,7 @@ export default function CheckoutPage() {
                 <div className="flex flex-col sm:flex-row gap-3 mt-4">
                   <button
                     onClick={() => handleSubmitOrder('quote')}
-                    disabled={!!isSubmitting}
+                    disabled={!!isSubmitting || (hasSpecialOrderItems && !specialOrderConfirmed)}
                     className="flex-1 px-6 py-3 border-2 border-[#E8621A] text-[#E8621A] font-oswald font-bold rounded-lg hover:bg-[#E8621A]/10 transition-colors disabled:opacity-50"
                   >
                     {isSubmitting === 'quote' ? (
@@ -816,7 +919,7 @@ export default function CheckoutPage() {
                       'Request a Quote'
                     )}
                   </button>
-                  <Button onClick={() => handleSubmitOrder('order')} className="flex-1" disabled={!!isSubmitting}>
+                  <Button onClick={() => handleSubmitOrder('order')} className="flex-1" disabled={!!isSubmitting || (hasSpecialOrderItems && !specialOrderConfirmed)}>
                     {isSubmitting === 'order' ? (
                       <span className="flex items-center gap-2">
                         <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
@@ -836,28 +939,40 @@ export default function CheckoutPage() {
 
           {/* Order Summary Sidebar */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-4 bg-[#FAFAFA]">
-              <h2 className="font-oswald text-xl font-bold text-[#383838] mb-4">
+            <Card className="sticky top-4 bg-[#F5EDE0]">
+              <h2 className="font-oswald text-xl font-bold text-[#1A1A1A] mb-4">
                 Order Summary
               </h2>
 
               <div className="space-y-3 mb-4 pb-4 border-b border-gray-200">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">{calculatedItems.length} item{calculatedItems.length !== 1 ? 's' : ''}</span>
-                  <span className="font-medium text-[#383838]">{formatCurrency(totalCost)}</span>
+                  <span className="text-gray-600">Subtotal ({calculatedItems.length} item{calculatedItems.length !== 1 ? 's' : ''})</span>
+                  <span className="font-medium text-[#1A1A1A]">{formatCurrency(totalCost)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Guests</span>
-                  <span className="font-medium text-[#383838]">{state.headcount}</span>
+                  <span className="font-medium text-[#1A1A1A]">{state.headcount}</span>
+                </div>
+                {buffetSetupFee > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Buffet Setup</span>
+                    <span className="font-medium text-[#1A1A1A]">{formatCurrency(buffetSetupFee)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Sales Tax (10.25%)</span>
+                  <span className="font-medium text-[#1A1A1A]">{formatCurrency(salesTax)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Delivery</span>
-                  <span className="font-medium text-[#383838]">{formatCurrency(deliveryFee)}</span>
+                  <span className="text-gray-600">
+                    {formData.deliveryType === 'pickup' ? 'Local Pickup' : 'Delivery'}
+                  </span>
+                  <span className="font-medium text-[#1A1A1A]">{formatCurrency(deliveryFee)}</span>
                 </div>
               </div>
 
               <div className="flex justify-between font-oswald font-bold text-lg mb-2">
-                <span className="text-[#383838]">Total</span>
+                <span className="text-[#1A1A1A]">Total</span>
                 <span className="text-[#E8621A]">{formatCurrency(orderTotal)}</span>
               </div>
 
@@ -869,10 +984,15 @@ export default function CheckoutPage() {
               {/* Items Preview */}
               <div className="mt-6 pt-4 border-t border-gray-200">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Items</p>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
+                <div className="space-y-3 max-h-64 overflow-y-auto">
                   {calculatedItems.map(item => (
-                    <div key={item.product.id} className="text-sm">
-                      <p className="text-[#383838] truncate">{item.product.title}</p>
+                    <div key={item.product.id} className="text-sm flex justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[#1A1A1A] font-medium">{item.product.title}</p>
+                        <p className="text-gray-400 text-xs line-clamp-1">{item.product.description}</p>
+                        <p className="text-gray-500 text-xs">{item.displayText}</p>
+                      </div>
+                      <p className="text-[#1A1A1A] font-semibold flex-shrink-0">{formatCurrency(item.totalPrice)}</p>
                     </div>
                   ))}
                 </div>
@@ -903,7 +1023,7 @@ export default function CheckoutPage() {
               {/* Support */}
               <div className="mt-4 pt-4 border-t border-gray-200">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Need Help?</p>
-                <a href="tel:3126008155" className="text-sm text-[#E8621A] hover:text-[#383838] transition-colors font-semibold">
+                <a href="tel:3126008155" className="text-sm text-[#E8621A] hover:text-[#1A1A1A] transition-colors font-semibold">
                   (312) 600-8155
                 </a>
                 <p className="text-xs text-gray-400 mt-1">Call, email, or text us anytime</p>

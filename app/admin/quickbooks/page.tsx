@@ -101,7 +101,7 @@ function QuickBooksAdmin() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-2xl mx-auto px-4 py-12">
-        <h1 className="font-oswald text-3xl font-bold text-[#383838] mb-8">
+        <h1 className="font-oswald text-3xl font-bold text-[#1A1A1A] mb-8">
           QuickBooks Integration
         </h1>
 
@@ -125,7 +125,7 @@ function QuickBooksAdmin() {
                 status?.connected ? 'bg-green-500' : 'bg-gray-300'
               }`}
             />
-            <span className="font-medium text-[#383838]">
+            <span className="font-medium text-[#1A1A1A]">
               {status?.connected ? 'Connected' : 'Not Connected'}
             </span>
           </div>
@@ -135,11 +135,11 @@ function QuickBooksAdmin() {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-gray-500">Company ID</p>
-                  <p className="font-medium text-[#383838]">{status.companyId}</p>
+                  <p className="font-medium text-[#1A1A1A]">{status.companyId}</p>
                 </div>
                 <div>
                   <p className="text-gray-500">Token Expires</p>
-                  <p className="font-medium text-[#383838]">
+                  <p className="font-medium text-[#1A1A1A]">
                     {status.expiresAt
                       ? new Date(status.expiresAt).toLocaleDateString()
                       : 'N/A'}
@@ -148,7 +148,7 @@ function QuickBooksAdmin() {
               </div>
 
               <div className="pt-4 border-t">
-                <h3 className="font-oswald font-bold text-[#383838] mb-2">How It Works</h3>
+                <h3 className="font-oswald font-bold text-[#1A1A1A] mb-2">How It Works</h3>
                 <ul className="text-sm text-gray-600 space-y-1">
                   <li>- New orders automatically create QuickBooks invoices</li>
                   <li>- Customers receive a payment link via email</li>
@@ -172,7 +172,7 @@ function QuickBooksAdmin() {
               </p>
 
               <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="font-oswald font-bold text-[#383838] mb-2">What You Need</h3>
+                <h3 className="font-oswald font-bold text-[#1A1A1A] mb-2">What You Need</h3>
                 <ul className="text-sm text-gray-600 space-y-1">
                   <li>- QuickBooks Online account (Plus or Advanced)</li>
                   <li>- QB Payments enabled for online payments</li>

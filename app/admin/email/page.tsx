@@ -89,16 +89,16 @@ function EmailSettingsPage() {
 
   if (!settings) {
     return (
-      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5EDE0] flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-[#E8621A] border-t-transparent rounded-full" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-[#F5EDE0]">
       {/* Header */}
-      <div className="bg-[#383838] py-6 sm:py-8">
+      <div className="bg-[#1A1A1A] py-6 sm:py-8">
         <div className="container mx-auto px-4">
           <Link
             href="/admin/menu"
@@ -109,7 +109,7 @@ function EmailSettingsPage() {
             </svg>
             Back to Menu Admin
           </Link>
-          <h1 className="font-oswald text-3xl sm:text-4xl font-bold text-[#FAFAFA] tracking-wider">
+          <h1 className="font-oswald text-3xl sm:text-4xl font-bold text-[#F5EDE0] tracking-wider">
             EMAIL SETTINGS
           </h1>
           <p className="text-white/60 mt-1">Manage email notifications for quotes and orders</p>
@@ -121,7 +121,7 @@ function EmailSettingsPage() {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-oswald text-xl font-bold text-[#383838]">Email Notifications</h2>
+              <h2 className="font-oswald text-xl font-bold text-[#1A1A1A]">Email Notifications</h2>
               <p className="text-sm text-gray-500 mt-1">Send confirmation emails when customers submit a quote or order</p>
             </div>
             <button
@@ -135,7 +135,7 @@ function EmailSettingsPage() {
 
         {/* Subject Lines */}
         <Card>
-          <h2 className="font-oswald text-xl font-bold text-[#383838] mb-4">Subject Lines</h2>
+          <h2 className="font-oswald text-xl font-bold text-[#1A1A1A] mb-4">Subject Lines</h2>
           <p className="text-sm text-gray-500 mb-4">
             Use <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">{'#{orderNumber}'}</code> to insert the order number.
           </p>
@@ -163,7 +163,7 @@ function EmailSettingsPage() {
 
         {/* Company Info */}
         <Card>
-          <h2 className="font-oswald text-xl font-bold text-[#383838] mb-4">Company Contact (Email Footer)</h2>
+          <h2 className="font-oswald text-xl font-bold text-[#1A1A1A] mb-4">Company Contact (Email Footer)</h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
@@ -205,7 +205,7 @@ function EmailSettingsPage() {
 
         {/* Test Email */}
         <Card>
-          <h2 className="font-oswald text-xl font-bold text-[#383838] mb-4">Send Test Email</h2>
+          <h2 className="font-oswald text-xl font-bold text-[#1A1A1A] mb-4">Send Test Email</h2>
           <p className="text-sm text-gray-500 mb-4">
             Send a sample email to verify formatting. Without <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">RESEND_API_KEY</code>, output logs to server console.
           </p>

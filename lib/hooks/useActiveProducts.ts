@@ -40,7 +40,7 @@ export function useActiveProducts() {
 
   const getActiveByEventType = useMemo(() => {
     return (eventType: string | null): CateringProduct[] => {
-      if (!eventType) return activeProducts;
+      if (!eventType || eventType === 'alacarte') return activeProducts;
       return activeProducts.filter((p) =>
         p.categories.includes(eventType as any),
       );

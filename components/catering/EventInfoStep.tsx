@@ -91,7 +91,7 @@ export default function EventInfoStep() {
     <div ref={sectionRef} className="bg-white py-12 sm:py-16 scroll-mt-4">
       <div className="container mx-auto px-4 max-w-2xl">
         <div className="text-center mb-10">
-          <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#383838] tracking-wider mb-4">
+          <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#1A1A1A] tracking-wider mb-4">
             TELL US ABOUT YOUR EVENT
           </h2>
           <p className="text-gray-600 text-base sm:text-lg">
@@ -122,7 +122,7 @@ export default function EventInfoStep() {
           {/* Phase 1: Occasion */}
           {phase === 'occasion' && (
             <div className="animate-fade-in space-y-6">
-              <h3 className="font-oswald text-2xl font-bold text-[#383838] tracking-wide">
+              <h3 className="font-oswald text-2xl font-bold text-[#1A1A1A] tracking-wide">
                 What&apos;s the occasion?
               </h3>
               <p className="text-gray-500 text-sm">Totally optional — helps us tailor the experience.</p>
@@ -134,8 +134,8 @@ export default function EventInfoStep() {
                     onClick={() => setEventName(suggestion)}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
                       eventName === suggestion
-                        ? 'bg-[#383838] text-white border-[#383838]'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-[#E8621A] hover:text-[#383838]'
+                        ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
+                        : 'bg-white text-gray-600 border-gray-200 hover:border-[#E8621A] hover:text-[#1A1A1A]'
                     }`}
                   >
                     {suggestion}
@@ -148,12 +148,12 @@ export default function EventInfoStep() {
                 value={eventName}
                 onChange={e => setEventName(e.target.value)}
                 placeholder="Or type your own..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 text-[#383838]"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 text-[#1A1A1A]"
               />
 
               <button
                 onClick={handleOccasionNext}
-                className="w-full bg-[#383838] text-white font-oswald font-bold px-8 py-4 rounded-lg hover:bg-gray-800 transition-colors text-lg tracking-wide"
+                className="w-full bg-[#1A1A1A] text-white font-oswald font-bold px-8 py-4 rounded-lg hover:bg-gray-800 transition-colors text-lg tracking-wide"
               >
                 {eventName ? 'NEXT' : 'SKIP'}
               </button>
@@ -163,7 +163,7 @@ export default function EventInfoStep() {
           {/* Phase 2: Date & Time */}
           {phase === 'datetime' && (
             <div className="animate-fade-in space-y-6">
-              <h3 className="font-oswald text-2xl font-bold text-[#383838] tracking-wide">
+              <h3 className="font-oswald text-2xl font-bold text-[#1A1A1A] tracking-wide">
                 When is your event?
               </h3>
 
@@ -181,7 +181,7 @@ export default function EventInfoStep() {
                   value={eventDate}
                   onChange={e => setEventDate(e.target.value)}
                   min={getMinDate()}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 text-[#383838]"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 text-[#1A1A1A]"
                 />
                 {eventDate && (() => {
                   const selected = new Date(eventDate + 'T00:00:00');
@@ -203,13 +203,13 @@ export default function EventInfoStep() {
 
               {eventDate && (
                 <div className="animate-fade-in">
-                  <p className="font-oswald text-lg font-bold text-[#383838] mb-2">
+                  <p className="font-oswald text-lg font-bold text-[#1A1A1A] mb-2">
                     And what time should we have everything ready?
                   </p>
                   <select
                     value={eventTime}
                     onChange={e => setEventTime(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 text-[#383838]"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 text-[#1A1A1A]"
                   >
                     <option value="">Select a time...</option>
                     {DELIVERY_TIMES.map(time => (
@@ -222,7 +222,7 @@ export default function EventInfoStep() {
               {eventDate && eventTime && (
                 <button
                   onClick={handleDateTimeNext}
-                  className="w-full bg-[#383838] text-white font-oswald font-bold px-8 py-4 rounded-lg hover:bg-gray-800 transition-colors text-lg tracking-wide animate-fade-in"
+                  className="w-full bg-[#1A1A1A] text-white font-oswald font-bold px-8 py-4 rounded-lg hover:bg-gray-800 transition-colors text-lg tracking-wide animate-fade-in"
                 >
                   NEXT
                 </button>
@@ -233,7 +233,7 @@ export default function EventInfoStep() {
           {/* Phase 3: Special Instructions */}
           {phase === 'notes' && (
             <div className="animate-fade-in space-y-6">
-              <h3 className="font-oswald text-2xl font-bold text-[#383838] tracking-wide">
+              <h3 className="font-oswald text-2xl font-bold text-[#1A1A1A] tracking-wide">
                 Anything else we should know?
               </h3>
               <p className="text-gray-500 text-sm">
@@ -245,13 +245,13 @@ export default function EventInfoStep() {
                 onChange={e => setSpecialInstructions(e.target.value)}
                 rows={4}
                 placeholder="e.g. Gluten-free options needed, use the service entrance on Oak St..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 text-[#383838] resize-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 text-[#1A1A1A] resize-none"
               />
 
               <div className="flex gap-4">
                 <button
                   onClick={handleFinish}
-                  className="flex-1 bg-[#383838] text-white font-oswald font-bold px-8 py-4 rounded-lg hover:bg-gray-800 transition-colors text-lg tracking-wide"
+                  className="flex-1 bg-[#1A1A1A] text-white font-oswald font-bold px-8 py-4 rounded-lg hover:bg-gray-800 transition-colors text-lg tracking-wide"
                 >
                   {specialInstructions ? 'CONTINUE' : 'SKIP & CONTINUE'}
                 </button>
@@ -262,7 +262,7 @@ export default function EventInfoStep() {
           {/* Phase 5: Transition */}
           {phase === 'transition' && (
             <div className="animate-fade-in text-center py-12">
-              <h3 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#383838] tracking-wider animate-pulse">
+              <h3 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#1A1A1A] tracking-wider animate-pulse">
                 Ok. Let&apos;s plan your meal.
               </h3>
             </div>
@@ -274,7 +274,7 @@ export default function EventInfoStep() {
           <div className="mt-10 text-center">
             <button
               onClick={handleBack}
-              className="font-oswald text-gray-500 hover:text-[#383838] transition-colors tracking-wide"
+              className="font-oswald text-gray-500 hover:text-[#1A1A1A] transition-colors tracking-wide"
             >
               &larr; BACK TO EVENT TYPE
             </button>

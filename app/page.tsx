@@ -7,6 +7,8 @@ import ProductImagePlaceholder from '@/components/ui/ProductImagePlaceholder';
 import { useRouter } from 'next/navigation';
 import { useCatering } from '@/context/CateringContext';
 import { useEnabledEventTypes } from '@/lib/hooks/useEnabledEventTypes';
+import BettyAILogo from '@/components/ui/BettyAILogo';
+import { FEATURES } from '@/lib/feature-flags';
 import StepIndicator from '@/components/catering/StepIndicator';
 import EventInfoStep from '@/components/catering/EventInfoStep';
 import HeadcountBudgetStep from '@/components/catering/HeadcountBudgetStep';
@@ -25,7 +27,7 @@ export default function HomePage() {
   const { state, dispatch } = useCatering();
   const { eventTypes: EVENT_TYPES } = useEnabledEventTypes();
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
-  const [showEventTypes, setShowEventTypes] = useState(!!state.orderMode);
+  const [showEventTypes, setShowEventTypes] = useState(true);
 
   const handlePlanEvent = () => {
     dispatch({ type: 'SET_ORDER_MODE', payload: 'wizard' });
@@ -42,11 +44,16 @@ export default function HomePage() {
       type: 'SET_EVENT_TYPE',
       payload: eventTypeId as 'breakfast' | 'lunch' | 'alacarte',
     });
+    // A la carte skips headcount/budget and goes straight to product selection
+    if (eventTypeId === 'alacarte') {
+      dispatch({ type: 'SET_ORDER_MODE', payload: 'wizard' });
+      dispatch({ type: 'SET_STEP', payload: 4 });
+    }
   };
 
   const eventImages: Record<string, string> = {
-    lunch: '/images/Macaroni and Cheese Shot Hi Res.png',
-    alacarte: '/images/bbq_brisket.jpg',
+    lunch: '/images/mac-n-cheese-pan.webp',
+    alacarte: '/images/sliders-board.png',
   };
 
   const handleToggleFilter = (tag: string) => {
@@ -61,7 +68,7 @@ export default function HomePage() {
   const inWizard = showEventTypes || state.orderMode === 'wizard' || state.currentStep > 1;
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-[#F5EDE0]">
       {/* Hero Section */}
       <section>
         {/* Mobile: Single full-width hero */}
@@ -99,7 +106,7 @@ export default function HomePage() {
                     priority
                   />
                 </div>
-                <h2 className="font-oswald text-xl md:text-2xl font-bold text-[#383838] tracking-wide mt-3">
+                <h2 className="font-oswald text-xl md:text-2xl font-bold text-[#1A1A1A] tracking-wide mt-3">
                   Best Brisket in Chicago
                 </h2>
                 <p className="font-oswald text-sm text-[#E8621A] tracking-wide">
@@ -118,7 +125,7 @@ export default function HomePage() {
                     priority
                   />
                 </div>
-                <h2 className="font-oswald text-xl md:text-2xl font-bold text-[#383838] tracking-wide mt-3">
+                <h2 className="font-oswald text-xl md:text-2xl font-bold text-[#1A1A1A] tracking-wide mt-3">
                   Chef Dominique Leach
                 </h2>
                 <p className="font-oswald text-sm text-[#E8621A] tracking-wide">
@@ -151,68 +158,12 @@ export default function HomePage() {
       {/* Client Logos */}
       <ClientLogos />
 
-      {/* Two-Path Entry (shown when not yet in wizard and no event type selected) */}
-      {!inWizard && (
-        <section id="catering" className="bg-[#FAFAFA] py-12 sm:py-16">
+      {/* Event Type Selection */}
+      {(
+        <section className="bg-[#F5EDE0] pb-12 sm:pb-16">
           <div className="container mx-auto px-4">
             <div className="text-center mb-10">
-              <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#383838] tracking-wider mb-4">
-                HOW CAN WE HELP?
-              </h2>
-              <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
-                Planning a full event or just need to place an order? We&apos;ve got you either way.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-6 max-w-4xl mx-auto">
-              {/* Plan Your Event */}
-              <div className="animate-scale-in w-full sm:w-[calc(50%-0.75rem)] max-w-[400px]">
-                <div
-                  onClick={handlePlanEvent}
-                  className="relative overflow-hidden rounded-xl cursor-pointer transition-all duration-300 shadow-md h-[180px] sm:h-[240px] md:h-[320px] hover:scale-105"
-                >
-                  <ProductImagePlaceholder title="Plan Your Event" className="text-lg sm:text-xl md:text-2xl" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                  <div className="absolute inset-0 flex flex-col items-center justify-end p-6 text-center">
-                    <h3 className="font-oswald text-2xl sm:text-3xl font-bold text-white mb-2 tracking-wide drop-shadow-lg">
-                      PLAN YOUR EVENT
-                    </h3>
-                    <p className="text-white/90 text-sm sm:text-base drop-shadow">
-                      Full-service catering with guided setup
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Order A La Carte */}
-              <div className="animate-scale-in w-full sm:w-[calc(50%-0.75rem)] max-w-[400px]" style={{ animationDelay: '0.1s' }}>
-                <div
-                  onClick={handleQuickOrder}
-                  className="relative overflow-hidden rounded-xl cursor-pointer transition-all duration-300 shadow-md h-[180px] sm:h-[240px] md:h-[320px] hover:scale-105"
-                >
-                  <ProductImagePlaceholder title="Order A La Carte" className="text-lg sm:text-xl md:text-2xl" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                  <div className="absolute inset-0 flex flex-col items-center justify-end p-6 text-center">
-                    <h3 className="font-oswald text-2xl sm:text-3xl font-bold text-white mb-2 tracking-wide drop-shadow-lg">
-                      ORDER A LA CARTE
-                    </h3>
-                    <p className="text-white/90 text-sm sm:text-base drop-shadow">
-                      Skip the wizard — go straight to the menu
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Step 1: Event Type Selection (shown after clicking "Plan Your Event") */}
-      {inWizard && (
-        <section className="bg-[#FAFAFA] pb-12 sm:pb-16">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-10">
-              <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#383838] tracking-wider mb-4">
+              <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#1A1A1A] tracking-wider mb-4">
                 LET US HELP YOU ORDER
               </h2>
               <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
@@ -238,13 +189,21 @@ export default function HomePage() {
                         transition-all duration-300 shadow-md
                         h-[180px] sm:h-[240px] md:h-[320px]
                         ${isSelected
-                          ? 'ring-4 ring-[#E8621A] scale-[1.02]'
+                          ? 'ring-4 ring-[#E8621A]'
                           : 'hover:scale-105'
                         }
-                        ${isUnselected ? 'opacity-50 grayscale' : ''}
                       `}
                     >
-                      <ProductImagePlaceholder title={eventType.name} className="text-lg sm:text-xl md:text-2xl" />
+                      {eventImages[eventType.id] ? (
+                        <Image
+                          src={eventImages[eventType.id]}
+                          alt={eventType.name}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <ProductImagePlaceholder title={eventType.name} className="text-lg sm:text-xl md:text-2xl" />
+                      )}
                       <div className={`absolute inset-0 ${isSelected ? 'bg-gradient-to-t from-black/70 via-black/30 to-transparent' : 'bg-gradient-to-t from-black/80 via-black/40 to-transparent'}`} />
                       <div className="absolute inset-0 flex flex-col items-center justify-end p-6 text-center">
                         <h3 className="font-oswald text-2xl sm:text-3xl font-bold text-white mb-2 tracking-wide drop-shadow-lg">
@@ -305,9 +264,17 @@ export default function HomePage() {
       )}
 
       {/* Browse Full Menu Link */}
-      <section className="bg-[#383838] py-12 sm:py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h3 className="font-oswald text-2xl sm:text-3xl font-bold text-[#FAFAFA] mb-3 tracking-wide">
+      <section className="relative bg-[#1A1A1A] overflow-hidden">
+        <div className="absolute inset-0">
+          <Image
+            src="/images/brisket-board.png"
+            alt="Smoked brisket and ribs on cutting board"
+            fill
+            className="object-cover opacity-30"
+          />
+        </div>
+        <div className="relative container mx-auto px-4 py-16 sm:py-24 text-center">
+          <h3 className="font-oswald text-2xl sm:text-3xl font-bold text-[#F5EDE0] mb-3 tracking-wide">
             LOOKING FOR SOMETHING ELSE?
           </h3>
           <p className="text-white/70 mb-6 max-w-xl mx-auto">

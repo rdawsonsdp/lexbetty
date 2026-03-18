@@ -5,6 +5,7 @@ import {
   TraySizeOption,
   PanSizeOption,
 } from './types';
+import { isMeatProduct } from './portion-engine';
 
 /**
  * Format currency for display
@@ -70,13 +71,25 @@ export function getBestPanSize(
  */
 export function calculateProductOrder(
   product: CateringProduct,
-  headcount: number
+  headcount: number,
+  sizeOverride?: 'small' | 'medium' | 'large' | 'half' | 'full'
 ): CalculatedOrderItem {
   const pricing = product.pricing;
 
   switch (pricing.type) {
     case 'tray': {
-      const { size, quantity } = getBestTraySize(pricing.sizes, headcount);
+      let size, quantity;
+      if (sizeOverride) {
+        const override = pricing.sizes.find(s => s.size === sizeOverride);
+        if (override) {
+          size = override;
+          quantity = Math.max(1, Math.ceil(headcount / override.servesMax));
+        } else {
+          ({ size, quantity } = getBestTraySize(pricing.sizes, headcount));
+        }
+      } else {
+        ({ size, quantity } = getBestTraySize(pricing.sizes, headcount));
+      }
       const totalServesMin = size.servesMin * quantity;
       const totalServesMax = size.servesMax * quantity;
       const sizeLabel = size.size.charAt(0).toUpperCase() + size.size.slice(1);
@@ -97,7 +110,18 @@ export function calculateProductOrder(
     }
 
     case 'pan': {
-      const { size, quantity } = getBestPanSize(pricing.sizes, headcount);
+      let size, quantity;
+      if (sizeOverride) {
+        const override = pricing.sizes.find(s => s.size === sizeOverride);
+        if (override) {
+          size = override;
+          quantity = Math.max(1, Math.ceil(headcount / override.servesMax));
+        } else {
+          ({ size, quantity } = getBestPanSize(pricing.sizes, headcount));
+        }
+      } else {
+        ({ size, quantity } = getBestPanSize(pricing.sizes, headcount));
+      }
       const totalServesMin = size.servesMin * quantity;
       const totalServesMax = size.servesMax * quantity;
       const sizeLabel = size.size === 'half' ? 'Half Pan' : 'Full Pan';
@@ -210,13 +234,73 @@ export function calculateProductOrder(
 
 /**
  * Calculate all order items with proper sizing based on headcount
+ *
+ * For dropdown-quantity items (per-each, per-container, per-dozen),
+ * item.quantity IS the user's chosen quantity — not a multiplier.
  */
 export function calculateAllOrderItems(
   items: SelectedCateringItem[],
   headcount: number
 ): CalculatedOrderItem[] {
   return items.map(item => {
-    const calc = calculateProductOrder(item.product, headcount);
+    const calc = calculateProductOrder(item.product, headcount, item.selectedSize);
+    const pt = item.product.pricing.type;
+
+    // --- per-each: item.quantity = user's chosen count (lbs for meats, units otherwise)
+    if (pt === 'per-each') {
+      const meat = isMeatProduct(item.product.id);
+      const serves = meat
+        ? Math.floor((item.quantity * 16) / 3)
+        : item.quantity;
+
+      return {
+        ...calc,
+        itemQuantity: item.quantity,
+        quantity: item.quantity,
+        totalPrice: calc.unitPrice * item.quantity,
+        displayText: meat
+          ? `${item.quantity} lbs`
+          : `${item.quantity} @ ${formatCurrency(calc.unitPrice)} each`,
+        servesMin: serves,
+        servesMax: serves,
+      };
+    }
+
+    // --- per-container: item.quantity = container count
+    if (pt === 'per-container' && item.product.pricing.type === 'per-container') {
+      const spc = item.product.pricing.servesPerContainer;
+      const totalServes = item.quantity * spc;
+      return {
+        ...calc,
+        itemQuantity: item.quantity,
+        quantity: item.quantity,
+        totalPrice: calc.unitPrice * item.quantity,
+        displayText: item.quantity === 1
+          ? `1 container (serves ${spc})`
+          : `${item.quantity} containers (serves ${totalServes})`,
+        servesMin: totalServes,
+        servesMax: totalServes,
+      };
+    }
+
+    // --- per-dozen: item.quantity = dozen count
+    if (pt === 'per-dozen' && item.product.pricing.type === 'per-dozen') {
+      const spd = item.product.pricing.servesPerDozen;
+      const totalServes = item.quantity * spd;
+      return {
+        ...calc,
+        itemQuantity: item.quantity,
+        quantity: item.quantity,
+        totalPrice: calc.unitPrice * item.quantity,
+        displayText: item.quantity === 1
+          ? `1 dozen (serves ${spd})`
+          : `${item.quantity} dozen (serves ${totalServes})`,
+        servesMin: totalServes,
+        servesMax: totalServes,
+      };
+    }
+
+    // --- tray / pan / per-person / flat: item.quantity is a multiplier
     return {
       ...calc,
       itemQuantity: item.quantity,

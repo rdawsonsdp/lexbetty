@@ -54,7 +54,7 @@ export default function PackageSelectionStep() {
     <div ref={sectionRef} className="bg-white py-12 sm:py-16 scroll-mt-4">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
-          <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#383838] tracking-wider mb-4">
+          <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#1A1A1A] tracking-wider mb-4">
             CHOOSE A PACKAGE
           </h2>
           <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
@@ -105,20 +105,20 @@ export default function PackageSelectionStep() {
                     </div>
 
                     {/* Title & Price */}
-                    <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#383838] mb-1 tracking-wide">
+                    <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#1A1A1A] mb-1 tracking-wide">
                       {pkg.title}
                     </h3>
                     <p className="text-sm text-gray-600 mb-4">{pkg.description}</p>
 
                     {/* Price */}
-                    <div className="mb-4 p-3 bg-[#FAFAFA] rounded-lg">
+                    <div className="mb-4 p-3 bg-[#F5EDE0] rounded-lg">
                       <div className="flex items-baseline gap-1">
-                        <span className="font-oswald text-3xl font-bold text-[#383838]">
+                        <span className="font-oswald text-3xl font-bold text-[#1A1A1A]">
                           {formatCurrency(pkg.pricePerPerson)}
                         </span>
                         <span className="text-sm text-gray-500">/person</span>
                       </div>
-                      <p className="text-sm text-[#383838] font-semibold mt-1">
+                      <p className="text-sm text-[#1A1A1A] font-semibold mt-1">
                         {state.headcount} guests = {formatCurrency(pkg.pricePerPerson * state.headcount)} total
                       </p>
                     </div>
@@ -164,9 +164,9 @@ export default function PackageSelectionStep() {
         {/* Checkout Button */}
         {state.selectedPackage && (
           <div className="mt-10 text-center animate-scale-in">
-            <div className="inline-block bg-[#FAFAFA] rounded-xl p-6 border-2 border-[#E8621A]">
+            <div className="inline-block bg-[#F5EDE0] rounded-xl p-6 border-2 border-[#E8621A]">
               <p className="text-sm text-gray-600 mb-2">Selected: <strong>{state.selectedPackage.title}</strong></p>
-              <p className="font-oswald text-2xl font-bold text-[#383838] mb-4">
+              <p className="font-oswald text-2xl font-bold text-[#1A1A1A] mb-4">
                 {formatCurrency(state.selectedPackage.pricePerPerson * state.headcount)} for {state.headcount} guests
               </p>
               <Button onClick={handleCheckout} className="px-10">
@@ -180,7 +180,7 @@ export default function PackageSelectionStep() {
         <div className="mt-10 text-center">
           <button
             onClick={handleBack}
-            className="font-oswald text-gray-500 hover:text-[#383838] transition-colors tracking-wide"
+            className="font-oswald text-gray-500 hover:text-[#1A1A1A] transition-colors tracking-wide"
           >
             ← BACK TO ORDER TYPE
           </button>

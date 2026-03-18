@@ -44,7 +44,7 @@ export async function PUT(
     }
 
     // Coerce nulls to undefined for CateringProduct compatibility
-    const { tags, featured, variantId, slug, inventory, is_active, sort_position, ...rest } = parsed.data;
+    const { tags, featured, variantId, slug, inventory, minOrderQuantity, specialOrder, is_active, sort_position, ...rest } = parsed.data;
     await upsertProduct({
       ...rest,
       tags: tags ?? undefined,
@@ -52,6 +52,8 @@ export async function PUT(
       variantId: variantId ?? undefined,
       slug: slug ?? undefined,
       inventory: inventory ?? undefined,
+      minOrderQuantity: minOrderQuantity ?? undefined,
+      specialOrder: specialOrder ?? undefined,
       is_active: is_active ?? undefined,
       sort_position: sort_position ?? undefined,
     });

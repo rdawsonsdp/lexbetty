@@ -113,14 +113,14 @@ export default function OrderConfirmationPage() {
 
   if (!orderDetails) {
     return (
-      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#F5EDE0] flex items-center justify-center p-4">
         <Card className="max-w-md w-full text-center">
           <div className="text-5xl mb-4">📋</div>
-          <h2 className="font-oswald text-2xl font-bold text-[#383838] mb-2">No Order Found</h2>
+          <h2 className="font-oswald text-2xl font-bold text-[#1A1A1A] mb-2">No Order Found</h2>
           <p className="text-gray-600 mb-6">It looks like you haven&apos;t placed an order yet.</p>
           <Link
             href="/#catering"
-            className="inline-block bg-[#383838] text-white font-oswald font-bold px-6 py-3 rounded-lg hover:bg-[#E8621A] hover:text-[#383838] transition-colors"
+            className="inline-block bg-[#1A1A1A] text-white font-oswald font-bold px-6 py-3 rounded-lg hover:bg-[#E8621A] hover:text-[#1A1A1A] transition-colors"
           >
             Start Ordering
           </Link>
@@ -315,16 +315,16 @@ export default function OrderConfirmationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-[#F5EDE0]">
       {/* Success Hero */}
-      <div className="bg-[#383838] py-12 sm:py-16 text-center">
+      <div className="bg-[#1A1A1A] py-12 sm:py-16 text-center">
         <div className="animate-scale-in">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-500 text-white mb-6">
             <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#FAFAFA] tracking-wider mb-3">
+          <h1 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#F5EDE0] tracking-wider mb-3">
             {isQuote ? 'YOUR QUOTE IS READY!' : 'YOU DID IT — THE FOOD IS PLANNED!'}
           </h1>
           <p className="text-[#E8621A] text-lg sm:text-xl font-oswald font-bold">
@@ -337,18 +337,18 @@ export default function OrderConfirmationPage() {
       {orderDetails.paymentLink ? (
         <div className="bg-[#E8621A] py-4">
           <div className="container mx-auto px-4 text-center">
-            <p className="font-oswald font-bold text-[#383838] text-sm sm:text-base tracking-wide mb-3">
+            <p className="font-oswald font-bold text-[#1A1A1A] text-sm sm:text-base tracking-wide mb-3">
               YOUR INVOICE IS READY — PAY SECURELY ONLINE
             </p>
             <a
               href={orderDetails.paymentLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-[#383838] text-white font-oswald font-bold px-8 py-3 rounded-lg hover:bg-[#4a4747] transition-colors text-lg"
+              className="inline-block bg-[#1A1A1A] text-white font-oswald font-bold px-8 py-3 rounded-lg hover:bg-[#4a4747] transition-colors text-lg"
             >
               Pay Now
             </a>
-            <p className="text-[#383838]/70 text-xs mt-2">
+            <p className="text-[#1A1A1A]/70 text-xs mt-2">
               A payment link has also been sent to {orderDetails.contact.email}
             </p>
           </div>
@@ -356,7 +356,7 @@ export default function OrderConfirmationPage() {
       ) : (
         <div className="bg-[#E8621A] py-3">
           <div className="container mx-auto px-4 text-center">
-            <p className="font-oswald font-bold text-[#383838] text-sm sm:text-base tracking-wide">
+            <p className="font-oswald font-bold text-[#1A1A1A] text-sm sm:text-base tracking-wide">
               {isQuote
                 ? "WE'LL REVIEW YOUR QUOTE AND GET BACK TO YOU WITHIN 1 BUSINESS DAY."
                 : "NOW YOU CAN FOCUS ON THE FUN PART — WE'VE GOT THE FOOD HANDLED."}
@@ -378,7 +378,7 @@ export default function OrderConfirmationPage() {
 
           {/* Order Summary Card */}
           <Card>
-            <h2 className="font-oswald text-xl font-bold text-[#383838] mb-4 flex items-center gap-2">
+            <h2 className="font-oswald text-xl font-bold text-[#1A1A1A] mb-4 flex items-center gap-2">
               <svg className="w-5 h-5 text-[#E8621A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
@@ -388,10 +388,10 @@ export default function OrderConfirmationPage() {
               {orderDetails.items.map((item, i) => (
                 <div key={i} className="flex justify-between text-sm">
                   <div>
-                    <p className="font-medium text-[#383838]">{item.title}</p>
+                    <p className="font-medium text-[#1A1A1A]">{item.title}</p>
                     <p className="text-gray-500 text-xs">{item.displayText}</p>
                   </div>
-                  <p className="font-semibold text-[#383838]">{formatCurrency(item.totalPrice)}</p>
+                  <p className="font-semibold text-[#1A1A1A]">{formatCurrency(item.totalPrice)}</p>
                 </div>
               ))}
             </div>
@@ -405,7 +405,7 @@ export default function OrderConfirmationPage() {
                 <span className="font-medium">{formatCurrency(orderDetails.deliveryFee)}</span>
               </div>
               <div className="flex justify-between font-oswald font-bold text-lg pt-2 border-t border-gray-200">
-                <span className="text-[#383838]">Total</span>
+                <span className="text-[#1A1A1A]">Total</span>
                 <span className="text-[#E8621A]">{formatCurrency(orderDetails.orderTotal)}</span>
               </div>
               <div className="flex justify-between text-sm text-gray-500">
@@ -417,7 +417,7 @@ export default function OrderConfirmationPage() {
 
           {/* Delivery Details Card */}
           <Card>
-            <h2 className="font-oswald text-xl font-bold text-[#383838] mb-4 flex items-center gap-2">
+            <h2 className="font-oswald text-xl font-bold text-[#1A1A1A] mb-4 flex items-center gap-2">
               <svg className="w-5 h-5 text-[#E8621A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -427,7 +427,7 @@ export default function OrderConfirmationPage() {
             <div className="grid sm:grid-cols-2 gap-6">
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Contact</p>
-                <p className="text-[#383838] font-medium">{orderDetails.contact.firstName} {orderDetails.contact.lastName}</p>
+                <p className="text-[#1A1A1A] font-medium">{orderDetails.contact.firstName} {orderDetails.contact.lastName}</p>
                 <p className="text-sm text-gray-600">{orderDetails.contact.email}</p>
                 <p className="text-sm text-gray-600">{orderDetails.contact.phone}</p>
                 {orderDetails.contact.company && (
@@ -436,13 +436,13 @@ export default function OrderConfirmationPage() {
               </div>
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Delivery Address</p>
-                <p className="text-[#383838]">{orderDetails.delivery.address}</p>
-                {orderDetails.delivery.address2 && <p className="text-[#383838]">{orderDetails.delivery.address2}</p>}
-                <p className="text-[#383838]">{orderDetails.delivery.city}, {orderDetails.delivery.state} {orderDetails.delivery.zip}</p>
+                <p className="text-[#1A1A1A]">{orderDetails.delivery.address}</p>
+                {orderDetails.delivery.address2 && <p className="text-[#1A1A1A]">{orderDetails.delivery.address2}</p>}
+                <p className="text-[#1A1A1A]">{orderDetails.delivery.city}, {orderDetails.delivery.state} {orderDetails.delivery.zip}</p>
               </div>
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Date & Time</p>
-                <p className="text-[#383838] font-medium">
+                <p className="text-[#1A1A1A] font-medium">
                   {orderDetails.event.date && new Date(orderDetails.event.date + 'T00:00:00').toLocaleDateString('en-US', {
                     weekday: 'long',
                     year: 'numeric',
@@ -454,8 +454,8 @@ export default function OrderConfirmationPage() {
               </div>
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Details</p>
-                <p className="text-sm text-[#383838]">{orderDetails.headcount} guests</p>
-                <p className="text-sm text-[#383838]">{orderDetails.event.setupRequired ? 'Full setup included' : 'Drop-off only'}</p>
+                <p className="text-sm text-[#1A1A1A]">{orderDetails.headcount} guests</p>
+                <p className="text-sm text-[#1A1A1A]">{orderDetails.event.setupRequired ? 'Full setup included' : 'Drop-off only'}</p>
                 {orderDetails.event.specialInstructions && (
                   <p className="text-sm text-gray-500 italic mt-1">&ldquo;{orderDetails.event.specialInstructions}&rdquo;</p>
                 )}
@@ -465,7 +465,7 @@ export default function OrderConfirmationPage() {
 
           {/* What Happens Next Timeline */}
           <Card>
-            <h2 className="font-oswald text-xl font-bold text-[#383838] mb-6 flex items-center gap-2">
+            <h2 className="font-oswald text-xl font-bold text-[#1A1A1A] mb-6 flex items-center gap-2">
               <svg className="w-5 h-5 text-[#E8621A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -490,7 +490,7 @@ export default function OrderConfirmationPage() {
                   {/* Content */}
                   <div className="pb-6">
                     <p className={`font-oswald font-bold text-sm ${
-                      step.status === 'complete' ? 'text-[#383838]' : 'text-gray-500'
+                      step.status === 'complete' ? 'text-[#1A1A1A]' : 'text-gray-500'
                     }`}>
                       {step.title}
                     </p>
@@ -502,8 +502,8 @@ export default function OrderConfirmationPage() {
           </Card>
 
           {/* Support Section */}
-          <Card className="bg-[#383838] text-white border-none">
-            <h2 className="font-oswald text-xl font-bold text-[#FAFAFA] mb-3">
+          <Card className="bg-[#1A1A1A] text-white border-none">
+            <h2 className="font-oswald text-xl font-bold text-[#F5EDE0] mb-3">
               Need to Make Changes?
             </h2>
             <p className="text-white/70 text-sm mb-4">

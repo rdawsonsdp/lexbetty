@@ -6,8 +6,10 @@ import { getEventTypeName } from '@/lib/event-types';
 import { formatCurrency } from '@/lib/pricing';
 import { getBudgetStatus } from '@/lib/budgets';
 import { useActiveProducts } from '@/lib/hooks/useActiveProducts';
+import { MEAT_TAG, isMeatTagged } from '@/lib/meat-planner';
 import CateringProductCard from './CateringProductCard';
 import CateringCart from './CateringCart';
+import MeatPlannerPopup from './MeatPlannerPopup';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 
@@ -27,6 +29,9 @@ export default function ProductSelectionStep({
   const { state, dispatch, perPersonCost, totalCost } = useCatering();
   const [searchTerm, setSearchTerm] = useState('');
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [showMeatPlanner, setShowMeatPlanner] = useState(false);
+  const [meatsPlanned, setMeatsPlanned] = useState(false);
+  const hasAutoOpenedRef = useRef(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const { getActiveByEventType } = useActiveProducts();
 
@@ -70,9 +75,52 @@ export default function ProductSelectionStep({
   }, [isCartOpen]);
 
   // Get products filtered by event type, excluding equipment
-  const products = getActiveByEventType(state.eventType).filter(
+  const allProducts = getActiveByEventType(state.eventType).filter(
     p => !p.tags?.includes('equipment') && !p.tags?.includes('cutlery') && !p.tags?.includes('service')
   );
+
+  // Check if this event type has meat products
+  const hasMeatProducts = allProducts.some(p => p.tags?.includes(MEAT_TAG));
+
+  // Auto-open meat planner on first mount (if meats available)
+  useEffect(() => {
+    if (hasAutoOpenedRef.current || !hasMeatProducts) return;
+    hasAutoOpenedRef.current = true;
+    const hasMeatsInCart = state.selectedItems.some(i => i.product.tags?.includes(MEAT_TAG));
+    if (hasMeatsInCart) {
+      setMeatsPlanned(true);
+    } else {
+      setShowMeatPlanner(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasMeatProducts]);
+
+  // Handle planner close
+  const handlePlannerClose = (meatsAdded: boolean) => {
+    setShowMeatPlanner(false);
+    if (meatsAdded) setMeatsPlanned(true);
+  };
+
+  // When meats are managed via planner, filter them out of the grid
+  const products = meatsPlanned
+    ? allProducts.filter(p => !p.tags?.includes(MEAT_TAG))
+    : allProducts;
+
+  // Meat summary for the bar
+  const meatItems = meatsPlanned
+    ? state.selectedItems.filter(i => i.product.tags?.includes(MEAT_TAG))
+    : [];
+  const meatCount = meatItems.length;
+  const meatTotal = meatItems.reduce((sum, item) => {
+    const p = item.product.pricing;
+    if (p.type === 'per-each') return sum + p.priceEach * item.quantity;
+    if (p.type === 'per-container') return sum + p.pricePerContainer * item.quantity;
+    if (p.type === 'pan') {
+      const sizeOpt = p.sizes.find(s => s.size === item.selectedSize) || p.sizes[0];
+      return sum + sizeOpt.price * item.quantity;
+    }
+    return sum;
+  }, 0);
 
   // Filter products based on search term and dietary filters
   const filteredProducts = products.filter((product) => {
@@ -125,7 +173,7 @@ export default function ProductSelectionStep({
               </Badge>
             )}
           </div>
-          <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#383838] tracking-wider mb-4">
+          <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#1A1A1A] tracking-wider mb-4">
             BUILD YOUR {state.eventType?.toUpperCase() || 'EVENT'}
           </h2>
           <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto mb-6">
@@ -139,7 +187,7 @@ export default function ProductSelectionStep({
             <div className="flex items-center gap-4">
               <div>
                 <span className="text-xs text-gray-500 uppercase tracking-wide block">Per Person</span>
-                <span className="font-oswald text-2xl sm:text-3xl font-bold text-[#383838]">
+                <span className="font-oswald text-2xl sm:text-3xl font-bold text-[#1A1A1A]">
                   {formatCurrency(orderTotal / state.headcount)}
                 </span>
               </div>
@@ -164,6 +212,45 @@ export default function ProductSelectionStep({
           </div>
         )}
 
+        {/* Meat Planner Summary / Open Button */}
+        {hasMeatProducts && (
+          meatsPlanned && meatCount > 0 ? (
+            <div className="mb-6 p-4 bg-[#E8621A]/10 border-2 border-[#E8621A]/30 rounded-xl flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-[#E8621A] rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-sm font-bold">{meatCount}</span>
+                </div>
+                <div>
+                  <span className="font-oswald font-bold text-[#1A1A1A]">
+                    {meatCount} meat{meatCount !== 1 ? 's' : ''} selected
+                  </span>
+                  <span className="text-sm text-gray-500 ml-2">
+                    {formatCurrency(meatTotal)}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowMeatPlanner(true)}
+                className="bg-[#1A1A1A] text-white px-4 py-2 rounded-lg font-oswald text-sm tracking-wide hover:bg-[#4a4646] transition-colors"
+              >
+                Edit Meats
+              </button>
+            </div>
+          ) : !meatsPlanned ? (
+            <div className="mb-4 text-center">
+              <button
+                onClick={() => setShowMeatPlanner(true)}
+                className="inline-flex items-center gap-2 text-sm text-[#E8621A] hover:underline font-medium"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Open Meat Planner
+              </button>
+            </div>
+          ) : null
+        )}
+
         {/* Search */}
         <div className="max-w-md mx-auto mb-4">
           <input
@@ -178,8 +265,7 @@ export default function ProductSelectionStep({
         {/* Dietary Filter Bar (injected from parent) */}
         {filterBar && <div className="mb-6">{filterBar}</div>}
 
-        {/* Recommended Items (injected from parent) */}
-        {recommendedSection && <div className="mb-8">{recommendedSection}</div>}
+        {/* Recommended section removed — featured items shown inline below */}
 
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -190,10 +276,10 @@ export default function ProductSelectionStep({
               <div className="mb-10">
                 {/* Subtle header */}
                 <div className="mb-5">
-                  <p className="font-oswald text-xs tracking-[0.2em] text-[#B0B0B0] uppercase mb-1">
+                  <p className="font-oswald text-xs tracking-[0.2em] text-[#9B9189] uppercase mb-1">
                     Chef&apos;s Recommendation
                   </p>
-                  <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#383838] tracking-wide">
+                  <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#1A1A1A] tracking-wide">
                     The BBQ Spread
                   </h3>
                 </div>
@@ -253,7 +339,7 @@ export default function ProductSelectionStep({
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 p-4 bg-gradient-to-t from-white via-white to-transparent">
           <button
             onClick={() => setIsCartOpen(true)}
-            className="w-full bg-[#383838] text-white rounded-xl py-4 px-6 flex items-center justify-between shadow-lg hover:bg-[#4a4646] transition-colors"
+            className="w-full bg-[#1A1A1A] text-white rounded-xl py-4 px-6 flex items-center justify-between shadow-lg hover:bg-[#4a4646] transition-colors"
           >
             <div className="flex items-center gap-3">
               <div className="relative">
@@ -261,7 +347,7 @@ export default function ProductSelectionStep({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
                 {state.selectedItems.length > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-[#E8621A] text-[#383838] text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                  <span className="absolute -top-2 -right-2 bg-[#E8621A] text-[#1A1A1A] text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
                     {state.selectedItems.length}
                   </span>
                 )}
@@ -287,9 +373,9 @@ export default function ProductSelectionStep({
               onClick={() => setIsCartOpen(false)}
             />
             {/* Drawer */}
-            <div className="lg:hidden fixed inset-y-0 right-0 w-full max-w-md bg-[#FAFAFA] z-50 shadow-2xl animate-slide-in-right overflow-y-auto">
+            <div className="lg:hidden fixed inset-y-0 right-0 w-full max-w-md bg-[#F5EDE0] z-50 shadow-2xl animate-slide-in-right overflow-y-auto">
               {/* Drawer Header */}
-              <div className="sticky top-0 bg-[#383838] text-white px-4 py-4 flex items-center justify-between z-10">
+              <div className="sticky top-0 bg-[#1A1A1A] text-white px-4 py-4 flex items-center justify-between z-10">
                 <h2 className="font-oswald text-xl font-bold tracking-wide">Your Order</h2>
                 <button
                   onClick={() => setIsCartOpen(false)}
@@ -313,12 +399,21 @@ export default function ProductSelectionStep({
         <div className="mt-10 text-center">
           <button
             onClick={handleBack}
-            className="font-oswald text-gray-500 hover:text-[#383838] transition-colors tracking-wide"
+            className="font-oswald text-gray-500 hover:text-[#1A1A1A] transition-colors tracking-wide"
           >
             ← BACK TO ORDER TYPE
           </button>
         </div>
       </div>
+
+      {/* Meat Planner Popup */}
+      {hasMeatProducts && (
+        <MeatPlannerPopup
+          isOpen={showMeatPlanner}
+          onClose={handlePlannerClose}
+          headcount={state.headcount}
+        />
+      )}
     </div>
   );
 }

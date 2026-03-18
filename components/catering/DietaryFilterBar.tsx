@@ -27,8 +27,8 @@ export default function DietaryFilterBar({ activeTags, onToggleTag }: DietaryFil
             onClick={() => onToggleTag(filter.id)}
             className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
               isActive
-                ? 'bg-[#383838] text-white'
-                : 'bg-white text-gray-600 border border-gray-200 hover:border-[#E8621A] hover:text-[#383838]'
+                ? 'bg-[#1A1A1A] text-white'
+                : 'bg-white text-gray-600 border border-gray-200 hover:border-[#E8621A] hover:text-[#1A1A1A]'
             }`}
           >
             {filter.label}

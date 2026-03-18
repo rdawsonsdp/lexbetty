@@ -98,7 +98,7 @@ export default function DashboardKPIs({ products }: DashboardKPIsProps) {
             className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow"
           >
             <div className="flex items-center gap-2 mb-2">
-              <div className="text-[#B0B0B0]">{kpi.icon}</div>
+              <div className="text-[#9B9189]">{kpi.icon}</div>
               <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                 {kpi.label}
               </span>
@@ -109,7 +109,7 @@ export default function DashboardKPIs({ products }: DashboardKPIsProps) {
                   ? 'text-green-600'
                   : kpi.highlight === 'red'
                   ? 'text-red-600'
-                  : 'text-[#383838]'
+                  : 'text-[#1A1A1A]'
               }`}
             >
               {kpi.value}

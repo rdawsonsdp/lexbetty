@@ -92,6 +92,8 @@ export interface CateringProduct {
   variantId?: string;
   slug?: string;
   inventory?: number;
+  minOrderQuantity?: number;
+  specialOrder?: boolean;
 }
 
 // Calculated order item (what the customer actually gets)
@@ -112,6 +114,7 @@ export interface CalculatedOrderItem {
 export interface SelectedCateringItem {
   product: CateringProduct;
   quantity: number;
+  selectedSize?: 'small' | 'medium' | 'large' | 'half' | 'full';
 }
 
 // Event info collected during wizard
@@ -189,12 +192,18 @@ export type CateringAction =
   | { type: 'ADD_ITEM'; payload: CateringProduct }
   | { type: 'REMOVE_ITEM'; payload: string }
   | { type: 'UPDATE_ITEM_QUANTITY'; payload: { productId: string; quantity: number } }
+  | { type: 'SET_ITEM_SIZE'; payload: { productId: string; size: 'small' | 'medium' | 'large' | 'half' | 'full' } }
   | { type: 'CLEAR_ITEMS' }
   | { type: 'SELECT_PACKAGE'; payload: CateringPackage }
   | { type: 'CLEAR_PACKAGE' }
   | { type: 'SET_STEP'; payload: 1 | 2 | 3 | 4 | 5 | 6 }
   | { type: 'GO_BACK' }
   | { type: 'SET_BUYER_INFO'; payload: BuyerInfo }
+  | { type: 'LOAD_CONCIERGE_ORDER'; payload: {
+      items: SelectedCateringItem[];
+      headcount: number;
+      eventType: EventType;
+    }}
   | { type: 'HYDRATE'; payload: CateringState }
   | { type: 'RESET' };
 

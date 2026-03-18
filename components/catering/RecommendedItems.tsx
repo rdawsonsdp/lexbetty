@@ -35,7 +35,7 @@ export default function RecommendedItems() {
     <div className="border-2 border-[#E8621A]/50 rounded-xl p-4 sm:p-6 bg-[#E8621A]/5">
       <div className="flex items-center gap-2 mb-4">
         <span className="text-[#E8621A] text-lg">&#9733;</span>
-        <h3 className="font-oswald text-lg font-bold text-[#383838] tracking-wide">
+        <h3 className="font-oswald text-lg font-bold text-[#1A1A1A] tracking-wide">
           RECOMMENDED FOR YOUR {getEventTypeName(state.eventType).toUpperCase()}
         </h3>
         <span className="text-xs text-gray-500">
@@ -54,16 +54,17 @@ export default function RecommendedItems() {
               <div className="relative aspect-square">
                 <ProductImagePlaceholder title={product.title} />
               </div>
-              <div className="pt-3 pb-2">
-                <h4 className="font-oswald font-semibold text-[#383838] text-sm sm:text-base line-clamp-1">
+              <div className="pt-3 pb-2 px-2">
+                <h4 className="font-oswald font-semibold text-[#1A1A1A] text-sm sm:text-base line-clamp-1">
                   {product.title}
                 </h4>
-                <p className="text-xs sm:text-sm text-gray-500 mb-2">
+                <p className="text-xs text-gray-500 mb-1 line-clamp-2">{product.description}</p>
+                <p className="text-xs sm:text-sm text-[#E8621A] font-semibold mb-2">
                   {formatCurrency(calc.totalPrice / state.headcount)}/person
                 </p>
                 <button
                   onClick={() => handleAdd(product)}
-                  className="w-full text-xs sm:text-sm font-semibold bg-[#383838] text-white py-2 rounded-lg hover:bg-[#E8621A] transition-colors"
+                  className="w-full text-xs sm:text-sm font-semibold bg-[#1A1A1A] text-white py-2 rounded-lg hover:bg-[#E8621A] transition-colors"
                 >
                   Add to Order
                 </button>

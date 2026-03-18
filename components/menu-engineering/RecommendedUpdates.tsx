@@ -102,7 +102,7 @@ export default function RecommendedUpdates({ recommendations }: RecommendedUpdat
 
   return (
     <section className="mb-8">
-      <h2 className="text-xl sm:text-2xl font-oswald font-semibold text-[#383838] mb-4">
+      <h2 className="text-xl sm:text-2xl font-oswald font-semibold text-[#1A1A1A] mb-4">
         Recommended Updates
       </h2>
 
@@ -111,8 +111,8 @@ export default function RecommendedUpdates({ recommendations }: RecommendedUpdat
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
           <div>
             <span className="text-sm text-gray-600">
-              <span className="font-bold text-[#383838]">{reviewed}</span> of{' '}
-              <span className="font-bold text-[#383838]">{total}</span> recommendations reviewed
+              <span className="font-bold text-[#1A1A1A]">{reviewed}</span> of{' '}
+              <span className="font-bold text-[#1A1A1A]">{total}</span> recommendations reviewed
             </span>
           </div>
           <div className="flex items-center gap-4 text-xs">
@@ -183,7 +183,7 @@ export default function RecommendedUpdates({ recommendations }: RecommendedUpdat
 
         <button
           onClick={handleAcceptAllHighPriority}
-          className="px-4 py-2 bg-[#383838] text-white rounded-lg text-sm font-semibold hover:bg-[#4a4747] transition-colors flex items-center gap-2"
+          className="px-4 py-2 bg-[#1A1A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#4a4747] transition-colors flex items-center gap-2"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -217,7 +217,7 @@ export default function RecommendedUpdates({ recommendations }: RecommendedUpdat
       {/* Implement Changes Panel */}
       {actionableRecs.length > 0 && (
         <div className="mt-6 bg-white rounded-xl border-2 border-[#E8621A] shadow-sm p-4 sm:p-6">
-          <h3 className="font-oswald text-lg font-semibold text-[#383838] mb-3 flex items-center gap-2">
+          <h3 className="font-oswald text-lg font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2">
             <svg className="w-5 h-5 text-[#E8621A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
@@ -302,7 +302,7 @@ export default function RecommendedUpdates({ recommendations }: RecommendedUpdat
           ) : (
             <button
               onClick={handleApplyToMenu}
-              className="w-full sm:w-auto px-6 py-3 bg-[#E8621A] text-[#383838] rounded-lg font-oswald font-bold text-base hover:bg-[#c5a855] transition-colors flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-6 py-3 bg-[#E8621A] text-[#1A1A1A] rounded-lg font-oswald font-bold text-base hover:bg-[#c5a855] transition-colors flex items-center justify-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />

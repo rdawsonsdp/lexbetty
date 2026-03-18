@@ -28,10 +28,10 @@ export default function Button({
       : 'bg-[#E8621A] text-white hover:opacity-90 active:opacity-80 focus:ring-[#E8621A] shadow-md hover:shadow-lg',
     secondary: disabled
       ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-      : 'bg-[#383838] text-white hover:bg-gray-700 active:bg-gray-800 focus:ring-[#383838] shadow-md hover:shadow-lg',
+      : 'bg-[#1A1A1A] text-white hover:bg-gray-700 active:bg-gray-800 focus:ring-[#1A1A1A] shadow-md hover:shadow-lg',
     outline: disabled
       ? 'border-2 border-gray-300 text-gray-500 cursor-not-allowed'
-      : 'border-2 border-[#383838] text-[#383838] hover:bg-[#383838] hover:text-white focus:ring-[#383838]',
+      : 'border-2 border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white focus:ring-[#1A1A1A]',
   };
 
   return (

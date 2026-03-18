@@ -40,10 +40,10 @@ export default function ValueProposition() {
               key={index}
               className="text-center px-4"
             >
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#E8621A]/20 text-[#383838] mb-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#E8621A]/20 text-[#1A1A1A] mb-4">
                 {prop.icon}
               </div>
-              <h3 className="font-oswald text-xl font-bold text-[#383838] mb-2 tracking-wide">
+              <h3 className="font-oswald text-xl font-bold text-[#1A1A1A] mb-2 tracking-wide">
                 {prop.title}
               </h3>
               <p className="text-sm text-gray-600 leading-relaxed">

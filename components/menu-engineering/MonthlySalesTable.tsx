@@ -9,14 +9,14 @@ export default function MonthlySalesTable() {
 
   return (
     <section className="mb-8">
-      <h2 className="text-xl sm:text-2xl font-oswald font-semibold text-[#383838] mb-4">
+      <h2 className="text-xl sm:text-2xl font-oswald font-semibold text-[#1A1A1A] mb-4">
         Monthly Sales Overview
       </h2>
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#383838] text-white">
+              <tr className="bg-[#1A1A1A] text-white">
                 <th className="px-4 py-3 text-left font-oswald font-medium tracking-wide">Month</th>
                 <th className="px-4 py-3 text-right font-oswald font-medium tracking-wide">Revenue</th>
                 <th className="px-4 py-3 text-right font-oswald font-medium tracking-wide">COGS</th>
@@ -40,7 +40,7 @@ export default function MonthlySalesTable() {
                       idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
                     } hover:bg-[#E8621A]/5 transition-colors`}
                   >
-                    <td className="px-4 py-3 font-semibold text-[#383838]">
+                    <td className="px-4 py-3 font-semibold text-[#1A1A1A]">
                       {formatMonth(row.month)}
                     </td>
                     <td className="px-4 py-3 text-right font-medium">
@@ -87,8 +87,8 @@ export default function MonthlySalesTable() {
               })}
             </tbody>
             <tfoot>
-              <tr className="bg-[#383838]/5 font-semibold">
-                <td className="px-4 py-3 text-[#383838]">Total</td>
+              <tr className="bg-[#1A1A1A]/5 font-semibold">
+                <td className="px-4 py-3 text-[#1A1A1A]">Total</td>
                 <td className="px-4 py-3 text-right">
                   {formatCurrency(summary.reduce((s, r) => s + r.totalRevenue, 0))}
                 </td>
@@ -99,7 +99,7 @@ export default function MonthlySalesTable() {
                   {formatCurrency(summary.reduce((s, r) => s + r.totalProfit, 0))}
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-[#383838] text-white">
+                  <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-[#1A1A1A] text-white">
                     {(
                       (summary.reduce((s, r) => s + r.totalProfit, 0) /
                         summary.reduce((s, r) => s + r.totalRevenue, 0)) *

@@ -10,11 +10,14 @@ import { getEmailSettings } from '@/lib/email/email-settings';
 interface OrderItem {
   productId: string;
   title: string;
+  description?: string;
   quantity: number;
   unitPrice: number;
   totalPrice: number;
   selectedSize: string;
   displayText: string;
+  servesMin?: number;
+  servesMax?: number;
 }
 
 interface CreateOrderRequest {
@@ -40,9 +43,20 @@ interface CreateOrderRequest {
     zip: string;
   };
   setupRequired?: boolean;
+  deliveryType?: string;
+  buffetSetupFee?: number;
   deliveryFee?: number;
+  salesTax?: number;
   orderTotal?: number;
   orderNumber?: string;
+  analytics?: {
+    session_id?: string;
+    items_added?: { product_id: string; title: string }[];
+    items_removed?: { product_id: string; title: string }[];
+    wizard_steps_visited?: number[];
+    time_to_order_seconds?: number;
+    device_type?: string;
+  };
 }
 
 export async function POST(request: NextRequest) {
@@ -114,6 +128,44 @@ export async function POST(request: NextRequest) {
       console.warn('DB order save failed (continuing):', dbErr);
     }
 
+    // Save training data for AI (non-blocking)
+    try {
+      const eventDate = body.buyerInfo.eventDate ? new Date(body.buyerInfo.eventDate) : null;
+      await supabaseAdmin.from('order_training_data').insert({
+        order_number: orderNumber,
+        session_id: body.analytics?.session_id || null,
+        event_type: body.eventType || null,
+        headcount: body.headcount,
+        order_type: orderType,
+        final_items: body.items.map(i => ({
+          product_id: i.productId,
+          title: i.title,
+          quantity: i.quantity,
+          unit_price: i.unitPrice,
+          total_price: i.totalPrice,
+          size: i.selectedSize,
+        })),
+        subtotal,
+        delivery_fee: deliveryFee,
+        sales_tax: body.salesTax || 0,
+        order_total: orderTotal,
+        per_person_cost: body.headcount > 0 ? orderTotal / body.headcount : 0,
+        items_added: body.analytics?.items_added || null,
+        items_removed: body.analytics?.items_removed || null,
+        wizard_steps_visited: body.analytics?.wizard_steps_visited || null,
+        time_to_order_seconds: body.analytics?.time_to_order_seconds || null,
+        delivery_type: body.deliveryType || null,
+        delivery_city: body.delivery?.city || null,
+        delivery_zip: body.delivery?.zip || null,
+        event_date: eventDate ? eventDate.toISOString().split('T')[0] : null,
+        event_day_of_week: eventDate ? eventDate.toLocaleDateString('en-US', { weekday: 'long' }) : null,
+        is_quote: orderType === 'quote',
+        device_type: body.analytics?.device_type || null,
+      });
+    } catch (trainingErr) {
+      console.warn('Training data save failed (non-blocking):', trainingErr);
+    }
+
     // Send confirmation email (non-blocking)
     try {
       const emailSettings = await getEmailSettings();
@@ -147,8 +199,11 @@ export async function POST(request: NextRequest) {
           },
           items: (body.items || []).map(i => ({
             title: i.title,
+            description: i.description,
             displayText: i.displayText,
             totalPrice: i.totalPrice,
+            servesMin: i.servesMin,
+            servesMax: i.servesMax,
           })),
           headcount: body.headcount,
           eventType: body.eventType,

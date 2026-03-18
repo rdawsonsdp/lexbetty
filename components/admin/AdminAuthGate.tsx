@@ -84,7 +84,7 @@ export default function AdminAuthGate({ children }: AdminAuthGateProps) {
           {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
           <button
             type="submit"
-            className="w-full mt-4 bg-[#383838] text-white py-3 rounded-lg font-semibold hover:bg-[#4a4747] transition-colors"
+            className="w-full mt-4 bg-[#1A1A1A] text-white py-3 rounded-lg font-semibold hover:bg-[#4a4747] transition-colors"
           >
             Sign In
           </button>

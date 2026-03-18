@@ -107,7 +107,7 @@ export default function RecommendationCard({
 
         {/* Title */}
         <h3
-          className={`font-oswald font-semibold text-[#383838] text-base sm:text-lg mb-1 ${
+          className={`font-oswald font-semibold text-[#1A1A1A] text-base sm:text-lg mb-1 ${
             status === 'rejected' ? 'line-through text-gray-400' : ''
           }`}
         >
@@ -212,7 +212,7 @@ export default function RecommendationCard({
         {status !== 'pending' && (
           <button
             onClick={onUndo}
-            className="text-xs text-gray-500 hover:text-[#383838] transition-colors flex items-center gap-1"
+            className="text-xs text-gray-500 hover:text-[#1A1A1A] transition-colors flex items-center gap-1"
           >
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />

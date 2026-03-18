@@ -18,7 +18,7 @@ function MenuEngineeringContent() {
   return (
     <div className="min-h-screen bg-[#f7f5f0]">
       {/* Hero Header */}
-      <section className="bg-[#383838] text-white py-8 sm:py-12">
+      <section className="bg-[#1A1A1A] text-white py-8 sm:py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-oswald font-bold mb-2">
@@ -53,7 +53,7 @@ function MenuEngineeringContent() {
       </section>
 
       {/* Quadrant Quick Stats */}
-      <section className="bg-[#383838] border-t border-white/10 pb-8">
+      <section className="bg-[#1A1A1A] border-t border-white/10 pb-8">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {quadrantSummary.map((qs) => (

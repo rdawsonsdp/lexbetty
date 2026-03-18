@@ -2,17 +2,17 @@
 
 :root {
   --background: #FFFFFF;
-  --foreground: #2D2D2D;
+  --foreground: #1A1A1A;
 
   /* Lexington Betty Smokehouse Brand Colors */
-  --primary-brown: #383838;
+  --primary-brown: #1A1A1A;
   --accent-gold: #E8621A;
-  --light-brown: #B0B0B0;
+  --light-brown: #9B9189;
   --cream: #EDE3D0;
-  --charcoal: #383838;
+  --charcoal: #1A1A1A;
   --smokehouse-orange: #E8621A;
-  --smoke-gray: #B0B0B0;
-  --warm-white: #FAFAFA;
+  --smoke-gray: #9B9189;
+  --warm-white: #F5EDE0;
   --success-green: #4CAF50;
   --error-red: #E53935;
 }
@@ -154,7 +154,7 @@
 
 .hover-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px -10px rgba(56, 56, 56, 0.15);
+  box-shadow: 0 8px 20px -10px rgba(26, 26, 26, 0.15);
 }
 
 .img-zoom {
@@ -186,7 +186,7 @@
 /* Clean card effect */
 .glass-card {
   background: #FFFFFF;
-  border: 1px solid rgba(56, 56, 56, 0.08);
+  border: 1px solid rgba(26, 26, 26, 0.08);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
@@ -353,12 +353,12 @@ a:active {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #B0B0B0;
+  background: #9B9189;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #383838;
+  background: #1A1A1A;
 }
 
 /* Step indicator styles */

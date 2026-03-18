@@ -16,6 +16,8 @@ interface ProductRow {
   variant_id: string | null;
   slug: string | null;
   inventory: number | null;
+  min_order_quantity: number | null;
+  special_order: boolean | null;
   is_active: boolean;
   sort_position: number;
   created_at: string;
@@ -35,6 +37,8 @@ function rowToProduct(row: ProductRow): CateringProduct {
     variantId: row.variant_id ?? undefined,
     slug: row.slug ?? undefined,
     inventory: row.inventory ?? undefined,
+    minOrderQuantity: row.min_order_quantity ?? undefined,
+    specialOrder: row.special_order ?? undefined,
   };
 }
 
@@ -51,6 +55,8 @@ export function productToRow(product: CateringProduct, sortPosition: number = 0)
     variant_id: product.variantId ?? null,
     slug: product.slug ?? null,
     inventory: product.inventory ?? null,
+    min_order_quantity: product.minOrderQuantity ?? null,
+    special_order: product.specialOrder ?? null,
     is_active: true,
     sort_position: sortPosition,
   };

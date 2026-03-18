@@ -83,13 +83,13 @@ function MenuItemCard({ product }: { product: CateringProduct }) {
           </div>
         )}
         {!isFeatured && isPopular && (
-          <div className="absolute top-2 left-2 bg-[#383838] text-white px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide z-10">
+          <div className="absolute top-2 left-2 bg-[#1A1A1A] text-white px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide z-10">
             POPULAR
           </div>
         )}
       </div>
       <div className="p-4">
-        <h4 className="font-oswald font-bold text-[#383838] text-sm sm:text-base mb-1 line-clamp-1">
+        <h4 className="font-oswald font-bold text-[#1A1A1A] text-sm sm:text-base mb-1 line-clamp-1">
           {product.title}
         </h4>
         <p className="text-xs text-gray-500 mb-2 line-clamp-2">
@@ -120,7 +120,7 @@ function PackageCard({ pkg }: { pkg: { id: string; title: string; description: s
         </div>
       </div>
       <div className="p-5">
-        <h3 className="font-oswald text-lg sm:text-xl font-bold text-[#383838] mb-2 tracking-wide">
+        <h3 className="font-oswald text-lg sm:text-xl font-bold text-[#1A1A1A] mb-2 tracking-wide">
           {pkg.title}
         </h3>
         <p className="text-sm text-gray-500 mb-3">{pkg.description}</p>
@@ -201,9 +201,9 @@ export default function MenusPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-[#F5EDE0]">
       {/* Hero Header */}
-      <div className="bg-[#383838] py-12 sm:py-16 relative overflow-hidden">
+      <div className="bg-[#1A1A1A] py-12 sm:py-16 relative overflow-hidden">
         <div className="absolute inset-0 opacity-5">
           <Image src="/images/lb-pattern-charcoal.png" alt="" fill className="object-cover" />
         </div>
@@ -229,8 +229,8 @@ export default function MenusPage() {
                 onClick={() => scrollToSection(section.id)}
                 className={`px-4 py-2 rounded-full font-oswald font-semibold text-sm whitespace-nowrap transition-all ${
                   activeSection === section.id
-                    ? 'bg-[#383838] text-white'
-                    : 'bg-gray-100 text-[#383838] hover:bg-[#E8621A]/20'
+                    ? 'bg-[#1A1A1A] text-white'
+                    : 'bg-gray-100 text-[#1A1A1A] hover:bg-[#E8621A]/20'
                 }`}
               >
                 {section.title}
@@ -251,7 +251,7 @@ export default function MenusPage() {
           <div className="relative mb-8 sm:mb-12 rounded-2xl overflow-hidden">
             <div className="relative h-48 sm:h-64">
               <Image src="/images/chef-dominique-ribs.jpg" alt="Catering Packs" fill className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#383838]/90 via-[#383838]/70 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#1A1A1A]/90 via-[#1A1A1A]/70 to-transparent" />
             </div>
             <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-10">
               <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-wider mb-2">
@@ -275,7 +275,7 @@ export default function MenusPage() {
           <div className="relative mb-8 sm:mb-12 rounded-2xl overflow-hidden">
             <div className="relative h-48 sm:h-64">
               <Image src="/images/brisket-sauce-pour.jpg" alt="Betty Meats" fill className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#383838]/90 via-[#383838]/70 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#1A1A1A]/90 via-[#1A1A1A]/70 to-transparent" />
             </div>
             <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-10">
               <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-wider mb-2">
@@ -291,7 +291,7 @@ export default function MenusPage() {
             {/* Pork */}
             <div>
               <div className="flex items-center gap-4 mb-6">
-                <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#383838]">Pork</h3>
+                <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#1A1A1A]">Pork</h3>
                 <div className="flex-1 h-px bg-[#E8621A]/50" />
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -304,7 +304,7 @@ export default function MenusPage() {
             {/* Poultry */}
             <div>
               <div className="flex items-center gap-4 mb-6">
-                <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#383838]">Poultry</h3>
+                <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#1A1A1A]">Poultry</h3>
                 <div className="flex-1 h-px bg-[#E8621A]/50" />
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -317,7 +317,7 @@ export default function MenusPage() {
             {/* Beef */}
             <div>
               <div className="flex items-center gap-4 mb-6">
-                <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#383838]">Beef</h3>
+                <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#1A1A1A]">Beef</h3>
                 <div className="flex-1 h-px bg-[#E8621A]/50" />
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -334,7 +334,7 @@ export default function MenusPage() {
           <div className="relative mb-8 sm:mb-12 rounded-2xl overflow-hidden">
             <div className="relative h-48 sm:h-64">
               <Image src="/images/Stacked Sandwiches Hi Res Shot.png" alt="Sliders" fill className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#383838]/90 via-[#383838]/70 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#1A1A1A]/90 via-[#1A1A1A]/70 to-transparent" />
             </div>
             <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-10">
               <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-wider mb-2">
@@ -357,7 +357,7 @@ export default function MenusPage() {
           <div className="relative mb-8 sm:mb-12 rounded-2xl overflow-hidden">
             <div className="relative h-48 sm:h-64">
               <Image src="/images/Macaroni and Cheese Shot Hi Res.png" alt="Soulful Sides" fill className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#383838]/90 via-[#383838]/70 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#1A1A1A]/90 via-[#1A1A1A]/70 to-transparent" />
             </div>
             <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-10">
               <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-wider mb-2">
@@ -380,7 +380,7 @@ export default function MenusPage() {
           <div className="relative mb-8 sm:mb-12 rounded-2xl overflow-hidden">
             <div className="relative h-48 sm:h-64">
               <Image src="/images/BSB Caramel Cake Slices Hi Res Shot.png" alt="Desserts" fill className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#383838]/90 via-[#383838]/70 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#1A1A1A]/90 via-[#1A1A1A]/70 to-transparent" />
             </div>
             <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-10">
               <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-wider mb-2">
@@ -403,7 +403,7 @@ export default function MenusPage() {
           <div className="relative mb-8 sm:mb-12 rounded-2xl overflow-hidden">
             <div className="relative h-48 sm:h-64">
               <Image src="/images/Cold Brew Hi Res Shot.png" alt="Drinks" fill className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#383838]/90 via-[#383838]/70 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#1A1A1A]/90 via-[#1A1A1A]/70 to-transparent" />
             </div>
             <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-10">
               <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-wider mb-2">
@@ -424,7 +424,7 @@ export default function MenusPage() {
         {/* === EQUIPMENT & EXTRAS === */}
         <section id="equipment" className="mb-16 sm:mb-20 scroll-mt-20">
           <div className="mb-8">
-            <h2 className="font-oswald text-2xl sm:text-3xl font-bold text-[#383838] tracking-wider mb-2">
+            <h2 className="font-oswald text-2xl sm:text-3xl font-bold text-[#1A1A1A] tracking-wider mb-2">
               EQUIPMENT &amp; EXTRAS
             </h2>
             <p className="text-gray-500">Catering supplies and add-ons</p>
@@ -439,7 +439,7 @@ export default function MenusPage() {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-[#383838] py-12 sm:py-16">
+      <div className="bg-[#1A1A1A] py-12 sm:py-16">
         <div className="container mx-auto px-4 text-center">
           <h3 className="font-oswald text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 tracking-wide">
             READY TO ORDER?
@@ -460,7 +460,7 @@ export default function MenusPage() {
             </Link>
             <a
               href="mailto:info@lexingtonbetty.com"
-              className="inline-flex items-center gap-2 border-2 border-white text-white font-oswald font-bold px-8 py-3 rounded-lg hover:bg-white hover:text-[#383838] transition-all"
+              className="inline-flex items-center gap-2 border-2 border-white text-white font-oswald font-bold px-8 py-3 rounded-lg hover:bg-white hover:text-[#1A1A1A] transition-all"
             >
               <span>Email Us</span>
             </a>
@@ -469,10 +469,10 @@ export default function MenusPage() {
       </div>
 
       {/* Smokin' Good Things to Know */}
-      <div className="bg-[#FAFAFA] py-10 border-t border-gray-200">
+      <div className="bg-[#F5EDE0] py-10 border-t border-gray-200">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h4 className="font-oswald text-xl font-bold text-[#383838] mb-4 tracking-wider">
+            <h4 className="font-oswald text-xl font-bold text-[#1A1A1A] mb-4 tracking-wider">
               SMOKIN&apos; GOOD THINGS TO KNOW
             </h4>
             <ul className="space-y-2 text-sm text-gray-600">

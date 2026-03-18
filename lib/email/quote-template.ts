@@ -23,8 +23,11 @@ interface QuoteEmailData {
   };
   items: Array<{
     title: string;
+    description?: string;
     displayText: string;
     totalPrice: number;
+    servesMin?: number;
+    servesMax?: number;
   }>;
   headcount: number;
   eventType: string;
@@ -62,16 +65,25 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
 
   const itemRows = data.items
     .map(
-      (item) => `
+      (item) => {
+        const servesText = item.servesMin && item.servesMax && item.servesMin !== item.servesMax
+          ? `Serves ${item.servesMin}-${item.servesMax}`
+          : item.servesMin
+            ? `Serves ${item.servesMin}`
+            : '';
+        return `
       <tr>
-        <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #383838;">
+        <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #1A1A1A;">
           <strong>${item.title}</strong><br/>
+          ${item.description ? `<span style="color: #999; font-size: 12px; line-height: 1.4;">${item.description}</span><br/>` : ''}
           <span style="color: #888; font-size: 12px;">${item.displayText}</span>
+          ${servesText ? `<span style="color: #E8621A; font-size: 11px; margin-left: 8px;">${servesText}</span>` : ''}
         </td>
-        <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #383838; text-align: right; white-space: nowrap;">
+        <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #1A1A1A; text-align: right; white-space: nowrap; vertical-align: top;">
           ${formatCurrency(item.totalPrice)}
         </td>
-      </tr>`
+      </tr>`;
+      }
     )
     .join('');
 
@@ -79,7 +91,7 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
     <tr><td style="padding: 0 24px 24px;">
       <table width="100%" cellpadding="0" cellspacing="0" style="background: #FFF8F0; border-radius: 8px; padding: 20px;">
         <tr><td style="padding: 20px; font-family: Arial, Helvetica, sans-serif;">
-          <h3 style="margin: 0 0 12px; font-size: 16px; color: #383838;">What Happens Next</h3>
+          <h3 style="margin: 0 0 12px; font-size: 16px; color: #1A1A1A;">What Happens Next</h3>
           <ol style="margin: 0; padding-left: 20px; color: #555; font-size: 14px; line-height: 1.8;">
             <li>Our team will review your quote within 1 business day</li>
             <li>We'll reach out to confirm details and answer questions</li>
@@ -95,7 +107,7 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
     <tr><td style="padding: 0 24px 24px;">
       <table width="100%" cellpadding="0" cellspacing="0" style="background: #F0FFF4; border-radius: 8px; padding: 20px;">
         <tr><td style="padding: 20px; font-family: Arial, Helvetica, sans-serif;">
-          <h3 style="margin: 0 0 12px; font-size: 16px; color: #383838;">What Happens Next</h3>
+          <h3 style="margin: 0 0 12px; font-size: 16px; color: #1A1A1A;">What Happens Next</h3>
           <ol style="margin: 0; padding-left: 20px; color: #555; font-size: 14px; line-height: 1.8;">
             <li>Our team will confirm your order within 1 business day</li>
             <li>We'll call 24 hours before to finalize details</li>
@@ -109,14 +121,14 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/></head>
-<body style="margin: 0; padding: 0; background-color: #FAFAFA; font-family: Arial, Helvetica, sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #FAFAFA; padding: 20px 0;">
+<body style="margin: 0; padding: 0; background-color: #F5EDE0; font-family: Arial, Helvetica, sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F5EDE0; padding: 20px 0;">
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
 
         <!-- Header -->
-        <tr><td style="background-color: #383838; padding: 32px 24px; text-align: center;">
-          <h1 style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 28px; font-weight: 700; color: #FAFAFA; letter-spacing: 2px;">
+        <tr><td style="background-color: #1A1A1A; padding: 32px 24px; text-align: center;">
+          <h1 style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 28px; font-weight: 700; color: #F5EDE0; letter-spacing: 2px;">
             LEXINGTON BETTY SMOKEHOUSE
           </h1>
           <p style="margin: 8px 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #E8621A; letter-spacing: 1px;">
@@ -126,17 +138,17 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
 
         <!-- Title Bar -->
         <tr><td style="background-color: #E8621A; padding: 16px 24px; text-align: center;">
-          <h2 style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 20px; font-weight: 700; color: #383838; letter-spacing: 1px;">
+          <h2 style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 20px; font-weight: 700; color: #1A1A1A; letter-spacing: 1px;">
             ${title.toUpperCase()}
           </h2>
-          <p style="margin: 4px 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #383838;">
+          <p style="margin: 4px 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #1A1A1A;">
             ${prefix} #${data.orderNumber}
           </p>
         </td></tr>
 
         <!-- Greeting -->
         <tr><td style="padding: 24px 24px 16px;">
-          <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #383838; line-height: 1.5;">
+          <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #1A1A1A; line-height: 1.5;">
             Hi ${data.contact.firstName},
           </p>
           <p style="margin: 8px 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #555; line-height: 1.6;">
@@ -148,34 +160,34 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
 
         <!-- Event Details Card -->
         <tr><td style="padding: 0 24px 16px;">
-          <table width="100%" cellpadding="0" cellspacing="0" style="background: #FAFAFA; border-radius: 8px; border: 1px solid #eee;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background: #F5EDE0; border-radius: 8px; border: 1px solid #eee;">
             <tr><td style="padding: 16px; font-family: Arial, Helvetica, sans-serif;">
               <h3 style="margin: 0 0 12px; font-size: 14px; color: #888; text-transform: uppercase; letter-spacing: 1px;">Event Details</h3>
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="padding: 4px 0; font-size: 14px; color: #888; width: 100px;">Date</td>
-                  <td style="padding: 4px 0; font-size: 14px; color: #383838; font-weight: 600;">${formatDate(data.event.date)}</td>
+                  <td style="padding: 4px 0; font-size: 14px; color: #1A1A1A; font-weight: 600;">${formatDate(data.event.date)}</td>
                 </tr>
                 <tr>
                   <td style="padding: 4px 0; font-size: 14px; color: #888;">Time</td>
-                  <td style="padding: 4px 0; font-size: 14px; color: #383838; font-weight: 600;">${data.event.time}</td>
+                  <td style="padding: 4px 0; font-size: 14px; color: #1A1A1A; font-weight: 600;">${data.event.time}</td>
                 </tr>
                 <tr>
                   <td style="padding: 4px 0; font-size: 14px; color: #888;">Guests</td>
-                  <td style="padding: 4px 0; font-size: 14px; color: #383838; font-weight: 600;">${data.headcount}</td>
+                  <td style="padding: 4px 0; font-size: 14px; color: #1A1A1A; font-weight: 600;">${data.headcount}</td>
                 </tr>
                 <tr>
                   <td style="padding: 4px 0; font-size: 14px; color: #888;">Setup</td>
-                  <td style="padding: 4px 0; font-size: 14px; color: #383838; font-weight: 600;">${data.event.setupRequired ? 'Full setup included' : 'Drop-off only'}</td>
+                  <td style="padding: 4px 0; font-size: 14px; color: #1A1A1A; font-weight: 600;">${data.event.setupRequired ? 'Full setup included' : 'Drop-off only'}</td>
                 </tr>
                 <tr>
                   <td style="padding: 4px 0; font-size: 14px; color: #888;">Address</td>
-                  <td style="padding: 4px 0; font-size: 14px; color: #383838;">${data.delivery.address}${data.delivery.address2 ? ', ' + data.delivery.address2 : ''}<br/>${data.delivery.city}, ${data.delivery.state} ${data.delivery.zip}</td>
+                  <td style="padding: 4px 0; font-size: 14px; color: #1A1A1A;">${data.delivery.address}${data.delivery.address2 ? ', ' + data.delivery.address2 : ''}<br/>${data.delivery.city}, ${data.delivery.state} ${data.delivery.zip}</td>
                 </tr>
                 ${data.event.specialInstructions ? `
                 <tr>
                   <td style="padding: 4px 0; font-size: 14px; color: #888; vertical-align: top;">Notes</td>
-                  <td style="padding: 4px 0; font-size: 14px; color: #383838; font-style: italic;">${data.event.specialInstructions}</td>
+                  <td style="padding: 4px 0; font-size: 14px; color: #1A1A1A; font-style: italic;">${data.event.specialInstructions}</td>
                 </tr>` : ''}
               </table>
             </td></tr>
@@ -186,8 +198,8 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
         <tr><td style="padding: 0 24px 16px;">
           <table width="100%" cellpadding="0" cellspacing="0">
             <tr>
-              <td style="padding: 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #383838;">Item</td>
-              <td style="padding: 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #383838; text-align: right;">Price</td>
+              <td style="padding: 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #1A1A1A;">Item</td>
+              <td style="padding: 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #1A1A1A; text-align: right;">Price</td>
             </tr>
             ${itemRows}
           </table>
@@ -198,15 +210,15 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
           <table width="100%" cellpadding="0" cellspacing="0">
             <tr>
               <td style="padding: 6px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #555;">Subtotal</td>
-              <td style="padding: 6px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #383838; text-align: right;">${formatCurrency(data.subtotal)}</td>
+              <td style="padding: 6px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #1A1A1A; text-align: right;">${formatCurrency(data.subtotal)}</td>
             </tr>
             <tr>
               <td style="padding: 6px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #555;">Delivery</td>
-              <td style="padding: 6px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #383838; text-align: right;">${formatCurrency(data.deliveryFee)}</td>
+              <td style="padding: 6px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #1A1A1A; text-align: right;">${formatCurrency(data.deliveryFee)}</td>
             </tr>
             <tr>
-              <td style="padding: 12px 0 6px; font-family: Arial, Helvetica, sans-serif; font-size: 18px; font-weight: 700; color: #383838; border-top: 2px solid #383838;">Total</td>
-              <td style="padding: 12px 0 6px; font-family: Arial, Helvetica, sans-serif; font-size: 18px; font-weight: 700; color: #E8621A; border-top: 2px solid #383838; text-align: right;">${formatCurrency(data.orderTotal)}</td>
+              <td style="padding: 12px 0 6px; font-family: Arial, Helvetica, sans-serif; font-size: 18px; font-weight: 700; color: #1A1A1A; border-top: 2px solid #1A1A1A;">Total</td>
+              <td style="padding: 12px 0 6px; font-family: Arial, Helvetica, sans-serif; font-size: 18px; font-weight: 700; color: #E8621A; border-top: 2px solid #1A1A1A; text-align: right;">${formatCurrency(data.orderTotal)}</td>
             </tr>
             <tr>
               <td style="padding: 2px 0; font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #888;">Per person (${data.headcount} guests)</td>
@@ -219,8 +231,8 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
         ${isQuote ? nextStepsQuote : nextStepsOrder}
 
         <!-- Footer -->
-        <tr><td style="background-color: #383838; padding: 24px; text-align: center;">
-          <p style="margin: 0 0 8px; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #FAFAFA; font-weight: 700; letter-spacing: 1px;">
+        <tr><td style="background-color: #1A1A1A; padding: 24px; text-align: center;">
+          <p style="margin: 0 0 8px; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #F5EDE0; font-weight: 700; letter-spacing: 1px;">
             LEXINGTON BETTY SMOKEHOUSE
           </p>
           <p style="margin: 0 0 4px; font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #ccc;">

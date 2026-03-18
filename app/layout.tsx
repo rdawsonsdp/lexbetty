@@ -3,6 +3,7 @@ import { Oswald, Roboto_Condensed } from 'next/font/google';
 import './globals.css';
 import Layout from '@/components/layout/Layout';
 import { CateringProvider } from '@/context/CateringContext';
+import { AnalyticsProvider } from '@/context/AnalyticsContext';
 
 const oswald = Oswald({
   variable: '--font-oswald',
@@ -32,7 +33,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  themeColor: '#383838',
+  themeColor: '#1A1A1A',
 };
 
 export default function RootLayout({
@@ -45,9 +46,11 @@ export default function RootLayout({
       <body
         className={`${oswald.variable} ${robotoCondensed.variable} antialiased`}
       >
-        <CateringProvider>
-          <Layout>{children}</Layout>
-        </CateringProvider>
+        <AnalyticsProvider>
+          <CateringProvider>
+            <Layout>{children}</Layout>
+          </CateringProvider>
+        </AnalyticsProvider>
       </body>
     </html>
   );

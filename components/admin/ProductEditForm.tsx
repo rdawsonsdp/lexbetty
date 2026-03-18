@@ -114,7 +114,7 @@ export default function ProductEditForm({ product, onSave, onDelete, onCancel, i
               onClick={() => toggleCategory(cat)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 categories?.includes(cat)
-                  ? 'bg-[#383838] text-white'
+                  ? 'bg-[#1A1A1A] text-white'
                   : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
               }`}
             >
@@ -164,12 +164,32 @@ export default function ProductEditForm({ product, onSave, onDelete, onCancel, i
         </div>
       </div>
 
+      {/* Order Minimums */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">Order Minimums</h3>
+        <div className="max-w-xs">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Min Order Quantity (optional)
+          </label>
+          <input
+            type="number"
+            min={0}
+            {...register('minOrderQuantity', { setValueAs: (v: string) => v === '' || v === undefined ? null : Number(v) })}
+            placeholder="No minimum"
+            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#E8621A]"
+          />
+          <p className="text-xs text-gray-400 mt-1">
+            Minimum number of units (pans, lbs, dozens, etc.) a customer must order. Leave empty for no minimum.
+          </p>
+        </div>
+      </div>
+
       {/* Actions */}
       <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
         <button
           type="submit"
           disabled={isSaving}
-          className="flex-1 bg-[#383838] text-white py-3 rounded-lg font-semibold hover:bg-[#4a4747] transition-colors disabled:opacity-50"
+          className="flex-1 bg-[#1A1A1A] text-white py-3 rounded-lg font-semibold hover:bg-[#4a4747] transition-colors disabled:opacity-50"
         >
           {isSaving ? 'Saving...' : isNew ? 'Create Item' : 'Save Changes'}
         </button>

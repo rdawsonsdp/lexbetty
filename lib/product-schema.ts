@@ -61,6 +61,8 @@ export const productSchema = z.object({
   variantId: z.string().nullish(),
   slug: z.string().nullish(),
   inventory: z.number().nullish(),
+  minOrderQuantity: z.number().min(1).nullish(),
+  specialOrder: z.boolean().nullish(),
   is_active: z.boolean().nullish(),
   sort_position: z.number().nullish(),
 });

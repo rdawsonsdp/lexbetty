@@ -48,10 +48,10 @@ export default function OrderTypeStep() {
   ];
 
   return (
-    <div ref={sectionRef} className="bg-[#FAFAFA] py-12 sm:py-16 scroll-mt-4">
+    <div ref={sectionRef} className="bg-[#F5EDE0] py-12 sm:py-16 scroll-mt-4">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
-          <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#383838] tracking-wider mb-4">
+          <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#1A1A1A] tracking-wider mb-4">
             HOW WOULD YOU LIKE TO ORDER?
           </h2>
           <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
@@ -73,13 +73,13 @@ export default function OrderTypeStep() {
                   bg-white border-2 rounded-xl p-8 sm:p-10 text-center cursor-pointer
                   transition-all duration-300 hover:scale-105 shadow-md
                   ${state.orderType === option.id
-                    ? 'border-[#383838] bg-[#E8621A]/20'
+                    ? 'border-[#1A1A1A] bg-[#E8621A]/20'
                     : 'border-gray-200 hover:border-[#E8621A]'
                   }
                 `}
               >
                 <div className="text-6xl sm:text-7xl mb-4">{option.icon}</div>
-                <h3 className="font-oswald text-2xl sm:text-3xl font-bold text-[#383838] mb-3 tracking-wide">
+                <h3 className="font-oswald text-2xl sm:text-3xl font-bold text-[#1A1A1A] mb-3 tracking-wide">
                   {option.title}
                 </h3>
                 <p className="text-gray-600 text-sm sm:text-base mb-2">
@@ -97,7 +97,7 @@ export default function OrderTypeStep() {
         <div className="mt-10 text-center">
           <button
             onClick={handleBack}
-            className="font-oswald text-gray-500 hover:text-[#383838] transition-colors tracking-wide"
+            className="font-oswald text-gray-500 hover:text-[#1A1A1A] transition-colors tracking-wide"
           >
             ← BACK TO GUESTS & BUDGET
           </button>
