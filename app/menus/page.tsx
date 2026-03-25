@@ -1,203 +1,86 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import ProductImagePlaceholder from '@/components/ui/ProductImagePlaceholder';
-import { CateringProduct } from '@/lib/types';
-import { getDisplayPrice, getPricingTypeLabel } from '@/lib/pricing';
-import DietaryFilterBar from '@/components/catering/DietaryFilterBar';
 import { useActiveProducts } from '@/lib/hooks/useActiveProducts';
 import { useActivePackages } from '@/lib/hooks/useActivePackages';
+import { formatCurrency } from '@/lib/pricing';
+import MenuItemRow from '@/components/catering/MenuItemRow';
+import ProductImagePlaceholder from '@/components/ui/ProductImagePlaceholder';
 
-// --- Menu Sections matching LB Catering Menu ---
-
+// Same sections as the ordering page
 const MENU_SECTIONS = [
-  {
-    id: 'packages',
-    title: 'CATERING PACKS',
-    subtitle: 'Betty Party Deals, Betty Boxes & Food Truck',
-    image: '/images/chef-dominique-ribs.jpg',
-  },
-  {
-    id: 'meats',
-    title: 'BETTY MEATS',
-    subtitle: 'Smoked Low & Slow — By the Pan or Pound',
-    image: '/images/brisket-sauce-pour.jpg',
-    subsections: [
-      { id: 'meats-pork', title: 'Pork', filter: (p: CateringProduct) => p.tags?.includes('pork') && !p.tags?.includes('sliders') },
-      { id: 'meats-poultry', title: 'Poultry', filter: (p: CateringProduct) => p.tags?.includes('poultry') && !p.tags?.includes('sliders') },
-      { id: 'meats-beef', title: 'Beef', filter: (p: CateringProduct) => p.tags?.includes('beef') && !p.tags?.includes('sliders') },
-    ],
-  },
-  {
-    id: 'sliders',
-    title: 'SLIDERS',
-    subtitle: 'Smoked to Perfection on Brioche Buns (24 ct)',
-    image: '/images/Stacked Sandwiches Hi Res Shot.png',
-  },
-  {
-    id: 'sides',
-    title: 'BETTY SOULFUL SIDES',
-    subtitle: 'Comfort Food Done Right',
-    image: '/images/Macaroni and Cheese Shot Hi Res.png',
-  },
-  {
-    id: 'desserts',
-    title: 'BETTY DESSERTS',
-    subtitle: 'Sweet Endings',
-    image: '/images/BSB Caramel Cake Slices Hi Res Shot.png',
-  },
-  {
-    id: 'drinks',
-    title: 'BETTY DRINKS',
-    subtitle: 'Refreshments for Every Occasion',
-    image: '/images/Cold Brew Hi Res Shot.png',
-  },
-  {
-    id: 'equipment',
-    title: 'EQUIPMENT & EXTRAS',
-    subtitle: 'Catering Supplies',
-    image: '/images/bbq_brisket.jpg',
-  },
+  { id: 'packages', label: 'Catering Packs', tag: 'packages', image: '/images/chef-dominique-ribs.jpg' },
+  { id: 'meats', label: 'Meats', tag: 'meats', image: '/images/brisket-board.png' },
+  { id: 'sliders', label: 'Sliders', tag: 'sliders', image: '/images/sliders-board.png' },
+  { id: 'sides', label: 'Sides', tag: 'sides', image: '/images/sides-hero.jpg' },
+  { id: 'dessert', label: 'Desserts', tag: 'dessert', image: '' },
+  { id: 'beverage', label: 'Drinks', tag: 'beverage', image: '' },
+  { id: 'equipment', label: 'Equipment & Extras', tag: 'equipment', image: '' },
 ];
-
-function filterByDietary(products: CateringProduct[], filters: string[]): CateringProduct[] {
-  if (filters.length === 0) return products;
-  return products.filter(p => filters.every(f => p.tags?.includes(f)));
-}
-
-// --- Components ---
-
-function MenuItemCard({ product }: { product: CateringProduct }) {
-  const isFeatured = product.featured;
-  const isPopular = product.tags?.includes('popular');
-
-  return (
-    <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-      <div className="relative h-32 sm:h-40">
-        <ProductImagePlaceholder title={product.title} />
-        {isFeatured && (
-          <div className="absolute top-2 left-2 bg-[#E8621A] text-white px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide z-10">
-            FEATURED
-          </div>
-        )}
-        {!isFeatured && isPopular && (
-          <div className="absolute top-2 left-2 bg-[#1A1A1A] text-white px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide z-10">
-            POPULAR
-          </div>
-        )}
-      </div>
-      <div className="p-4">
-        <h4 className="font-oswald font-bold text-[#1A1A1A] text-sm sm:text-base mb-1 line-clamp-1">
-          {product.title}
-        </h4>
-        <p className="text-xs text-gray-500 mb-2 line-clamp-2">
-          {product.description}
-        </p>
-        <div className="flex items-center gap-2">
-          <span className="font-oswald font-bold text-[#E8621A]">
-            {getDisplayPrice(product)}
-          </span>
-          <span className="text-sm text-gray-400">
-            {getPricingTypeLabel(product)}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PackageCard({ pkg }: { pkg: { id: string; title: string; description: string; pricePerPerson: number; image: string; items: string[]; minHeadcount?: number } }) {
-  return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-      <div className="relative h-40 sm:h-48">
-        <ProductImagePlaceholder title={pkg.title} />
-        <div className="absolute bottom-3 left-3 z-10">
-          <span className="bg-[#E8621A] text-white font-oswald font-bold px-3 py-1 rounded text-sm">
-            ${pkg.pricePerPerson}/PP
-          </span>
-        </div>
-      </div>
-      <div className="p-5">
-        <h3 className="font-oswald text-lg sm:text-xl font-bold text-[#1A1A1A] mb-2 tracking-wide">
-          {pkg.title}
-        </h3>
-        <p className="text-sm text-gray-500 mb-3">{pkg.description}</p>
-        <ul className="space-y-1.5">
-          {pkg.items.map((item, i) => (
-            <li key={i} className="text-xs text-gray-600 flex items-start gap-2">
-              <span className="text-[#E8621A] mt-0.5 flex-shrink-0">&#8226;</span>
-              {item}
-            </li>
-          ))}
-        </ul>
-        {pkg.minHeadcount && (
-          <p className="text-[10px] text-gray-400 mt-3 uppercase tracking-wide">
-            Min {pkg.minHeadcount} guests
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// --- Page ---
 
 export default function MenusPage() {
   const [activeSection, setActiveSection] = useState<string>('packages');
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const { activeProducts } = useActiveProducts();
   const { packages } = useActivePackages();
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  const handleToggleFilter = (tag: string) => {
-    setActiveFilters(prev =>
-      prev.includes(tag)
-        ? prev.filter(f => f !== tag)
-        : [...prev, tag]
-    );
-  };
+  // Filter products excluding equipment for food sections
+  const allFood = useMemo(() =>
+    activeProducts.filter(p => !p.tags?.includes('service')),
+    [activeProducts]
+  );
 
-  // Products by section
-  const sectionProducts = useMemo(() => {
-    const sliders = activeProducts.filter(p => p.tags?.includes('sliders'));
-    const sides = activeProducts.filter(p => p.tags?.includes('sides') && !p.tags?.includes('condiments'));
-    const desserts = activeProducts.filter(p => p.tags?.includes('dessert'));
-    const drinks = activeProducts.filter(p => p.tags?.includes('beverage'));
-    const equipment = activeProducts.filter(p => p.tags?.includes('equipment') || p.tags?.includes('cutlery') || p.tags?.includes('condiments'));
-    return { sliders, sides, desserts, drinks, equipment };
-  }, [activeProducts]);
+  // Group into sections
+  const groupedSections = useMemo(() => {
+    const filtered = searchTerm
+      ? allFood.filter(p =>
+          p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          p.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          p.tags?.some(t => t.toLowerCase().includes(searchTerm.toLowerCase()))
+        )
+      : allFood;
 
-  // Track scroll position to update active nav tab
+    return MENU_SECTIONS
+      .filter(s => s.id !== 'packages') // packages handled separately
+      .map(section => ({
+        ...section,
+        products: filtered
+          .filter(p => {
+            if (section.tag === 'equipment') {
+              return p.tags?.includes('equipment') || p.tags?.includes('cutlery') || p.tags?.includes('condiments');
+            }
+            return p.tags?.includes(section.tag);
+          })
+          .sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0)),
+      }))
+      .filter(section => section.products.length > 0);
+  }, [allFood, searchTerm]);
+
+  // Scroll spy
   useEffect(() => {
     const handleScroll = () => {
-      for (const section of MENU_SECTIONS) {
-        const element = document.getElementById(section.id);
-        if (element) {
-          const rect = element.getBoundingClientRect();
+      const allSections = ['packages', ...groupedSections.map(s => s.id)];
+      for (const id of allSections) {
+        const el = sectionRefs.current[id];
+        if (el) {
+          const rect = el.getBoundingClientRect();
           if (rect.top <= 150 && rect.bottom >= 150) {
-            setActiveSection(section.id);
+            setActiveSection(id);
             break;
           }
         }
       }
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [groupedSections]);
 
   const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      const offset = 80;
-      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({
-        top: elementPosition - offset,
-        behavior: 'smooth',
-      });
-      setActiveSection(sectionId);
-    }
+    setActiveSection(sectionId);
+    sectionRefs.current[sectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
@@ -219,11 +102,21 @@ export default function MenusPage() {
         </div>
       </div>
 
-      {/* Quick Navigation */}
+      {/* Sticky Nav + Search */}
       <div className="bg-white border-b sticky top-0 z-40 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex overflow-x-auto gap-2 py-4 scrollbar-hide">
-            {MENU_SECTIONS.map((section) => (
+            <button
+              onClick={() => scrollToSection('packages')}
+              className={`px-4 py-2 rounded-full font-oswald font-semibold text-sm whitespace-nowrap transition-all ${
+                activeSection === 'packages'
+                  ? 'bg-[#1A1A1A] text-white'
+                  : 'bg-gray-100 text-[#1A1A1A] hover:bg-[#E8621A]/20'
+              }`}
+            >
+              Catering Packs
+            </button>
+            {groupedSections.map((section) => (
               <button
                 key={section.id}
                 onClick={() => scrollToSection(section.id)}
@@ -233,12 +126,18 @@ export default function MenusPage() {
                     : 'bg-gray-100 text-[#1A1A1A] hover:bg-[#E8621A]/20'
                 }`}
               >
-                {section.title}
+                {section.label}
               </button>
             ))}
           </div>
           <div className="pb-3">
-            <DietaryFilterBar activeTags={activeFilters} onToggleTag={handleToggleFilter} />
+            <input
+              type="text"
+              placeholder="Search menu items..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full max-w-md px-4 py-2 border border-gray-200 rounded-lg focus:border-[#E8621A] focus:outline-none text-sm"
+            />
           </div>
         </div>
       </div>
@@ -246,196 +145,101 @@ export default function MenusPage() {
       {/* Menu Content */}
       <div className="container mx-auto px-4 py-8 sm:py-12">
 
-        {/* === CATERING PACKS (Packages) === */}
-        <section id="packages" className="mb-16 sm:mb-20 scroll-mt-20">
-          <div className="relative mb-8 sm:mb-12 rounded-2xl overflow-hidden">
-            <div className="relative h-48 sm:h-64">
-              <Image src="/images/chef-dominique-ribs.jpg" alt="Catering Packs" fill className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#1A1A1A]/90 via-[#1A1A1A]/70 to-transparent" />
-            </div>
-            <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-10">
-              <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-wider mb-2">
-                CATERING PACKS
-              </h2>
-              <p className="text-[#E8621A] text-base sm:text-lg font-oswald tracking-wide">
-                Betty Party Deals &bull; Betty Boxes &bull; Food Truck
-              </p>
-            </div>
+        {/* Packages Section */}
+        <div
+          ref={(el) => { sectionRefs.current['packages'] = el; }}
+          className="mb-12 scroll-mt-36"
+        >
+          <div className="mb-5">
+            <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#1A1A1A] tracking-wide uppercase">
+              Catering Packs
+            </h3>
+            <div className="w-12 h-1 bg-[#E8621A] mt-2" />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {packages.map(pkg => (
-              <PackageCard key={pkg.id} pkg={pkg} />
-            ))}
-          </div>
-        </section>
-
-        {/* === BETTY MEATS === */}
-        <section id="meats" className="mb-16 sm:mb-20 scroll-mt-20">
-          <div className="relative mb-8 sm:mb-12 rounded-2xl overflow-hidden">
-            <div className="relative h-48 sm:h-64">
-              <Image src="/images/brisket-sauce-pour.jpg" alt="Betty Meats" fill className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#1A1A1A]/90 via-[#1A1A1A]/70 to-transparent" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left: Hero image */}
+            <div className="relative aspect-[3/4] rounded-xl overflow-hidden">
+              <Image
+                src="/images/chef-dominique-ribs.jpg"
+                alt="Catering Packs"
+                fill
+                className="object-cover"
+              />
             </div>
-            <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-10">
-              <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-wider mb-2">
-                BETTY MEATS
-              </h2>
-              <p className="text-[#E8621A] text-base sm:text-lg">
-                Smoked Low &amp; Slow — By the Pan or Pound
-              </p>
-            </div>
-          </div>
 
-          <div className="space-y-12">
-            {/* Pork */}
+            {/* Right: Package list */}
             <div>
-              <div className="flex items-center gap-4 mb-6">
-                <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#1A1A1A]">Pork</h3>
-                <div className="flex-1 h-px bg-[#E8621A]/50" />
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {filterByDietary(activeProducts.filter(p => p.tags?.includes('pork') && !p.tags?.includes('sliders')), activeFilters).map(p => (
-                  <MenuItemCard key={p.id} product={p} />
+              {packages.map((pkg) => (
+                <div key={pkg.id} className="py-4 border-b border-gray-100 last:border-b-0">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-oswald font-semibold text-[#1A1A1A] text-sm sm:text-base tracking-wide">
+                        {pkg.title}
+                      </h4>
+                      <p className="text-gray-500 text-xs mt-0.5 line-clamp-2">{pkg.description}</p>
+                      <ul className="mt-1.5 space-y-0.5">
+                        {pkg.items.map((item, i) => (
+                          <li key={i} className="text-xs text-gray-500 flex items-start gap-1.5">
+                            <span className="text-[#E8621A] mt-0.5 flex-shrink-0">&#8226;</span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                      {pkg.minHeadcount && (
+                        <p className="text-[10px] text-gray-400 mt-1.5 uppercase tracking-wide">
+                          Min {pkg.minHeadcount} guests
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex-shrink-0">
+                      <span className="font-oswald font-bold text-[#E8621A] text-base">
+                        {formatCurrency(pkg.pricePerPerson)}/pp
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Food Sections — same layout as ordering page */}
+        {groupedSections.map((section) => (
+          <div
+            key={section.id}
+            ref={(el) => { sectionRefs.current[section.id] = el; }}
+            className="mb-12 scroll-mt-36"
+          >
+            {/* Section Header */}
+            <div className="mb-5">
+              <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#1A1A1A] tracking-wide uppercase">
+                {section.label}
+              </h3>
+              <div className="w-12 h-1 bg-[#E8621A] mt-2" />
+            </div>
+
+            {/* 2-column: hero image left, menu items right */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {section.image && (
+                <div className="relative aspect-[3/4] rounded-xl overflow-hidden">
+                  <Image
+                    src={section.image}
+                    alt={section.label}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              )}
+
+              <div className={section.image ? '' : 'md:col-span-2'}>
+                {section.products.map((product) => (
+                  <MenuItemRow key={product.id} product={product} />
                 ))}
               </div>
             </div>
-
-            {/* Poultry */}
-            <div>
-              <div className="flex items-center gap-4 mb-6">
-                <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#1A1A1A]">Poultry</h3>
-                <div className="flex-1 h-px bg-[#E8621A]/50" />
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {filterByDietary(activeProducts.filter(p => p.tags?.includes('poultry') && !p.tags?.includes('sliders')), activeFilters).map(p => (
-                  <MenuItemCard key={p.id} product={p} />
-                ))}
-              </div>
-            </div>
-
-            {/* Beef */}
-            <div>
-              <div className="flex items-center gap-4 mb-6">
-                <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#1A1A1A]">Beef</h3>
-                <div className="flex-1 h-px bg-[#E8621A]/50" />
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {filterByDietary(activeProducts.filter(p => p.tags?.includes('beef') && !p.tags?.includes('sliders')), activeFilters).map(p => (
-                  <MenuItemCard key={p.id} product={p} />
-                ))}
-              </div>
-            </div>
           </div>
-        </section>
-
-        {/* === SLIDERS === */}
-        <section id="sliders" className="mb-16 sm:mb-20 scroll-mt-20">
-          <div className="relative mb-8 sm:mb-12 rounded-2xl overflow-hidden">
-            <div className="relative h-48 sm:h-64">
-              <Image src="/images/Stacked Sandwiches Hi Res Shot.png" alt="Sliders" fill className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#1A1A1A]/90 via-[#1A1A1A]/70 to-transparent" />
-            </div>
-            <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-10">
-              <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-wider mb-2">
-                SLIDERS
-              </h2>
-              <p className="text-[#E8621A] text-base sm:text-lg">
-                24 per order — Brioche buns, pickles &amp; coleslaw
-              </p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filterByDietary(sectionProducts.sliders, activeFilters).map(p => (
-              <MenuItemCard key={p.id} product={p} />
-            ))}
-          </div>
-        </section>
-
-        {/* === BETTY SOULFUL SIDES === */}
-        <section id="sides" className="mb-16 sm:mb-20 scroll-mt-20">
-          <div className="relative mb-8 sm:mb-12 rounded-2xl overflow-hidden">
-            <div className="relative h-48 sm:h-64">
-              <Image src="/images/Macaroni and Cheese Shot Hi Res.png" alt="Soulful Sides" fill className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#1A1A1A]/90 via-[#1A1A1A]/70 to-transparent" />
-            </div>
-            <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-10">
-              <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-wider mb-2">
-                BETTY SOULFUL SIDES
-              </h2>
-              <p className="text-[#E8621A] text-base sm:text-lg">
-                Comfort Food Done Right
-              </p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filterByDietary(sectionProducts.sides, activeFilters).map(p => (
-              <MenuItemCard key={p.id} product={p} />
-            ))}
-          </div>
-        </section>
-
-        {/* === BETTY DESSERTS === */}
-        <section id="desserts" className="mb-16 sm:mb-20 scroll-mt-20">
-          <div className="relative mb-8 sm:mb-12 rounded-2xl overflow-hidden">
-            <div className="relative h-48 sm:h-64">
-              <Image src="/images/BSB Caramel Cake Slices Hi Res Shot.png" alt="Desserts" fill className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#1A1A1A]/90 via-[#1A1A1A]/70 to-transparent" />
-            </div>
-            <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-10">
-              <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-wider mb-2">
-                BETTY DESSERTS
-              </h2>
-              <p className="text-[#E8621A] text-base sm:text-lg">
-                Sweet Endings
-              </p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filterByDietary(sectionProducts.desserts, activeFilters).map(p => (
-              <MenuItemCard key={p.id} product={p} />
-            ))}
-          </div>
-        </section>
-
-        {/* === BETTY DRINKS === */}
-        <section id="drinks" className="mb-16 sm:mb-20 scroll-mt-20">
-          <div className="relative mb-8 sm:mb-12 rounded-2xl overflow-hidden">
-            <div className="relative h-48 sm:h-64">
-              <Image src="/images/Cold Brew Hi Res Shot.png" alt="Drinks" fill className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#1A1A1A]/90 via-[#1A1A1A]/70 to-transparent" />
-            </div>
-            <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-10">
-              <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-wider mb-2">
-                BETTY DRINKS
-              </h2>
-              <p className="text-[#E8621A] text-base sm:text-lg">
-                Refreshments for Every Occasion
-              </p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filterByDietary(sectionProducts.drinks, activeFilters).map(p => (
-              <MenuItemCard key={p.id} product={p} />
-            ))}
-          </div>
-        </section>
-
-        {/* === EQUIPMENT & EXTRAS === */}
-        <section id="equipment" className="mb-16 sm:mb-20 scroll-mt-20">
-          <div className="mb-8">
-            <h2 className="font-oswald text-2xl sm:text-3xl font-bold text-[#1A1A1A] tracking-wider mb-2">
-              EQUIPMENT &amp; EXTRAS
-            </h2>
-            <p className="text-gray-500">Catering supplies and add-ons</p>
-            <div className="h-1 w-16 bg-[#E8621A] mt-4" />
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {sectionProducts.equipment.map(p => (
-              <MenuItemCard key={p.id} product={p} />
-            ))}
-          </div>
-        </section>
+        ))}
       </div>
 
       {/* CTA Section */}

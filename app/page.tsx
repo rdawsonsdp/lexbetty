@@ -224,7 +224,7 @@ export default function HomePage() {
         <EquipmentStep />
       )}
 
-      {/* Browse Full Menu Link */}
+      {/* Restaurant Menu Link */}
       <section className="relative bg-[#1A1A1A] overflow-hidden">
         <div className="absolute inset-0">
           <Image
@@ -236,16 +236,18 @@ export default function HomePage() {
         </div>
         <div className="relative container mx-auto px-4 py-16 sm:py-24 text-center">
           <h3 className="font-oswald text-2xl sm:text-3xl font-bold text-[#F5EDE0] mb-3 tracking-wide">
-            LOOKING FOR SOMETHING ELSE?
+            VISIT OUR RESTAURANT
           </h3>
           <p className="text-white/70 mb-6 max-w-xl mx-auto">
-            Browse our complete menu with over 90 items including breakfast, lunch, dinner, desserts, and beverages.
+            756 E. 111th St, Chicago IL 60628 — Dine in, carry out, or order for delivery.
           </p>
-          <Link
-            href="/products"
+          <a
+            href="https://www.lexingtonbetty.com"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-[#E8621A] text-white font-oswald font-bold px-8 py-3 rounded-lg hover:opacity-90 transition-all group"
           >
-            <span>Browse Full Menu</span>
+            <span>Restaurant Menu</span>
             <svg
               className="w-5 h-5 group-hover:translate-x-1 transition-transform"
               fill="none"
@@ -254,7 +256,7 @@ export default function HomePage() {
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
-          </Link>
+          </a>
         </div>
       </section>
     </div>

@@ -34,8 +34,8 @@ export default function EventInfoStep() {
     dispatch({ type: 'SET_ORDER_TYPE', payload: 'build-your-own' });
   };
 
-  const handleBack = () => {
-    dispatch({ type: 'GO_BACK' });
+  const handleStartOver = () => {
+    dispatch({ type: 'RESET' });
   };
 
   // Get package price range for preview
@@ -189,10 +189,10 @@ export default function EventInfoStep() {
         {/* Back */}
         <div className="mt-10 text-center">
           <button
-            onClick={handleBack}
-            className="font-oswald text-gray-500 hover:text-[#1A1A1A] transition-colors tracking-wide"
+            onClick={handleStartOver}
+            className="font-oswald text-gray-500 hover:text-red-500 transition-colors tracking-wide"
           >
-            &larr; BACK TO EVENT TYPE
+            START OVER
           </button>
         </div>
       </div>
