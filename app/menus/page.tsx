@@ -12,9 +12,9 @@ import ProductImagePlaceholder from '@/components/ui/ProductImagePlaceholder';
 // Same sections as the ordering page
 const MENU_SECTIONS = [
   { id: 'packages', label: 'Catering Packs', tag: 'packages', image: '/images/chef-dominique-ribs.jpg' },
-  { id: 'meats', label: 'Meats', tag: 'meats', image: '/images/brisket-board.png' },
-  { id: 'sliders', label: 'Sliders', tag: 'sliders', image: '/images/sliders-board.png' },
-  { id: 'sides', label: 'Sides', tag: 'sides', image: '/images/sides-hero.jpg' },
+  { id: 'meats', label: 'Meats', tag: 'meats', image: '/images/meats-hero.webp' },
+  { id: 'sliders', label: 'Sliders', tag: 'sliders', image: '/images/sliders-hero.webp' },
+  { id: 'sides', label: 'Sides', tag: 'sides', image: '/images/sides-hero.webp' },
   { id: 'dessert', label: 'Desserts', tag: 'dessert', image: '' },
   { id: 'beverage', label: 'Drinks', tag: 'beverage', image: '' },
   { id: 'equipment', label: 'Equipment & Extras', tag: 'equipment', image: '' },

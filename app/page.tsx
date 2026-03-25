@@ -46,7 +46,7 @@ export default function HomePage() {
   };
 
   const eventImages: Record<string, string> = {
-    lunch: '/images/mac-n-cheese-pan.webp',
+    lunch: '/images/event-menu-hero.webp',
     alacarte: '/images/sliders-board.png',
   };
 
@@ -141,6 +141,9 @@ export default function HomePage() {
         />
       )}
 
+      {/* Brand Pattern Divider */}
+      <div className="h-8 bg-repeat-x bg-center" style={{ backgroundImage: 'url(/images/lb-pattern-logo.png)', backgroundSize: 'auto 100%', opacity: 0.08 }} />
+
       {/* Event Type Selection */}
       {(
         <section className="bg-[#F5EDE0] py-12 sm:py-16">
@@ -223,6 +226,9 @@ export default function HomePage() {
       {state.currentStep >= 6 && state.orderType === 'build-your-own' && (
         <EquipmentStep />
       )}
+
+      {/* Brand Pattern Divider */}
+      <div className="h-8 bg-repeat-x bg-center" style={{ backgroundImage: 'url(/images/lb-pattern-logo.png)', backgroundSize: 'auto 100%', opacity: 0.08 }} />
 
       {/* Restaurant Menu Link */}
       <section className="relative bg-[#1A1A1A] overflow-hidden">

@@ -17,9 +17,9 @@ import Badge from '@/components/ui/Badge';
 
 // Menu section definitions — order matters for display
 const MENU_SECTIONS = [
-  { id: 'meats', label: 'Meats', tag: 'meats', image: '/images/brisket-board.png' },
-  { id: 'sliders', label: 'Sliders', tag: 'sliders', image: '/images/sliders-board.png' },
-  { id: 'sides', label: 'Sides', tag: 'sides', image: '/images/sides-hero.jpg' },
+  { id: 'meats', label: 'Meats', tag: 'meats', image: '/images/meats-hero.webp' },
+  { id: 'sliders', label: 'Sliders', tag: 'sliders', image: '/images/sliders-hero.webp' },
+  { id: 'sides', label: 'Sides', tag: 'sides', image: '/images/sides-hero.webp' },
   { id: 'dessert', label: 'Desserts', tag: 'dessert', image: '' },
   { id: 'beverage', label: 'Drinks', tag: 'beverage', image: '' },
   { id: 'condiments', label: 'Extras', tag: 'condiments', image: '' },

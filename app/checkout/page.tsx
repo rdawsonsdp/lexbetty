@@ -25,6 +25,7 @@ interface FormData {
   zip: string;
 
   // Event Details
+  eventName: string;
   eventDate: string;
   deliveryTime: string;
 
@@ -123,7 +124,6 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState<'quote' | 'order' | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [specialOrderConfirmed, setSpecialOrderConfirmed] = useState(false);
-  const hasEventInfo = !!state.eventInfo;
 
   // Check for special order items in the cart
   const specialOrderItems = state.selectedItems.filter(item => item.product.specialOrder);
@@ -151,6 +151,7 @@ export default function CheckoutPage() {
     city: state.eventInfo?.city || '',
     state: state.eventInfo?.state || '',
     zip: state.eventInfo?.zip || '',
+    eventName: state.eventInfo?.eventName || '',
     eventDate: state.eventInfo?.eventDate || '',
     deliveryTime: state.eventInfo?.eventTime || '',
     deliveryType: 'delivery',
@@ -653,9 +654,28 @@ export default function CheckoutPage() {
                     </svg>
                     Event Details
                   </h2>
-                  {hasEventInfo && (
-                    <p className="text-sm text-gray-500 mb-4">Pre-filled from event planning. Update if needed.</p>
-                  )}
+
+                  <div className="flex items-start gap-3 p-4 mb-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+                    <svg className="w-5 h-5 flex-shrink-0 mt-0.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>All catering orders require a minimum of <strong>72 hours</strong> advance notice.</span>
+                  </div>
+
+                  {/* Event Name */}
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Event Name <span className="text-gray-400">(optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="eventName"
+                      value={formData.eventName}
+                      onChange={handleInputChange}
+                      placeholder="e.g. Office Party, Wedding Reception, Corporate Lunch"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50"
+                    />
+                  </div>
 
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
@@ -673,6 +693,19 @@ export default function CheckoutPage() {
                         }`}
                       />
                       {errors.eventDate && <p className="text-red-500 text-xs mt-1">{errors.eventDate}</p>}
+                      {formData.eventDate && (() => {
+                        const selected = new Date(formData.eventDate + 'T00:00:00');
+                        const now = new Date();
+                        const hoursUntil = (selected.getTime() - now.getTime()) / (1000 * 60 * 60);
+                        if (hoursUntil < 72) {
+                          return (
+                            <p className="text-red-600 text-xs mt-1 font-medium">
+                              This date is less than 72 hours away. For rush orders, call (312) 600-8155.
+                            </p>
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
 
                     <div>

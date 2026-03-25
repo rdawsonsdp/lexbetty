@@ -75,7 +75,7 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     id: 'pulled-chicken',
     title: 'Pulled Chicken',
     description: 'Slow-smoked whole chicken, hand-shredded and tossed in our original BBQ sauce. Light, lean, and full of flavor.',
-    image: '/images/chicken-quarters.jpg',
+    image: '/images/chicken-quarters.webp',
     categories: ['lunch'],
     pricing: { type: 'per-each', priceEach: 15, minOrder: 2, unit: 'lb' },
     tags: ['bbq', 'poultry', 'meats'],
