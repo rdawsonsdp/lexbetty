@@ -1,285 +1,200 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useCatering } from '@/context/CateringContext';
-import { EventInfo } from '@/lib/types';
-
-type Phase = 'occasion' | 'datetime' | 'notes' | 'transition';
-
-const OCCASION_SUGGESTIONS = ['Office Party', 'Wedding', 'Birthday', 'Corporate Lunch', 'Graduation', 'Family Reunion'];
-
-const DELIVERY_TIMES = [
-  '7:00 AM', '7:30 AM', '8:00 AM', '8:30 AM', '9:00 AM', '9:30 AM',
-  '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM',
-  '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM',
-  '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM', '6:00 PM',
-];
+import { BUDGET_RANGES } from '@/lib/budgets';
+import { useActivePackages } from '@/lib/hooks/useActivePackages';
+import { formatCurrency } from '@/lib/pricing';
+import { OrderType } from '@/lib/types';
+import BudgetCard from './BudgetCard';
 
 export default function EventInfoStep() {
-  const { dispatch } = useCatering();
+  const { state, dispatch } = useCatering();
   const sectionRef = useRef<HTMLDivElement>(null);
-
-  const [phase, setPhase] = useState<Phase>('occasion');
-  const [eventName, setEventName] = useState('');
-  const [eventDate, setEventDate] = useState('');
-  const [eventTime, setEventTime] = useState('');
-  const [specialInstructions, setSpecialInstructions] = useState('');
-
-  // Track completed phases for summary display
-  const [completedPhases, setCompletedPhases] = useState<Phase[]>([]);
+  const quickHeadcounts = [10, 25, 50, 100, 150, 200];
 
   useEffect(() => {
     sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
 
-  // Scroll when phase changes
-  useEffect(() => {
-    setTimeout(() => {
-      sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
-  }, [phase]);
-
-  const getMinDate = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
+  const handleHeadcountChange = (value: number) => {
+    dispatch({ type: 'SET_HEADCOUNT', payload: Math.max(1, value) });
   };
 
-  const advancePhase = (from: Phase, to: Phase) => {
-    setCompletedPhases(prev => [...prev, from]);
-    setPhase(to);
+  const handleSelectBudget = (budget: typeof BUDGET_RANGES[number]) => {
+    dispatch({ type: 'SET_BUDGET_RANGE', payload: budget });
   };
 
-  const handleOccasionNext = () => {
-    advancePhase('occasion', 'datetime');
+  const handleSelectOrderType = (orderType: OrderType) => {
+    dispatch({ type: 'SET_ORDER_TYPE', payload: orderType });
   };
 
-  const handleDateTimeNext = () => {
-    if (eventDate && eventTime) {
-      advancePhase('datetime', 'notes');
-    }
-  };
-
-  const handleFinish = () => {
-    advancePhase('notes', 'transition');
-
-    const eventInfo: EventInfo = {
-      eventName: eventName || undefined,
-      eventDate,
-      eventTime,
-      specialInstructions: specialInstructions || undefined,
-    };
-
-    // Brief pause to show transition message, then dispatch
-    setTimeout(() => {
-      dispatch({ type: 'SET_EVENT_INFO', payload: eventInfo });
-    }, 2000);
+  const handleSkip = () => {
+    // Skip straight to build-your-own menu
+    dispatch({ type: 'SET_ORDER_TYPE', payload: 'build-your-own' });
   };
 
   const handleBack = () => {
     dispatch({ type: 'GO_BACK' });
   };
 
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return '';
-    return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', {
-      weekday: 'short', month: 'short', day: 'numeric',
-    });
-  };
+  // Get package price range for preview
+  const { packages: allPackages } = useActivePackages();
+  const packages = state.eventType ? allPackages.filter(pkg => pkg.categories.includes(state.eventType!)) : [];
+  const minPrice = packages.length > 0 ? Math.min(...packages.map(p => p.pricePerPerson)) : 0;
+  const maxPrice = packages.length > 0 ? Math.max(...packages.map(p => p.pricePerPerson)) : 0;
+
+  const orderOptions = [
+    {
+      id: 'build-your-own' as OrderType,
+      icon: '\u{1F6E0}\u{FE0F}',
+      title: 'BUILD YOUR OWN',
+      description: 'Customize your menu with individual items',
+      detail: 'Choose exactly what you want, item by item',
+    },
+    {
+      id: 'packages' as OrderType,
+      icon: '\u{1F4E6}',
+      title: 'CHOOSE A PACKAGE',
+      description: 'Pre-built menus ready to order',
+      detail: packages.length > 0
+        ? `Packages from ${formatCurrency(minPrice)}-${formatCurrency(maxPrice)}/person for ${state.headcount} guests`
+        : 'Curated menu packages',
+    },
+  ];
 
   return (
     <div ref={sectionRef} className="bg-white py-12 sm:py-16 scroll-mt-4">
-      <div className="container mx-auto px-4 max-w-2xl">
-        <div className="text-center mb-10">
+      <div className="container mx-auto px-4">
+        {/* Headcount Section */}
+        <div className="text-center mb-12">
           <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#1A1A1A] tracking-wider mb-4">
-            TELL US ABOUT YOUR EVENT
+            HOW MANY GUESTS?
           </h2>
-          <p className="text-gray-600 text-base sm:text-lg">
-            A few quick details so we can make everything perfect.
+          <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto mb-8">
+            The more we know, the better we serve. This helps us get your portions just right.
           </p>
-        </div>
 
-        <div className="space-y-6">
-          {/* Completed phase summaries */}
-          {completedPhases.includes('occasion') && phase !== 'occasion' && (
-            <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-lg text-sm text-gray-600 animate-fade-in">
-              <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              <span>{eventName ? `"${eventName}"` : 'Occasion set'}</span>
-            </div>
-          )}
-
-          {completedPhases.includes('datetime') && phase !== 'datetime' && (
-            <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-lg text-sm text-gray-600 animate-fade-in">
-              <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              <span>{formatDate(eventDate)} at {eventTime}</span>
-            </div>
-          )}
-
-          {/* Phase 1: Occasion */}
-          {phase === 'occasion' && (
-            <div className="animate-fade-in space-y-6">
-              <h3 className="font-oswald text-2xl font-bold text-[#1A1A1A] tracking-wide">
-                What&apos;s the occasion?
-              </h3>
-              <p className="text-gray-500 text-sm">Totally optional — helps us tailor the experience.</p>
-
-              <div className="flex flex-wrap gap-2">
-                {OCCASION_SUGGESTIONS.map(suggestion => (
-                  <button
-                    key={suggestion}
-                    onClick={() => setEventName(suggestion)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
-                      eventName === suggestion
-                        ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-[#E8621A] hover:text-[#1A1A1A]'
-                    }`}
-                  >
-                    {suggestion}
-                  </button>
-                ))}
-              </div>
-
-              <input
-                type="text"
-                value={eventName}
-                onChange={e => setEventName(e.target.value)}
-                placeholder="Or type your own..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 text-[#1A1A1A]"
-              />
-
-              <button
-                onClick={handleOccasionNext}
-                className="w-full bg-[#1A1A1A] text-white font-oswald font-bold px-8 py-4 rounded-lg hover:bg-gray-800 transition-colors text-lg tracking-wide"
-              >
-                {eventName ? 'NEXT' : 'SKIP'}
-              </button>
-            </div>
-          )}
-
-          {/* Phase 2: Date & Time */}
-          {phase === 'datetime' && (
-            <div className="animate-fade-in space-y-6">
-              <h3 className="font-oswald text-2xl font-bold text-[#1A1A1A] tracking-wide">
-                When is your event?
-              </h3>
-
-              <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
-                <svg className="w-5 h-5 flex-shrink-0 mt-0.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>All catering orders require a minimum of <strong>72 hours</strong> advance notice.</span>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Event Date</label>
-                <input
-                  type="date"
-                  value={eventDate}
-                  onChange={e => setEventDate(e.target.value)}
-                  min={getMinDate()}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 text-[#1A1A1A]"
-                />
-                {eventDate && (() => {
-                  const selected = new Date(eventDate + 'T00:00:00');
-                  const now = new Date();
-                  const hoursUntil = (selected.getTime() - now.getTime()) / (1000 * 60 * 60);
-                  if (hoursUntil < 72) {
-                    return (
-                      <div className="flex items-start gap-3 p-4 mt-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800 animate-fade-in">
-                        <svg className="w-5 h-5 flex-shrink-0 mt-0.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span>This date is less than 72 hours away. Catering orders need at least <strong>72 hours</strong> advance notice. For rush orders, call <strong>(312) 600-8155</strong> to check availability.</span>
-                      </div>
-                    );
-                  }
-                  return null;
-                })()}
-              </div>
-
-              {eventDate && (
-                <div className="animate-fade-in">
-                  <p className="font-oswald text-lg font-bold text-[#1A1A1A] mb-2">
-                    And what time should we have everything ready?
-                  </p>
-                  <select
-                    value={eventTime}
-                    onChange={e => setEventTime(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 text-[#1A1A1A]"
-                  >
-                    <option value="">Select a time...</option>
-                    {DELIVERY_TIMES.map(time => (
-                      <option key={time} value={time}>{time}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {eventDate && eventTime && (
-                <button
-                  onClick={handleDateTimeNext}
-                  className="w-full bg-[#1A1A1A] text-white font-oswald font-bold px-8 py-4 rounded-lg hover:bg-gray-800 transition-colors text-lg tracking-wide animate-fade-in"
-                >
-                  NEXT
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Phase 3: Special Instructions */}
-          {phase === 'notes' && (
-            <div className="animate-fade-in space-y-6">
-              <h3 className="font-oswald text-2xl font-bold text-[#1A1A1A] tracking-wide">
-                Anything else we should know?
-              </h3>
-              <p className="text-gray-500 text-sm">
-                Dietary needs, loading dock access, setup preferences — whatever helps us nail it.
-              </p>
-
-              <textarea
-                value={specialInstructions}
-                onChange={e => setSpecialInstructions(e.target.value)}
-                rows={4}
-                placeholder="e.g. Gluten-free options needed, use the service entrance on Oak St..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 text-[#1A1A1A] resize-none"
-              />
-
-              <div className="flex gap-4">
-                <button
-                  onClick={handleFinish}
-                  className="flex-1 bg-[#1A1A1A] text-white font-oswald font-bold px-8 py-4 rounded-lg hover:bg-gray-800 transition-colors text-lg tracking-wide"
-                >
-                  {specialInstructions ? 'CONTINUE' : 'SKIP & CONTINUE'}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Phase 5: Transition */}
-          {phase === 'transition' && (
-            <div className="animate-fade-in text-center py-12">
-              <h3 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#1A1A1A] tracking-wider animate-pulse">
-                Ok. Let&apos;s plan your meal.
-              </h3>
-            </div>
-          )}
-        </div>
-
-        {/* Back button (not shown during transition) */}
-        {phase !== 'transition' && (
-          <div className="mt-10 text-center">
+          {/* Large Headcount Input */}
+          <div className="flex items-center justify-center gap-4 mb-6">
             <button
-              onClick={handleBack}
-              className="font-oswald text-gray-500 hover:text-[#1A1A1A] transition-colors tracking-wide"
+              onClick={() => handleHeadcountChange(state.headcount - 5)}
+              className="w-14 h-14 rounded-full bg-[#F5EDE0] hover:bg-[#E8621A] text-[#1A1A1A] font-bold text-2xl transition-colors flex items-center justify-center"
+              aria-label="Decrease guests by 5"
             >
-              &larr; BACK TO EVENT TYPE
+              -
+            </button>
+            <input
+              type="number"
+              value={state.headcount}
+              onChange={(e) => handleHeadcountChange(parseInt(e.target.value) || 10)}
+              className="w-28 h-14 text-center text-3xl font-oswald font-bold border-2 border-[#1A1A1A] rounded-lg focus:ring-2 focus:ring-[#E8621A]/50 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              min="1"
+            />
+            <button
+              onClick={() => handleHeadcountChange(state.headcount + 5)}
+              className="w-14 h-14 rounded-full bg-[#F5EDE0] hover:bg-[#E8621A] text-[#1A1A1A] font-bold text-2xl transition-colors flex items-center justify-center"
+              aria-label="Increase guests by 5"
+            >
+              +
             </button>
           </div>
-        )}
+
+          {/* Quick-select pills */}
+          <div className="flex flex-wrap justify-center gap-3">
+            {quickHeadcounts.map((n) => {
+              const isSelected = state.headcount === n;
+              return (
+                <button
+                  key={n}
+                  onClick={() => handleHeadcountChange(n)}
+                  className={`px-5 py-3 rounded-xl text-sm font-bold transition-all duration-300 border-2 ${
+                    isSelected
+                      ? 'bg-[#1A1A1A] text-white border-[#1A1A1A] scale-[1.02] shadow-md'
+                      : 'bg-[#F5EDE0] text-gray-600 border-transparent opacity-50 grayscale hover:opacity-100 hover:grayscale-0 hover:bg-[#E8621A]/30 hover:text-[#1A1A1A]'
+                  }`}
+                >
+                  {n} guests
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Budget Section */}
+        <div className="text-center mb-12">
+          <h3 className="font-oswald text-2xl sm:text-3xl font-bold text-[#1A1A1A] tracking-wider mb-3">
+            WHAT&apos;S YOUR PER-PERSON BUDGET?
+          </h3>
+          <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto mb-8">
+            Totally optional — this just helps us highlight the best value for your group.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
+            {BUDGET_RANGES.map((budget) => (
+              <BudgetCard
+                key={budget.id}
+                budget={budget}
+                isSelected={state.budgetRange?.id === budget.id}
+                hasSelection={!!state.budgetRange}
+                onSelect={() => handleSelectBudget(budget)}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Order Type Section */}
+        <div className="text-center mb-8">
+          <h3 className="font-oswald text-2xl sm:text-3xl font-bold text-[#1A1A1A] tracking-wider mb-3">
+            HOW WOULD YOU LIKE TO ORDER?
+          </h3>
+          <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto mb-8">
+            However you like to plan — we&apos;ve got you covered either way.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            {orderOptions.map((option, index) => (
+              <div
+                key={option.id}
+                className="animate-scale-in"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div
+                  onClick={() => handleSelectOrderType(option.id)}
+                  className={`
+                    bg-white border-2 rounded-xl p-8 sm:p-10 text-center cursor-pointer
+                    transition-all duration-300 hover:scale-105 shadow-md
+                    ${state.orderType === option.id
+                      ? 'border-[#1A1A1A] bg-[#E8621A]/20'
+                      : 'border-gray-200 hover:border-[#E8621A]'
+                    }
+                  `}
+                >
+                  <div className="text-6xl sm:text-7xl mb-4">{option.icon}</div>
+                  <h3 className="font-oswald text-2xl sm:text-3xl font-bold text-[#1A1A1A] mb-3 tracking-wide">
+                    {option.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm sm:text-base mb-2">
+                    {option.description}
+                  </p>
+                  <p className="text-xs text-[#E8621A] font-semibold">
+                    {option.detail}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Back */}
+        <div className="mt-10 text-center">
+          <button
+            onClick={handleBack}
+            className="font-oswald text-gray-500 hover:text-[#1A1A1A] transition-colors tracking-wide"
+          >
+            &larr; BACK TO EVENT TYPE
+          </button>
+        </div>
       </div>
     </div>
   );

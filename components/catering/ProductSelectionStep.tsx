@@ -6,26 +6,26 @@ import { getEventTypeName } from '@/lib/event-types';
 import { formatCurrency } from '@/lib/pricing';
 import { getBudgetStatus } from '@/lib/budgets';
 import { useActiveProducts } from '@/lib/hooks/useActiveProducts';
-import { MEAT_TAG, isMeatTagged } from '@/lib/meat-planner';
+import { MEAT_TAG } from '@/lib/meat-planner';
+import Image from 'next/image';
 import CateringProductCard from './CateringProductCard';
+import MenuItemRow from './MenuItemRow';
 import CateringCart from './CateringCart';
 import MeatPlannerPopup from './MeatPlannerPopup';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 
-interface ProductSelectionStepProps {
-  activeFilters?: string[];
-  onToggleFilter?: (tag: string) => void;
-  filterBar?: React.ReactNode;
-  recommendedSection?: React.ReactNode;
-}
+// Menu section definitions — order matters for display
+const MENU_SECTIONS = [
+  { id: 'meats', label: 'Meats', tag: 'meats', image: '/images/brisket-board.png' },
+  { id: 'sliders', label: 'Sliders', tag: 'sliders', image: '/images/sliders-board.png' },
+  { id: 'sides', label: 'Sides', tag: 'sides', image: '/images/sides-hero.jpg' },
+  { id: 'dessert', label: 'Desserts', tag: 'dessert', image: '' },
+  { id: 'beverage', label: 'Drinks', tag: 'beverage', image: '' },
+  { id: 'condiments', label: 'Extras', tag: 'condiments', image: '' },
+];
 
-export default function ProductSelectionStep({
-  activeFilters = [],
-  onToggleFilter,
-  filterBar,
-  recommendedSection,
-}: ProductSelectionStepProps) {
+export default function ProductSelectionStep() {
   const { state, dispatch, perPersonCost, totalCost } = useCatering();
   const [searchTerm, setSearchTerm] = useState('');
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -101,10 +101,8 @@ export default function ProductSelectionStep({
     if (meatsAdded) setMeatsPlanned(true);
   };
 
-  // When meats are managed via planner, filter them out of the grid
-  const products = meatsPlanned
-    ? allProducts.filter(p => !p.tags?.includes(MEAT_TAG))
-    : allProducts;
+  // Show all products including meats (meat planner selections show in Meats section)
+  const products = allProducts;
 
   // Meat summary for the bar
   const meatItems = meatsPlanned
@@ -123,36 +121,35 @@ export default function ProductSelectionStep({
     return sum;
   }, 0);
 
-  // Filter products based on search term and dietary filters
+  // Filter products based on search term only
   const filteredProducts = products.filter((product) => {
-    // Search filter
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      const matchesSearch =
+      return (
         product.title.toLowerCase().includes(term) ||
         product.description.toLowerCase().includes(term) ||
-        product.tags?.some(tag => tag.toLowerCase().includes(term));
-      if (!matchesSearch) return false;
-    }
-    // Dietary filters (must match ALL active filters)
-    if (activeFilters.length > 0) {
-      const matchesFilters = activeFilters.every(f => product.tags?.includes(f));
-      if (!matchesFilters) return false;
+        product.tags?.some(tag => tag.toLowerCase().includes(term))
+      );
     }
     return true;
   });
 
-  // Separate featured items from regular items
-  const featuredProducts = filteredProducts.filter(p => p.featured);
-  const regularProducts = filteredProducts.filter(p => !p.featured);
+  // Group products into sections by tag
+  const groupedSections = MENU_SECTIONS.map(section => ({
+    ...section,
+    products: filteredProducts
+      .filter(p => p.tags?.includes(section.tag))
+      .sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0)),
+  })).filter(section => section.products.length > 0);
 
-  // Sort regular products by pricing type to group similar items
-  const sortedProducts = [...regularProducts].sort((a, b) => {
-    const typeOrder: Record<string, number> = { 'tray': 0, 'pan': 1, 'per-person': 2, 'per-dozen': 3, 'per-each': 4, 'per-lb': 4, 'per-container': 5, 'flat': 6 };
-    const typeA = typeOrder[a.pricing.type] ?? 99;
-    const typeB = typeOrder[b.pricing.type] ?? 99;
-    return typeA - typeB;
-  });
+  // Section refs for scroll-to navigation
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+
+  const scrollToSection = (sectionId: string) => {
+    setActiveSection(sectionId);
+    sectionRefs.current[sectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   const handleContinueToExtras = () => {
     dispatch({ type: 'SET_STEP', payload: 6 });
@@ -175,7 +172,7 @@ export default function ProductSelectionStep({
             )}
           </div>
           <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#1A1A1A] tracking-wider mb-4">
-            BUILD YOUR {state.eventType?.toUpperCase() || 'EVENT'}
+            BUILD YOUR EVENT ORDER
           </h2>
           <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto mb-6">
             Everything here is crowd-tested and loved. Sizes adjust automatically for your {state.headcount} guests.
@@ -263,68 +260,85 @@ export default function ProductSelectionStep({
           />
         </div>
 
-        {/* Dietary Filter Bar (injected from parent) */}
-        {filterBar && <div className="mb-6">{filterBar}</div>}
-
-        {/* Recommended section removed — featured items shown inline below */}
-
+        {/* Category Section Nav */}
+        {groupedSections.length > 1 && (
+          <div className="flex overflow-x-auto gap-2 pb-1 mb-6 scrollbar-hide">
+            {groupedSections.map((section) => {
+              const isActive = activeSection === section.id;
+              return (
+                <button
+                  key={section.id}
+                  onClick={() => scrollToSection(section.id)}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
+                    isActive
+                      ? 'bg-[#1A1A1A] text-white'
+                      : 'bg-white text-gray-600 border border-gray-200 hover:border-[#E8621A] hover:text-[#1A1A1A]'
+                  }`}
+                >
+                  {section.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-          {/* Product Grid */}
+          {/* Menu Sections */}
           <div className="lg:col-span-2">
-            {/* Featured Items Banner */}
-            {featuredProducts.length > 0 && (
-              <div className="mb-10">
-                {/* Subtle header */}
-                <div className="mb-5">
-                  <p className="font-oswald text-xs tracking-[0.2em] text-[#9B9189] uppercase mb-1">
-                    Chef&apos;s Recommendation
-                  </p>
-                  <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#1A1A1A] tracking-wide">
-                    The BBQ Spread
-                  </h3>
-                </div>
-
-                {/* Featured Products — compact grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {featuredProducts.map((product) => (
-                    <CateringProductCard key={product.id} product={product} featured />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {sortedProducts.length === 0 && featuredProducts.length === 0 ? (
+            {groupedSections.length === 0 ? (
               <Card className="text-center py-12">
                 <p className="text-gray-500">
-                  {searchTerm || activeFilters.length > 0
-                    ? 'No products match your filters.'
+                  {searchTerm
+                    ? 'No products match your search.'
                     : 'No products available for this event type.'}
                 </p>
-                {(searchTerm || activeFilters.length > 0) && (
+                {searchTerm && (
                   <button
-                    onClick={() => {
-                      setSearchTerm('');
-                      if (onToggleFilter) activeFilters.forEach(f => onToggleFilter(f));
-                    }}
+                    onClick={() => setSearchTerm('')}
                     className="mt-3 text-[#E8621A] hover:underline text-sm"
                   >
-                    Clear filters
+                    Clear search
                   </button>
                 )}
               </Card>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-6">
-                {sortedProducts.map((product, index) => (
-                  <div
-                    key={product.id}
-                    className="animate-scale-in"
-                    style={{ animationDelay: `${Math.min(index * 0.03, 0.3)}s` }}
-                  >
-                    <CateringProductCard product={product} />
+              groupedSections.map((section) => (
+                <div
+                  key={section.id}
+                  ref={(el) => { sectionRefs.current[section.id] = el; }}
+                  className="mb-12 scroll-mt-24"
+                >
+                  {/* Section Header */}
+                  <div className="mb-5">
+                    <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#1A1A1A] tracking-wide uppercase">
+                      {section.label}
+                    </h3>
+                    <div className="w-12 h-1 bg-[#E8621A] mt-2" />
                   </div>
-                ))}
-              </div>
+
+                  {/* 2-column: hero image left, menu items right */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Left: Hero image */}
+                    {section.image && (
+                      <div className="relative aspect-[3/4] rounded-xl overflow-hidden">
+                        <Image
+                          src={section.image}
+                          alt={section.label}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
+
+                    {/* Right: Menu item rows */}
+                    <div className={section.image ? '' : 'md:col-span-2'}>
+                      {section.products.map((product) => (
+                        <MenuItemRow key={product.id} product={product} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))
             )}
           </div>
 

@@ -4,9 +4,12 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { FEATURES } from '@/lib/feature-flags';
+import { useCatering } from '@/context/CateringContext';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { state } = useCatering();
+  const cartCount = state.selectedItems.length;
 
   const navLinks = [
     { href: '/', label: 'HOME' },
@@ -73,12 +76,20 @@ export default function Header() {
                 </svg>
               </a>
             </div>
-            {/* Order CTA */}
+            {/* Cart */}
             <Link
-              href="/#catering"
-              className="ml-2 bg-[#E8621A] text-white font-oswald text-sm xl:text-base tracking-wider px-5 py-2 hover:opacity-90 transition-opacity whitespace-nowrap"
+              href="/checkout"
+              className="ml-2 relative bg-[#E8621A] text-white font-oswald text-sm xl:text-base tracking-wider px-5 py-2 hover:opacity-90 transition-opacity whitespace-nowrap flex items-center gap-2"
             >
-              BUILD YOUR MENU
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              CART
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-[#1A1A1A] text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                  {cartCount}
+                </span>
+              )}
             </Link>
           </nav>
 
@@ -135,11 +146,11 @@ export default function Header() {
               ADMIN
             </Link>
             <Link
-              href="/#catering"
-              className="block mt-3 bg-[#E8621A] text-white font-oswald tracking-wider px-5 py-3 text-center hover:opacity-90 transition-opacity"
+              href="/checkout"
+              className="block mt-3 bg-[#E8621A] text-white font-oswald tracking-wider px-5 py-3 text-center hover:opacity-90 transition-opacity relative"
               onClick={() => setMobileMenuOpen(false)}
             >
-              BUILD YOUR MENU
+              CART {cartCount > 0 && `(${cartCount})`}
             </Link>
             <div className="flex items-center gap-4 mt-4 pt-3 border-t border-gray-200">
               <a

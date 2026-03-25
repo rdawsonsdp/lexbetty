@@ -10,7 +10,7 @@ export const EVENT_TYPES: EventTypeConfig[] = [
   },
   {
     id: 'alacarte',
-    name: 'Pick Your Favorites',
+    name: 'Jump In and Order',
     description: 'Order exactly what you want, ready when your team is',
     icon: '🍽️',
     suggestedItems: ['brisket', 'pulled pork', 'rib tips', 'mac n cheese', 'banana pudding'],

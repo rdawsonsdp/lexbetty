@@ -283,16 +283,16 @@ export default function CateringCart({ onCheckout }: CateringCartProps) {
                   {formatCurrency(deliveryFee)}
                 </span>
               </div>
-              <div className="flex justify-between text-sm pt-2 border-t border-gray-200">
-                <span className="text-gray-600 font-medium">Order Total</span>
-                <span className="font-bold text-[#1A1A1A]">
-                  {formatCurrency(orderTotal)}
+              <div className="flex justify-between text-sm">
+                <span className="text-[#E8621A] font-bold">Per Person</span>
+                <span className="font-bold text-[#E8621A]">
+                  {formatCurrency(totalPerPerson)}
                 </span>
               </div>
               <div className="flex justify-between text-lg font-oswald font-bold pt-2 border-t border-gray-200">
-                <span className="text-[#1A1A1A]">Per Person</span>
-                <span className="text-[#E8621A]">
-                  {formatCurrency(totalPerPerson)}
+                <span className="text-[#1A1A1A]">Order Total</span>
+                <span className="text-[#1A1A1A]">
+                  {formatCurrency(orderTotal)}
                 </span>
               </div>
             </div>

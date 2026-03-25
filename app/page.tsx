@@ -11,22 +11,15 @@ import BettyAILogo from '@/components/ui/BettyAILogo';
 import { FEATURES } from '@/lib/feature-flags';
 import StepIndicator from '@/components/catering/StepIndicator';
 import EventInfoStep from '@/components/catering/EventInfoStep';
-import HeadcountBudgetStep from '@/components/catering/HeadcountBudgetStep';
-import OrderTypeStep from '@/components/catering/OrderTypeStep';
 import ProductSelectionStep from '@/components/catering/ProductSelectionStep';
 import PackageSelectionStep from '@/components/catering/PackageSelectionStep';
 import EquipmentStep from '@/components/catering/EquipmentStep';
 import ValueProposition from '@/components/marketing/ValueProposition';
-import ClientLogos from '@/components/marketing/ClientLogos';
-
-import DietaryFilterBar from '@/components/catering/DietaryFilterBar';
-import RecommendedItems from '@/components/catering/RecommendedItems';
 
 export default function HomePage() {
   const router = useRouter();
   const { state, dispatch } = useCatering();
   const { eventTypes: EVENT_TYPES } = useEnabledEventTypes();
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showEventTypes, setShowEventTypes] = useState(true);
 
   const handlePlanEvent = () => {
@@ -44,24 +37,17 @@ export default function HomePage() {
       type: 'SET_EVENT_TYPE',
       payload: eventTypeId as 'breakfast' | 'lunch' | 'alacarte',
     });
-    // A la carte skips headcount/budget and goes straight to product selection
+    // A la carte skips headcount/budget and goes straight to build-your-own menu
     if (eventTypeId === 'alacarte') {
       dispatch({ type: 'SET_ORDER_MODE', payload: 'wizard' });
-      dispatch({ type: 'SET_STEP', payload: 4 });
+      dispatch({ type: 'SET_HEADCOUNT', payload: 10 });
+      dispatch({ type: 'SET_ORDER_TYPE', payload: 'build-your-own' });
     }
   };
 
   const eventImages: Record<string, string> = {
     lunch: '/images/mac-n-cheese-pan.webp',
     alacarte: '/images/sliders-board.png',
-  };
-
-  const handleToggleFilter = (tag: string) => {
-    setActiveFilters(prev =>
-      prev.includes(tag)
-        ? prev.filter(f => f !== tag)
-        : [...prev, tag]
-    );
   };
 
   // Show the wizard step indicator only after entering the wizard path
@@ -155,9 +141,6 @@ export default function HomePage() {
         />
       )}
 
-      {/* Client Logos */}
-      <ClientLogos />
-
       {/* Event Type Selection */}
       {(
         <section className="bg-[#F5EDE0] py-12 sm:py-16">
@@ -222,19 +205,9 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* Step 2: Event Info */}
+      {/* Step 2: Guests, Budget & Order Type (combined) */}
       {state.currentStep >= 2 && (
         <EventInfoStep />
-      )}
-
-      {/* Step 3: Headcount & Budget */}
-      {state.currentStep >= 3 && (
-        <HeadcountBudgetStep />
-      )}
-
-      {/* Step 4: Order Type */}
-      {state.currentStep >= 4 && (
-        <OrderTypeStep />
       )}
 
       {/* Step 5: Product or Package Selection */}
@@ -242,19 +215,7 @@ export default function HomePage() {
         state.orderType === 'packages' ? (
           <PackageSelectionStep />
         ) : (
-          <ProductSelectionStep
-            activeFilters={activeFilters}
-            onToggleFilter={handleToggleFilter}
-            filterBar={
-              <DietaryFilterBar
-                activeTags={activeFilters}
-                onToggleTag={handleToggleFilter}
-              />
-            }
-            recommendedSection={
-              <RecommendedItems />
-            }
-          />
+          <ProductSelectionStep />
         )
       )}
 
