@@ -4,6 +4,7 @@ import './globals.css';
 import Layout from '@/components/layout/Layout';
 import { CateringProvider } from '@/context/CateringContext';
 import { AnalyticsProvider } from '@/context/AnalyticsContext';
+import { AuthProvider } from '@/context/AuthContext';
 
 const oswald = Oswald({
   variable: '--font-oswald',
@@ -47,9 +48,11 @@ export default function RootLayout({
         className={`${oswald.variable} ${robotoCondensed.variable} antialiased`}
       >
         <AnalyticsProvider>
-          <CateringProvider>
-            <Layout>{children}</Layout>
-          </CateringProvider>
+          <AuthProvider>
+            <CateringProvider>
+              <Layout>{children}</Layout>
+            </CateringProvider>
+          </AuthProvider>
         </AnalyticsProvider>
       </body>
     </html>

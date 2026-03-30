@@ -344,7 +344,7 @@ export default function ProductSelectionStep() {
 
           {/* Cart Sidebar - Desktop Only */}
           <div className="hidden lg:block lg:col-span-1">
-            <div className="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto rounded-xl">
+            <div className="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto overscroll-contain rounded-xl scrollbar-thin">
               <CateringCart onCheckout={handleContinueToExtras} />
             </div>
           </div>

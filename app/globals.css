@@ -342,6 +342,25 @@ a:active {
   display: none;
 }
 
+/* Thin but visible scrollbar for cart areas */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #9B9189 transparent;
+}
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #9B9189;
+  border-radius: 3px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #1A1A1A;
+}
+
 /* Better scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

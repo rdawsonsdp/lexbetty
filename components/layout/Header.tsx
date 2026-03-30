@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { FEATURES } from '@/lib/feature-flags';
 import { useCatering } from '@/context/CateringContext';
+import SignInDropdown from '@/components/auth/SignInDropdown';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -76,6 +77,8 @@ export default function Header() {
                 </svg>
               </a>
             </div>
+            {/* Account */}
+            {FEATURES.CUSTOMER_ACCOUNTS_ENABLED && <SignInDropdown />}
             {/* Cart */}
             <Link
               href="/checkout"
@@ -145,6 +148,12 @@ export default function Header() {
             >
               ADMIN
             </Link>
+            {/* Mobile Account */}
+            {FEATURES.CUSTOMER_ACCOUNTS_ENABLED && (
+              <div className="py-3">
+                <SignInDropdown />
+              </div>
+            )}
             <Link
               href="/checkout"
               className="block mt-3 bg-[#E8621A] text-white font-oswald tracking-wider px-5 py-3 text-center hover:opacity-90 transition-opacity relative"

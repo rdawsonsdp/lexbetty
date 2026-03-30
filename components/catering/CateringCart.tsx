@@ -44,6 +44,10 @@ export default function CateringCart({ onCheckout }: CateringCartProps) {
     dispatch({ type: 'REMOVE_ITEM', payload: productId });
   };
 
+  const handleUpdateQuantity = (productId: string, newQuantity: number) => {
+    dispatch({ type: 'UPDATE_ITEM_QUANTITY', payload: { productId, quantity: newQuantity } });
+  };
+
   const handleClearAll = () => {
     dispatch({ type: 'CLEAR_ITEMS' });
   };
@@ -91,7 +95,7 @@ export default function CateringCart({ onCheckout }: CateringCartProps) {
 
   return (
     <>
-      <Card className="animate-scale-in delay-200 bg-[#F5EDE0]" hover={false}>
+      <Card className="animate-scale-in delay-200 bg-[#F5EDE0] !border-[3px] !border-[#1A1A1A]/25 shadow-lg" hover={false}>
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg sm:text-xl font-oswald font-bold text-[#1A1A1A] tracking-wide">
@@ -217,36 +221,64 @@ export default function CateringCart({ onCheckout }: CateringCartProps) {
           </div>
         ) : (
           <>
-            <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6 max-h-[300px] sm:max-h-[350px] overflow-y-auto">
-              {calculatedItems.map((item) => (
-                <div
-                  key={item.product.id}
-                  className="flex justify-between items-start border-b border-gray-200 pb-3"
-                >
-                  <div className="flex-1 min-w-0 pr-2">
-                    <p className="font-oswald font-semibold text-[#1A1A1A] text-sm truncate">
-                      {item.itemQuantity > 1 ? `${item.itemQuantity} × ` : ''}{item.product.title}
-                    </p>
-                    <p className="text-xs text-[#9B9189] mt-0.5">
-                      {item.displayText}
-                    </p>
+            <div className="space-y-2 mb-4 sm:mb-6 max-h-[400px] sm:max-h-[450px] overflow-y-auto overscroll-contain pr-1 scrollbar-thin">
+              {calculatedItems.map((item) => {
+                const currentItem = state.selectedItems.find(si => si.product.id === item.product.id);
+                const qty = currentItem?.quantity || 1;
+                const minQty = item.product.minOrderQuantity || 1;
+
+                return (
+                  <div
+                    key={item.product.id}
+                    className="bg-white rounded-lg p-3 border border-gray-200"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1 min-w-0 pr-2">
+                        <p className="font-oswald font-semibold text-[#1A1A1A] text-sm truncate">
+                          {item.product.title}
+                        </p>
+                        <p className="text-xs text-[#9B9189] mt-0.5">
+                          {item.displayText}
+                        </p>
+                      </div>
+                      <p className="font-oswald font-bold text-[#1A1A1A] text-sm whitespace-nowrap">
+                        {formatCurrency(item.totalPrice)}
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleUpdateQuantity(item.product.id, qty - 1)}
+                          className="w-7 h-7 flex items-center justify-center rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 transition-colors text-sm font-bold"
+                          aria-label={`Decrease ${item.product.title}`}
+                        >
+                          -
+                        </button>
+                        <span className="w-8 text-center text-sm font-bold text-[#1A1A1A]">{qty}</span>
+                        <button
+                          onClick={() => handleUpdateQuantity(item.product.id, qty + 1)}
+                          className="w-7 h-7 flex items-center justify-center rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 transition-colors text-sm font-bold"
+                          aria-label={`Increase ${item.product.title}`}
+                        >
+                          +
+                        </button>
+                        {minQty > 1 && (
+                          <span className="text-[10px] text-gray-400 ml-1">min {minQty}</span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => handleRemoveItem(item.product.id)}
+                        className="text-red-400 hover:text-red-600 p-1 transition-colors"
+                        aria-label={`Remove ${item.product.title}`}
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <p className="font-oswald font-bold text-[#1A1A1A] text-sm whitespace-nowrap">
-                      {formatCurrency(item.totalPrice)}
-                    </p>
-                    <button
-                      onClick={() => handleRemoveItem(item.product.id)}
-                      className="text-red-400 hover:text-red-600 p-1"
-                      aria-label={`Remove ${item.product.title}`}
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Clear All Button */}

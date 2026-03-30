@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCatering } from '@/context/CateringContext';
 import { formatCurrency } from '@/lib/pricing';
-import { getProductById } from '@/lib/products';
+import { getProductById, getTakeHomeProducts } from '@/lib/products';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 
@@ -228,10 +228,27 @@ export default function CheckoutPage() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const FIELD_LABELS: Record<string, string> = {
+    firstName: 'First Name',
+    lastName: 'Last Name',
+    email: 'Email',
+    phone: 'Phone',
+    company: 'Company/Organization',
+    address: 'Street Address',
+    city: 'City',
+    state: 'State',
+    zip: 'ZIP Code',
+    eventDate: 'Event Date',
+    deliveryTime: 'Delivery Time',
+  };
+
   const handleContinue = () => {
     if (validateForm()) {
       setCurrentStep(2);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      // Scroll to the validation summary
+      document.getElementById('validation-summary')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };
 
@@ -442,6 +459,33 @@ export default function CheckoutPage() {
           <div className="lg:col-span-2">
             {currentStep === 1 ? (
               <div className="space-y-6">
+                {/* Validation Summary Message Box */}
+                {Object.keys(errors).length > 0 && (
+                  <div
+                    id="validation-summary"
+                    className="bg-red-50 border-2 border-red-300 rounded-xl p-4 animate-scale-in"
+                  >
+                    <div className="flex items-start gap-3">
+                      <svg className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.072 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                      <div>
+                        <h3 className="font-oswald font-bold text-red-700 text-base mb-2">
+                          Please complete the following fields:
+                        </h3>
+                        <ul className="space-y-1">
+                          {Object.keys(errors).map((field) => (
+                            <li key={field} className="flex items-center gap-2 text-sm text-red-600">
+                              <span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />
+                              {FIELD_LABELS[field] || field}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Contact Information */}
                 <Card>
                   <h2 className="font-oswald text-xl font-bold text-[#1A1A1A] mb-4 flex items-center gap-2">
@@ -810,6 +854,52 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                 </Card>
+
+                {/* Take Us Home — Upsell Add-Ons */}
+                {(() => {
+                  const takeHomeProducts = getTakeHomeProducts().filter(
+                    (p) => !state.selectedItems.some((si) => si.product.id === p.id)
+                  );
+                  if (takeHomeProducts.length === 0) return null;
+                  return (
+                    <Card className="bg-[#1A1A1A] text-white border-none">
+                      <div className="text-center mb-4">
+                        <p className="font-oswald text-2xl font-bold text-[#F5EDE0] tracking-wide">
+                          TAKE US HOME
+                        </p>
+                        <p className="text-white/60 text-sm mt-1">
+                          Loved the food? Bring the flavor home — your guests will thank you later.
+                        </p>
+                      </div>
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        {takeHomeProducts.map((product) => (
+                          <button
+                            key={product.id}
+                            onClick={() => dispatch({ type: 'ADD_ITEM', payload: product })}
+                            className="flex items-center gap-3 p-3 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-left group"
+                          >
+                            <div className="flex-1 min-w-0">
+                              <p className="font-oswald font-semibold text-[#F5EDE0] text-sm truncate">
+                                {product.title}
+                              </p>
+                              <p className="text-white/50 text-xs line-clamp-1 mt-0.5">
+                                {product.description}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <span className="font-oswald font-bold text-[#E8621A] text-sm">
+                                {formatCurrency(product.pricing.type === 'per-each' ? product.pricing.priceEach : 0)}
+                              </span>
+                              <span className="w-7 h-7 flex items-center justify-center rounded-full bg-[#E8621A] text-[#1A1A1A] font-bold text-lg group-hover:scale-110 transition-transform">
+                                +
+                              </span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </Card>
+                  );
+                })()}
 
                 <Button onClick={handleContinue} className="w-full">
                   Continue to Review Order

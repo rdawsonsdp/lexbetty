@@ -406,6 +406,65 @@ export const CATERING_PRODUCTS: CateringProduct[] = [
     pricing: { type: 'per-each', priceEach: 0.50, minOrder: 10 },
     tags: ['equipment', 'cutlery'],
   },
+
+  // ==================== TAKE US HOME — Retail Add-Ons ====================
+  {
+    id: 'take-home-bbq-sauce',
+    title: "Chef Dominique's BBQ Sauce (32oz)",
+    description: 'Our signature sweet-and-smoky sauce bottled up so you can drizzle it on everything at home. A party favorite that keeps the flavor going.',
+    image: '/images/brisket-sauce-pour.jpg',
+    categories: ['other'],
+    pricing: { type: 'per-each', priceEach: 18, minOrder: 1 },
+    tags: ['take-home', 'popular'],
+    featured: true,
+  },
+  {
+    id: 'take-home-hot-sauce',
+    title: "Betty's Hot Sauce (8oz)",
+    description: 'Slow-burn heat with smoky depth — a few dashes transform any plate. Made in small batches right here in Chicago.',
+    image: '/images/brisket-sauce-pour.jpg',
+    categories: ['other'],
+    pricing: { type: 'per-each', priceEach: 12, minOrder: 1 },
+    tags: ['take-home'],
+  },
+  {
+    id: 'take-home-wagyu-sausage',
+    title: 'Wagyu Beef Sausage Pack (4 links)',
+    description: 'Premium wagyu links vacuum-sealed and ready for your grill. Because one taste at the party is never enough.',
+    image: '/images/wagyu_dog_chicago_style.jpg',
+    categories: ['other'],
+    pricing: { type: 'per-each', priceEach: 28, minOrder: 1 },
+    tags: ['take-home', 'premium', 'bbq'],
+    featured: true,
+  },
+  {
+    id: 'take-home-dry-rub',
+    title: "Smokehouse Dry Rub (12oz)",
+    description: 'The secret blend Chef Dominique rubs on every rack of ribs. Now you can bring the magic to your own backyard.',
+    image: '/images/bbq_brisket.jpg',
+    categories: ['other'],
+    pricing: { type: 'per-each', priceEach: 14, minOrder: 1 },
+    tags: ['take-home'],
+  },
+  {
+    id: 'take-home-banana-pudding',
+    title: 'Banana Pudding Jar (16oz)',
+    description: 'Grandma\'s recipe in a grab-and-go jar. Layers of vanilla custard, fresh bananas, and Nilla wafers — dessert for tomorrow.',
+    image: '/images/dessert_banana_pudding.jpg',
+    categories: ['other'],
+    pricing: { type: 'per-each', priceEach: 10, minOrder: 1 },
+    tags: ['take-home', 'dessert'],
+  },
+  {
+    id: 'take-home-rib-tips',
+    title: 'Rib Tips Family Pack (3 lbs)',
+    description: 'Three pounds of our famous rib tips, sealed and ready to reheat. Perfect for the ride home or tomorrow\'s lunch.',
+    image: '/images/special_rib_tips_chicken.jpg',
+    categories: ['other'],
+    pricing: { type: 'per-each', priceEach: 45, minOrder: 1 },
+    tags: ['take-home', 'bbq', 'popular'],
+    featured: true,
+  },
 ];
 
 // Helper functions
@@ -452,4 +511,8 @@ export function getRecommendedProducts(
 export function getSuggestedMenu(eventType: string): CateringProduct[] {
   const products = getProductsByEventType(eventType);
   return products.filter((p) => p.featured).slice(0, 4);
+}
+
+export function getTakeHomeProducts(): CateringProduct[] {
+  return CATERING_PRODUCTS.filter((p) => p.tags?.includes('take-home'));
 }
