@@ -291,7 +291,7 @@ export async function POST(request: NextRequest) {
         const subject = subjectTemplate.replace('{orderNumber}', orderNumber);
 
         // Store notification CC — always CC the store
-        const STORE_CC = ['info@lexingtonbettycatering.com'];
+        const STORE_CC = ['info@lexingtonbetty.com'];
         const additionalCc = (emailSettings.notification_emails || '')
           .split(',')
           .map((e: string) => e.trim())
