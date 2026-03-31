@@ -162,7 +162,7 @@ export default function CheckoutPage() {
 
   // Calculate delivery fee based on order subtotal and delivery type
   const getDeliveryFee = (subtotal: number, deliveryType: 'delivery' | 'pickup'): number => {
-    if (deliveryType === 'pickup') return 25; // Local Delivery / Pickup
+    if (deliveryType === 'pickup') return 0;  // Local Pickup — free
     if (subtotal >= 2000) return 250;          // Delivery over $2k
     if (subtotal >= 1000) return 150;          // Delivery over $1k
     return 100;                                // Standard Delivery Option
@@ -258,7 +258,7 @@ export default function CheckoutPage() {
 
     try {
       // Save order details to sessionStorage for confirmation page
-      const orderNumber = `SD-${String(Math.floor(1000 + Math.random() * 9000))}`;
+      const orderNumber = `LB-${String(Math.floor(1000 + Math.random() * 9000))}`;
       const orderDetails = {
         orderNumber,
         orderType,
@@ -817,7 +817,7 @@ export default function CheckoutPage() {
                           />
                           <div>
                             <span className="text-sm font-medium text-[#1A1A1A]">Local Pickup</span>
-                            <p className="text-xs text-gray-500">$25 — 756 E. 111th St, Chicago</p>
+                            <p className="text-xs text-gray-500">Free — 756 E. 111th St, Chicago</p>
                           </div>
                         </label>
                       </div>

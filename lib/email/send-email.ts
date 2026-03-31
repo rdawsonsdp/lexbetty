@@ -8,8 +8,7 @@ const DEFAULT_FROM =
   process.env.RESEND_FROM_EMAIL ||
   'Lexington Betty Smokehouse <onboarding@resend.dev>';
 
-// TODO: Remove this override once Resend domain is verified for lexingtonbetty.com
-const EMAIL_OVERRIDE = 'rdawson@strategicdataproducts.com';
+const EMAIL_OVERRIDE = ''; // Domain verified: lexingtonbettycatering.com
 
 interface SendEmailParams {
   to: string;

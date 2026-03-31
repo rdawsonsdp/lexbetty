@@ -1,4 +1,5 @@
 import OAuthClient from 'intuit-oauth';
+import crypto from 'crypto';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { QBTokens } from './types';
 
@@ -6,6 +7,7 @@ const QB_CLIENT_ID = process.env.QB_CLIENT_ID || '';
 const QB_CLIENT_SECRET = process.env.QB_CLIENT_SECRET || '';
 const QB_REDIRECT_URI = process.env.QB_REDIRECT_URI || '';
 const QB_ENVIRONMENT = (process.env.QB_ENVIRONMENT || 'sandbox') as 'sandbox' | 'production';
+const QB_API_MINOR_VERSION = '65';
 
 let oauthClient: OAuthClient | null = null;
 
@@ -25,14 +27,16 @@ function getOAuthClient(): OAuthClient {
 }
 
 /**
- * Generate the OAuth2 authorization URL for the admin to visit.
+ * Generate the OAuth2 authorization URL with CSRF-safe random state.
  */
-export function getAuthorizationUrl(): string {
+export function getAuthorizationUrl(): { url: string; state: string } {
   const client = getOAuthClient();
-  return client.authorizeUri({
+  const state = crypto.randomBytes(16).toString('hex');
+  const url = client.authorizeUri({
     scope: [OAuthClient.scopes.Accounting],
-    state: 'lexbetty-qb-connect',
+    state,
   });
+  return { url, state };
 }
 
 /**
@@ -133,7 +137,8 @@ export async function qbApiCall(
     ? 'https://quickbooks.api.intuit.com'
     : 'https://sandbox-quickbooks.api.intuit.com';
 
-  const url = `${baseUrl}/v3/company/${companyId}/${endpoint}`;
+  const separator = endpoint.includes('?') ? '&' : '?';
+  const url = `${baseUrl}/v3/company/${companyId}/${endpoint}${separator}minorversion=${QB_API_MINOR_VERSION}`;
 
   const headers: Record<string, string> = {
     'Authorization': `Bearer ${accessToken}`,
@@ -184,8 +189,36 @@ export async function isQBConnected(): Promise<{ connected: boolean; companyId?:
 }
 
 /**
- * Disconnect QuickBooks by removing tokens.
+ * Disconnect QuickBooks by revoking tokens with Intuit, then deleting locally.
  */
 export async function disconnectQB(): Promise<void> {
+  try {
+    const { data } = await supabaseAdmin
+      .from('qb_tokens')
+      .select('access_token, refresh_token, company_id')
+      .limit(1)
+      .single();
+
+    if (data) {
+      // Revoke token with Intuit's revocation endpoint (best-effort)
+      const revokeUrl = QB_ENVIRONMENT === 'production'
+        ? 'https://oauth.platform.intuit.com/oauth2/v1/tokens/revoke'
+        : 'https://oauth.platform.intuit.com/oauth2/v1/tokens/revoke';
+      const basicAuth = Buffer.from(`${QB_CLIENT_ID}:${QB_CLIENT_SECRET}`).toString('base64');
+      await fetch(revokeUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Basic ${basicAuth}`,
+        },
+        body: JSON.stringify({ token: data.access_token }),
+      }).catch(() => {
+        // Revocation is best-effort — still delete locally
+      });
+    }
+  } catch {
+    // Continue with local deletion even if revocation fails
+  }
+
   await supabaseAdmin.from('qb_tokens').delete().neq('id', '00000000-0000-0000-0000-000000000000');
 }

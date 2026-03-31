@@ -10,8 +10,9 @@ export async function findOrCreateCustomer(info: {
   phone?: string;
   company?: string;
 }): Promise<string> {
-  // Search for existing customer by email
-  const query = `SELECT * FROM Customer WHERE PrimaryEmailAddr = '${info.email.replace(/'/g, "\\'")}'`;
+  // Search for existing customer by email (sanitize input for QBL query)
+  const sanitizedEmail = info.email.replace(/['"\\;]/g, '');
+  const query = `SELECT * FROM Customer WHERE PrimaryEmailAddr = '${sanitizedEmail}'`;
   const searchResult = await qbApiCall('GET', `query?query=${encodeURIComponent(query)}`) as {
     QueryResponse: { Customer?: QBCustomer[] };
   };

@@ -2,16 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { QBWebhookPayload } from '@/lib/quickbooks/types';
+import { getInvoiceStatus } from '@/lib/quickbooks/invoices';
 
 const WEBHOOK_VERIFIER_TOKEN = process.env.QB_WEBHOOK_VERIFIER_TOKEN || '';
 
 function verifySignature(payload: string, signature: string): boolean {
-  if (!WEBHOOK_VERIFIER_TOKEN) return false;
+  if (!WEBHOOK_VERIFIER_TOKEN) {
+    console.warn('QB webhook received but QB_WEBHOOK_VERIFIER_TOKEN is not set — rejecting');
+    return false;
+  }
   const hash = crypto
     .createHmac('sha256', WEBHOOK_VERIFIER_TOKEN)
     .update(payload)
     .digest('base64');
-  return hash === signature;
+  return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
 }
 
 export async function POST(request: NextRequest) {
@@ -19,7 +23,9 @@ export async function POST(request: NextRequest) {
   const signature = request.headers.get('intuit-signature') || '';
 
   if (!verifySignature(rawBody, signature)) {
-    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    console.warn('QB webhook rejected: invalid signature');
+    // Return 200 to prevent Intuit from retrying with bad signature
+    return NextResponse.json({ success: false }, { status: 200 });
   }
 
   try {
@@ -27,19 +33,9 @@ export async function POST(request: NextRequest) {
 
     for (const notification of payload.eventNotifications) {
       for (const entity of notification.dataChangeEvent.entities) {
-        // Handle Payment events — mark the linked order as paid
-        if (entity.name === 'Payment' && (entity.operation === 'Create' || entity.operation === 'Update')) {
-          // Payment entity doesn't directly reference the invoice,
-          // so we need to look up the payment to find linked invoices.
-          // For now, log it — the order confirmation page can also poll status.
-          console.log(`QB Payment ${entity.operation}: ${entity.id} in realm ${notification.realmId}`);
-        }
-
-        // Handle Invoice events
+        // Handle Invoice update events — check if payment was applied
         if (entity.name === 'Invoice' && entity.operation === 'Update') {
-          // An invoice was updated — could mean payment was applied
-          // We'll check if balance is 0 via a status check
-          console.log(`QB Invoice updated: ${entity.id}`);
+          console.log(`QB Invoice updated: ${entity.id} in realm ${notification.realmId}`);
 
           // Find the order linked to this invoice
           const { data: order } = await supabaseAdmin
@@ -49,19 +45,27 @@ export async function POST(request: NextRequest) {
             .single();
 
           if (order && order.status !== 'paid') {
-            // Mark as paid — in production, you'd verify the invoice balance is 0
-            // via a QB API call before marking as paid
-            await supabaseAdmin
-              .from('orders')
-              .update({ status: 'paid', updated_at: new Date().toISOString() })
-              .eq('id', order.id);
-
-            console.log(`Order ${order.id} marked as paid`);
+            // Verify the invoice balance is actually 0 before marking as paid
+            try {
+              const invoiceStatus = await getInvoiceStatus(entity.id);
+              if (invoiceStatus.isPaid) {
+                await supabaseAdmin
+                  .from('orders')
+                  .update({ status: 'paid', updated_at: new Date().toISOString() })
+                  .eq('id', order.id);
+                console.log(`Order ${order.id} marked as paid (invoice balance verified: $0)`);
+              } else {
+                console.log(`Invoice ${entity.id} updated but balance is $${invoiceStatus.balance} — not marking as paid`);
+              }
+            } catch (verifyErr) {
+              console.error(`Failed to verify invoice ${entity.id} balance:`, verifyErr);
+            }
           }
         }
 
         // Handle voided invoices
         if (entity.name === 'Invoice' && entity.operation === 'Void') {
+          console.log(`QB Invoice voided: ${entity.id}`);
           const { data: order } = await supabaseAdmin
             .from('orders')
             .select('id')
@@ -73,15 +77,22 @@ export async function POST(request: NextRequest) {
               .from('orders')
               .update({ status: 'cancelled', updated_at: new Date().toISOString() })
               .eq('id', order.id);
+            console.log(`Order ${order.id} cancelled (invoice voided)`);
           }
+        }
+
+        // Log payment events for audit trail
+        if (entity.name === 'Payment') {
+          console.log(`QB Payment ${entity.operation}: ${entity.id} in realm ${notification.realmId}`);
         }
       }
     }
 
+    // Always return 200 to acknowledge receipt
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('QB webhook processing error:', error);
-    // Return 200 to prevent retries even on processing errors
+    // Return 200 to prevent Intuit from retrying on processing errors
     return NextResponse.json({ success: true });
   }
 }

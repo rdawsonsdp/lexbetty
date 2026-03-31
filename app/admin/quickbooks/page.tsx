@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import AdminAuthGate from '@/components/admin/AdminAuthGate';
+import AdminNav from '@/components/admin/AdminNav';
 
 interface QBStatus {
   connected: boolean;
@@ -100,6 +101,7 @@ function QuickBooksAdmin() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <AdminNav />
       <div className="max-w-2xl mx-auto px-4 py-12">
         <h1 className="font-oswald text-3xl font-bold text-[#1A1A1A] mb-8">
           QuickBooks Integration

@@ -15,8 +15,8 @@ const DEFAULTS: EmailSettings = {
   email_subject_quote: 'Your Catering Quote #{orderNumber} — Lexington Betty Smokehouse',
   email_subject_order: 'Your Catering Order #{orderNumber} — Lexington Betty Smokehouse',
   company_phone: '(312) 600-8155',
-  company_email: 'orders@souldelivered.com',
-  company_address: 'Chicago, IL',
+  company_email: 'orders@lexingtonbettycatering.com',
+  company_address: '756 E. 111th St, Chicago, IL 60628',
 };
 
 // In-memory fallback
