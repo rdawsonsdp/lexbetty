@@ -26,21 +26,26 @@ let localEmailSettings: EmailSettings = { ...DEFAULTS };
 
 export async function getEmailSettings(): Promise<EmailSettings> {
   try {
-    const { data, error } = await supabase
+    // Use admin client to avoid RLS restrictions
+    const { data, error } = await supabaseAdmin
       .from('settings')
       .select('value')
       .eq('key', 'email_settings')
       .single();
 
     if (error || !data) return localEmailSettings;
-    return { ...DEFAULTS, ...(data.value as Partial<EmailSettings>) };
+    const merged = { ...DEFAULTS, ...(data.value as Partial<EmailSettings>) };
+    localEmailSettings = merged;
+    return merged;
   } catch {
     return localEmailSettings;
   }
 }
 
 export async function setEmailSettings(settings: Partial<EmailSettings>): Promise<void> {
-  const merged = { ...localEmailSettings, ...settings };
+  // Read current from DB first, then merge
+  const current = await getEmailSettings();
+  const merged = { ...current, ...settings };
   try {
     const { error } = await supabaseAdmin
       .from('settings')
