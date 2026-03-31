@@ -9,8 +9,13 @@ export async function GET(request: NextRequest) {
 
   try {
     const { url, state } = getAuthorizationUrl();
-    console.log('QB Auth URL redirect_uri:', process.env.QB_REDIRECT_URI);
-    console.log('QB Auth URL full:', url);
+    console.log('=== QB AUTHORIZE DEBUG ===');
+    console.log('QB_CLIENT_ID:', process.env.QB_CLIENT_ID);
+    console.log('QB_CLIENT_SECRET:', process.env.QB_CLIENT_SECRET ? '***set***' : '***MISSING***');
+    console.log('QB_REDIRECT_URI:', process.env.QB_REDIRECT_URI);
+    console.log('QB_ENVIRONMENT:', process.env.QB_ENVIRONMENT);
+    console.log('Full Auth URL:', url);
+    console.log('=== END QB DEBUG ===');
 
     // Set the CSRF state in a short-lived cookie for verification in the callback
     const response = NextResponse.json({ authUrl: url });
