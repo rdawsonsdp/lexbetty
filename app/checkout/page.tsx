@@ -862,13 +862,22 @@ export default function CheckoutPage() {
                   );
                   if (takeHomeProducts.length === 0) return null;
                   return (
-                    <Card className="bg-[#1A1A1A] text-white border-none">
-                      <div className="text-center mb-4">
-                        <p className="font-oswald text-2xl font-bold text-[#F5EDE0] tracking-wide">
+                    <div className="bg-[#1A1A1A] rounded-2xl p-6 sm:p-8 shadow-xl border-2 border-[#E8621A]/30">
+                      <div className="text-center mb-6">
+                        <div className="inline-flex items-center gap-2 bg-[#E8621A] text-white font-oswald font-bold text-xs tracking-widest px-4 py-1.5 rounded-full mb-3">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                          </svg>
+                          DON&apos;T MISS THIS
+                        </div>
+                        <h3 className="font-oswald text-3xl sm:text-4xl font-bold text-white tracking-wider mb-2">
                           TAKE US HOME
+                        </h3>
+                        <p className="text-[#E8621A] font-oswald text-base font-semibold">
+                          Loved the food? Bring the flavor home.
                         </p>
-                        <p className="text-white/60 text-sm mt-1">
-                          Loved the food? Bring the flavor home — your guests will thank you later.
+                        <p className="text-white/50 text-sm mt-1">
+                          Your guests will thank you later.
                         </p>
                       </div>
                       <div className="grid sm:grid-cols-2 gap-3">
@@ -876,28 +885,28 @@ export default function CheckoutPage() {
                           <button
                             key={product.id}
                             onClick={() => dispatch({ type: 'ADD_ITEM', payload: product })}
-                            className="flex items-center gap-3 p-3 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-left group"
+                            className="flex items-center gap-3 p-4 bg-white/10 hover:bg-[#E8621A]/20 border border-white/10 hover:border-[#E8621A]/40 rounded-xl transition-all text-left group"
                           >
                             <div className="flex-1 min-w-0">
-                              <p className="font-oswald font-semibold text-[#F5EDE0] text-sm truncate">
+                              <p className="font-oswald font-bold text-white text-base">
                                 {product.title}
                               </p>
-                              <p className="text-white/50 text-xs line-clamp-1 mt-0.5">
+                              <p className="text-white/40 text-xs line-clamp-2 mt-1">
                                 {product.description}
                               </p>
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0">
-                              <span className="font-oswald font-bold text-[#E8621A] text-sm">
+                              <span className="font-oswald font-bold text-[#E8621A] text-lg">
                                 {formatCurrency(product.pricing.type === 'per-each' ? product.pricing.priceEach : 0)}
                               </span>
-                              <span className="w-7 h-7 flex items-center justify-center rounded-full bg-[#E8621A] text-[#1A1A1A] font-bold text-lg group-hover:scale-110 transition-transform">
+                              <span className="w-9 h-9 flex items-center justify-center rounded-full bg-[#E8621A] text-white font-bold text-xl shadow-lg group-hover:scale-110 transition-transform">
                                 +
                               </span>
                             </div>
                           </button>
                         ))}
                       </div>
-                    </Card>
+                    </div>
                   );
                 })()}
 

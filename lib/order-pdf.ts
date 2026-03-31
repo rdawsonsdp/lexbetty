@@ -226,19 +226,27 @@ export function generatePackingSlipPDF(data: OrderPDFData) {
   doc.setTextColor(...DARK);
   doc.setFont('helvetica', 'bold');
   doc.text('KITCHEN PACKING SLIP', margin, y);
-  y += 12;
+  y += 14;
+
+  // Customer name & event date — prominent
+  doc.setFontSize(14);
+  doc.setTextColor(...DARK);
+  doc.setFont('helvetica', 'bold');
+  doc.text(data.contact.name, margin, y);
+  y += 7;
+  doc.setFontSize(12);
+  doc.text(formatEventDate(data.event.date), margin, y);
+  y += 10;
 
   // Event & delivery info
   doc.setFontSize(10);
   doc.setTextColor(...GRAY);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Event: ${formatEventDate(data.event.date)}`, margin, y);
-  y += 5;
   doc.text(`Time: ${data.event.time || 'N/A'}`, margin, y);
   y += 5;
   doc.text(`Guests: ${data.headcount}`, margin, y);
   y += 5;
-  doc.text(`Contact: ${data.contact.name} — ${data.contact.phone || 'N/A'}`, margin, y);
+  doc.text(`Contact: ${data.contact.phone || 'N/A'}`, margin, y);
   y += 5;
   doc.text(`Delivery: ${data.deliveryAddress || 'N/A'}`, margin, y);
   y += 5;

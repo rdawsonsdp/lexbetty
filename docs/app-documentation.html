@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lexington Betty Smokehouse — Application Documentation</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      --dark: #1A1A1A;
+      --orange: #E8621A;
+      --cream: #F5EDE0;
+      --warm-gray: #9B9189;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      color: var(--dark);
+      line-height: 1.6;
+      background: #fff;
+    }
+
+    @media print {
+      body { font-size: 11pt; }
+      .page-break { page-break-before: always; }
+      .no-print { display: none; }
+      h2 { page-break-after: avoid; }
+      table { page-break-inside: avoid; }
+    }
+
+    /* Cover Page */
+    .cover {
+      min-height: 100vh;
+      background: var(--dark);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+    .cover h1 {
+      font-family: 'Oswald', sans-serif;
+      font-size: 3.5rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--cream);
+      margin-bottom: 0.5rem;
+    }
+    .cover .subtitle {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.5rem;
+      color: var(--orange);
+      font-weight: 600;
+      margin-bottom: 2rem;
+    }
+    .cover .meta {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.9rem;
+    }
+    .cover .version {
+      margin-top: 3rem;
+      padding: 0.75rem 2rem;
+      border: 2px solid var(--orange);
+      border-radius: 0.5rem;
+      color: var(--orange);
+      font-family: 'Oswald', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+    }
+
+    /* Content */
+    .content {
+      max-width: 850px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+
+    h2 {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--dark);
+      border-bottom: 3px solid var(--orange);
+      padding-bottom: 0.5rem;
+      margin: 3rem 0 1.5rem;
+      letter-spacing: 0.02em;
+    }
+
+    h3 {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--dark);
+      margin: 2rem 0 0.75rem;
+    }
+
+    h4 {
+      font-weight: 600;
+      font-size: 1rem;
+      margin: 1.5rem 0 0.5rem;
+      color: var(--orange);
+    }
+
+    p { margin-bottom: 1rem; }
+
+    ul, ol {
+      margin-bottom: 1rem;
+      padding-left: 1.5rem;
+    }
+    li { margin-bottom: 0.4rem; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 0.9rem;
+    }
+    th {
+      background: var(--dark);
+      color: white;
+      font-family: 'Oswald', sans-serif;
+      font-weight: 600;
+      text-align: left;
+      padding: 0.6rem 1rem;
+      letter-spacing: 0.03em;
+    }
+    td {
+      padding: 0.5rem 1rem;
+      border-bottom: 1px solid #eee;
+    }
+    tr:nth-child(even) td { background: #fafafa; }
+
+    code {
+      background: var(--cream);
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      font-size: 0.85em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+
+    pre {
+      background: var(--dark);
+      color: var(--cream);
+      padding: 1rem 1.5rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin: 1rem 0 1.5rem;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    pre code { background: none; padding: 0; color: inherit; }
+
+    .callout {
+      background: var(--cream);
+      border-left: 4px solid var(--orange);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+    .callout strong { color: var(--orange); }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-green { background: #dcfce7; color: #166534; }
+    .badge-amber { background: #fef3c7; color: #92400e; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    .badge-red { background: #fee2e2; color: #991b1b; }
+
+    .flow-diagram {
+      background: #f8f8f8;
+      border: 2px solid #e5e5e5;
+      border-radius: 0.75rem;
+      padding: 2rem;
+      margin: 1.5rem 0;
+      text-align: center;
+      font-family: 'Inter', sans-serif;
+    }
+    .flow-step {
+      display: inline-block;
+      background: var(--dark);
+      color: white;
+      padding: 0.5rem 1.25rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin: 0.25rem;
+    }
+    .flow-arrow {
+      display: inline-block;
+      color: var(--orange);
+      font-size: 1.5rem;
+      margin: 0 0.25rem;
+      vertical-align: middle;
+    }
+
+    .toc a {
+      color: var(--dark);
+      text-decoration: none;
+      border-bottom: 1px solid #ddd;
+    }
+    .toc a:hover { color: var(--orange); border-color: var(--orange); }
+    .toc li { margin-bottom: 0.6rem; }
+
+    .color-swatch {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      vertical-align: middle;
+      margin-right: 0.5rem;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .screenshot-placeholder {
+      background: var(--cream);
+      border: 2px dashed var(--warm-gray);
+      border-radius: 0.75rem;
+      padding: 2rem;
+      text-align: center;
+      color: var(--warm-gray);
+      font-style: italic;
+      margin: 1rem 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ==================== COVER PAGE ==================== -->
+<div class="cover">
+  <h1>LEXINGTON BETTY<br>SMOKEHOUSE</h1>
+  <div class="subtitle">Catering Platform — Application Documentation</div>
+  <p class="meta">
+    Prepared for Chef Dominique Leach<br>
+    756 E. 111th St, Chicago, IL 60628<br>
+    (312) 600-8155
+  </p>
+  <div class="version">VERSION 1.0 — MARCH 2026</div>
+  <p class="meta" style="margin-top: 2rem; font-size: 0.8rem;">
+    Built with Next.js 14 &middot; Supabase &middot; Resend &middot; QuickBooks Online<br>
+    Hosted on Vercel &middot; Domain: lexingtonbettycatering.com
+  </p>
+</div>
+
+<!-- ==================== TABLE OF CONTENTS ==================== -->
+<div class="content page-break">
+  <h2>Table of Contents</h2>
+  <ol class="toc" style="font-size: 1.05rem; line-height: 2;">
+    <li><a href="#overview">Platform Overview</a></li>
+    <li><a href="#brand">Brand Identity & Colors</a></li>
+    <li><a href="#architecture">Technical Architecture</a></li>
+    <li><a href="#order-flow">Customer Order Flow</a></li>
+    <li><a href="#menu">Menu & Products</a></li>
+    <li><a href="#cart">Cart & Checkout</a></li>
+    <li><a href="#upsell">Take Us Home — Upsell Products</a></li>
+    <li><a href="#admin">Admin Dashboard</a></li>
+    <li><a href="#orders-admin">Orders Management</a></li>
+    <li><a href="#kitchen">Kitchen Printouts (PDFs)</a></li>
+    <li><a href="#email">Email Integration (Resend)</a></li>
+    <li><a href="#quickbooks">QuickBooks Integration</a></li>
+    <li><a href="#hosting">Hosting & Domain</a></li>
+    <li><a href="#env-vars">Environment Variables</a></li>
+    <li><a href="#getting-started">Getting Started (Developer Guide)</a></li>
+  </ol>
+</div>
+
+<!-- ==================== 1. OVERVIEW ==================== -->
+<div class="content page-break" id="overview">
+  <h2>1. Platform Overview</h2>
+  <p>
+    Lexington Betty Smokehouse is a <strong>catering ordering platform</strong> built for Chef Dominique Leach's BBQ catering business in Chicago. The platform allows customers to build custom catering orders, select from pre-built packages, and submit orders or request quotes — all through a guided, mobile-friendly ordering wizard.
+  </p>
+
+  <div class="callout">
+    <strong>Tagline:</strong> "Best BBQ in Chicago" — as seen on Good Morning America
+  </div>
+
+  <h3>Key Features</h3>
+  <ul>
+    <li><strong>Guided Ordering Wizard</strong> — 6-step flow from event type to checkout</li>
+    <li><strong>Build Your Own or Packages</strong> — Flexible ordering modes</li>
+    <li><strong>Smart Portions</strong> — Auto-calculates quantities based on headcount</li>
+    <li><strong>Equipment & Extras</strong> — Sternos, racks, utensils with smart suggestions</li>
+    <li><strong>Take Us Home Upsells</strong> — Retail add-on products at checkout</li>
+    <li><strong>Admin Dashboard</strong> — Full menu management, order tracking, analytics</li>
+    <li><strong>Automated Emails</strong> — Order/quote confirmations via Resend</li>
+    <li><strong>QuickBooks Integration</strong> — Auto-invoice creation with payment links</li>
+    <li><strong>Kitchen Printouts</strong> — Packing slips and full order PDFs</li>
+    <li><strong>Betty VIP</strong> — Customer loyalty program (Coming Soon)</li>
+  </ul>
+</div>
+
+<!-- ==================== 2. BRAND ==================== -->
+<div class="content page-break" id="brand">
+  <h2>2. Brand Identity & Colors</h2>
+  <p>The visual design matches the physical Lexington Betty Smokehouse menu board and branding.</p>
+
+  <h3>Color Palette</h3>
+  <table>
+    <tr>
+      <th>Color</th>
+      <th>Hex Code</th>
+      <th>Usage</th>
+    </tr>
+    <tr>
+      <td><span class="color-swatch" style="background:#1A1A1A;"></span> Near Black</td>
+      <td><code>#1A1A1A</code></td>
+      <td>Primary text, dark backgrounds, headers</td>
+    </tr>
+    <tr>
+      <td><span class="color-swatch" style="background:#E8621A;"></span> Smokehouse Orange</td>
+      <td><code>#E8621A</code></td>
+      <td>Accent color, CTAs, prices, highlights</td>
+    </tr>
+    <tr>
+      <td><span class="color-swatch" style="background:#9B9189;"></span> Warm Gray</td>
+      <td><code>#9B9189</code></td>
+      <td>Secondary text, borders, subtle elements</td>
+    </tr>
+    <tr>
+      <td><span class="color-swatch" style="background:#F5EDE0;"></span> Warm Cream</td>
+      <td><code>#F5EDE0</code></td>
+      <td>Section backgrounds, cards</td>
+    </tr>
+    <tr>
+      <td><span class="color-swatch" style="background:#EDE3D0;"></span> Cream</td>
+      <td><code>#EDE3D0</code></td>
+      <td>Deeper cream accents</td>
+    </tr>
+  </table>
+
+  <h3>Typography</h3>
+  <ul>
+    <li><strong>Oswald</strong> — Headings, prices, navigation, buttons</li>
+    <li><strong>System sans-serif</strong> — Body text, descriptions, form fields</li>
+  </ul>
+
+  <h3>Logo Assets</h3>
+  <p>All logos are stored in <code>/public/images/</code>:</p>
+  <table>
+    <tr><th>File</th><th>Usage</th></tr>
+    <tr><td><code>lb-logo-horizontal.png</code></td><td>Header navigation</td></tr>
+    <tr><td><code>lb-logo-white.png</code></td><td>Footer (dark background)</td></tr>
+    <tr><td><code>lb-logo-stacked.png</code></td><td>Marketing sections</td></tr>
+    <tr><td><code>lb-logo-dark.png</code></td><td>Light background usage</td></tr>
+    <tr><td><code>lb-house-icon-orange.png</code></td><td>Favicon / app icon</td></tr>
+  </table>
+</div>
+
+<!-- ==================== 3. ARCHITECTURE ==================== -->
+<div class="content page-break" id="architecture">
+  <h2>3. Technical Architecture</h2>
+
+  <h3>Tech Stack</h3>
+  <table>
+    <tr><th>Component</th><th>Technology</th><th>Purpose</th></tr>
+    <tr><td>Framework</td><td>Next.js 14</td><td>React SSR/SSG web application</td></tr>
+    <tr><td>Styling</td><td>Tailwind CSS</td><td>Utility-first CSS framework</td></tr>
+    <tr><td>Database</td><td>Supabase (PostgreSQL)</td><td>Products, orders, settings, tokens</td></tr>
+    <tr><td>Email</td><td>Resend</td><td>Transactional emails (order confirmations)</td></tr>
+    <tr><td>Invoicing</td><td>QuickBooks Online</td><td>Invoice creation, payment links</td></tr>
+    <tr><td>Hosting</td><td>Vercel</td><td>Edge deployment, serverless functions</td></tr>
+    <tr><td>Source Code</td><td>GitHub</td><td>Repository: rdawsonsdp/lexbetty</td></tr>
+    <tr><td>PDF Generation</td><td>jsPDF</td><td>Order receipts, packing slips</td></tr>
+    <tr><td>AI</td><td>Anthropic Claude</td><td>AI Concierge (Betty AI)</td></tr>
+  </table>
+
+  <h3>Database Tables (Supabase)</h3>
+  <table>
+    <tr><th>Table</th><th>Purpose</th></tr>
+    <tr><td><code>orders</code></td><td>All customer orders and quotes</td></tr>
+    <tr><td><code>products</code></td><td>Menu items (admin-managed, with fallback to hardcoded)</td></tr>
+    <tr><td><code>packages</code></td><td>Pre-built catering packages</td></tr>
+    <tr><td><code>settings</code></td><td>App settings (email config, disabled categories)</td></tr>
+    <tr><td><code>qb_tokens</code></td><td>QuickBooks OAuth tokens</td></tr>
+    <tr><td><code>order_training_data</code></td><td>AI training data from orders</td></tr>
+    <tr><td><code>customer_profiles</code></td><td>Customer accounts (for Betty VIP)</td></tr>
+  </table>
+
+  <h3>Data Fallback Strategy</h3>
+  <p>The application uses a <strong>fallback chain</strong> for resilience:</p>
+  <div class="flow-diagram">
+    <span class="flow-step">Supabase DB</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Hardcoded Data</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">In-Memory Cache</span>
+  </div>
+  <p>If the database is unavailable, the app falls back to hardcoded products in <code>lib/products.ts</code> and <code>lib/packages.ts</code>, ensuring the ordering flow never breaks.</p>
+</div>
+
+<!-- ==================== 4. ORDER FLOW ==================== -->
+<div class="content page-break" id="order-flow">
+  <h2>4. Customer Order Flow</h2>
+  <p>The ordering process follows a guided wizard with 6 steps, plus checkout.</p>
+
+  <div class="flow-diagram">
+    <span class="flow-step">1. Event Type</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">2. Event Info</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">3. Guests & Budget</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">4. Order Type</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">5. Build Order</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">6. Equipment</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step" style="background:var(--orange);">Checkout</span>
+  </div>
+
+  <h3>Step 1: Event Type</h3>
+  <p>Customer selects their event category:</p>
+  <ul>
+    <li><strong>BBQ Catering (Lunch)</strong> — Full smokehouse menu with meats, sides, desserts</li>
+    <li><strong>Desserts & Drinks</strong> — Sweet treats and beverages only</li>
+  </ul>
+  <p><em>Note: Breakfast has been removed from the current menu.</em></p>
+
+  <h3>Step 2: Event Info</h3>
+  <p>Collects event details: name, date, time, venue address, and special instructions. These carry forward to checkout and are pre-filled if already entered.</p>
+
+  <h3>Step 3: Guests & Budget</h3>
+  <p>Customer sets their headcount and optionally selects a budget range per person. The budget tracker in the cart shows real-time whether they're on track, under, or over budget.</p>
+
+  <h3>Step 4: Order Type</h3>
+  <p>Two options:</p>
+  <ul>
+    <li><strong>Build Your Own</strong> — Select individual items from the full menu</li>
+    <li><strong>Packages</strong> — Choose a pre-built catering package with fixed per-person pricing</li>
+  </ul>
+
+  <h3>Step 5: Build Order</h3>
+  <p>The main menu selection screen. Products are organized by category sections (Meats, Sliders, Sides, Desserts, Drinks). The cart sidebar on desktop (or drawer on mobile) shows running totals, per-person cost, and budget tracking. Quantities auto-adjust based on headcount.</p>
+
+  <h3>Step 6: Equipment & Extras</h3>
+  <p>Smart suggestions for serving equipment based on the order:</p>
+  <ul>
+    <li>Pan count suggests sternos and catering racks</li>
+    <li>Headcount suggests utensil sets</li>
+    <li>Items: Sterno ($2), Catering Rack ($12), Serving Utensils ($2), Utensil Sets ($0.50)</li>
+  </ul>
+
+  <h3>Checkout</h3>
+  <p>Two-step checkout process:</p>
+  <ol>
+    <li><strong>Details</strong> — Contact info, delivery address, event details, delivery type (delivery or free local pickup), buffet setup option, special instructions</li>
+    <li><strong>Review & Submit</strong> — Full order review with option to "Request a Quote" or "Place Order"</li>
+  </ol>
+
+  <div class="callout">
+    <strong>Validation:</strong> A prominent red message box appears at the top of the form listing all missing required fields, with auto-scroll to the message.
+  </div>
+
+  <h3>After Submission</h3>
+  <div class="flow-diagram">
+    <span class="flow-step">Save to DB</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Send Email</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Create QB Invoice</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Confirmation Page</span>
+  </div>
+</div>
+
+<!-- ==================== 5. MENU ==================== -->
+<div class="content page-break" id="menu">
+  <h2>5. Menu & Products</h2>
+
+  <h3>Product Categories</h3>
+  <table>
+    <tr><th>Category</th><th>Tag</th><th>Items</th></tr>
+    <tr><td>Betty Meats (Pork)</td><td><code>meats</code></td><td>Rib Tips, Smoked Ribs, Pulled Pork, Hot Links</td></tr>
+    <tr><td>Betty Meats (Poultry)</td><td><code>meats</code></td><td>Chicken Quarters & Wing Mix, Pulled Chicken, Turkey Tips</td></tr>
+    <tr><td>Betty Meats (Beef)</td><td><code>meats</code></td><td>Brisket, Beef Wagyu Sausage</td></tr>
+    <tr><td>Sliders (24 ct)</td><td><code>sliders</code></td><td>Pulled Chicken, Pulled Pork, Brisket, Portabella & Peppers</td></tr>
+    <tr><td>Soulful Sides</td><td><code>sides</code></td><td>Gouda Mac, Greens, Baked Beans, Corn, Coleslaw, Salad, Candy Yams, Jambalaya, Cornbread</td></tr>
+    <tr><td>Desserts</td><td><code>dessert</code></td><td>Banana Pudding, Peach Cobbler, Custom Cake, Cookies</td></tr>
+    <tr><td>Drinks</td><td><code>beverage</code></td><td>Tobi's Lemonade, Lemonade, Iced Tea, Water, Soda</td></tr>
+    <tr><td>Equipment</td><td><code>equipment</code></td><td>Sterno, Catering Rack, Serving Utensils, Utensil Sets</td></tr>
+    <tr><td>Take Us Home</td><td><code>take-home</code></td><td>BBQ Sauce 32oz, Hot Sauce, Wagyu Sausage Pack, Dry Rub, Banana Pudding Jar, Rib Tips Family Pack</td></tr>
+  </table>
+
+  <h3>Pricing Models</h3>
+  <p>Products support 8 different pricing types:</p>
+  <table>
+    <tr><th>Type</th><th>Description</th><th>Example</th></tr>
+    <tr><td><code>pan</code></td><td>Half/Full pan with serving ranges</td><td>Gouda Mac: Half $60, Full $120</td></tr>
+    <tr><td><code>per-each</code></td><td>Unit price with min order</td><td>Smoked Ribs: $18/lb, min 3 lbs</td></tr>
+    <tr><td><code>per-container</code></td><td>Container with serving count</td><td>Hot Links: $60/container, serves 15</td></tr>
+    <tr><td><code>per-dozen</code></td><td>Dozen count</td><td>Cornbread: $15/dozen</td></tr>
+    <tr><td><code>per-person</code></td><td>Per guest pricing</td><td>Full Setup Service: $5/person</td></tr>
+    <tr><td><code>flat</code></td><td>Fixed price</td><td>Buffet Setup: $50</td></tr>
+    <tr><td><code>tray</code></td><td>Small/Medium/Large</td><td>(Available for admin use)</td></tr>
+    <tr><td><code>per-lb</code></td><td>By the pound</td><td>(Available for admin use)</td></tr>
+  </table>
+
+  <h3>Catering Packages (5)</h3>
+  <table>
+    <tr><th>Package</th><th>Includes</th><th>Price</th></tr>
+    <tr><td>Betty Party Deal</td><td>3 Meats + 3 Sides</td><td>$22/person</td></tr>
+    <tr><td>Betty Party Deal Plus</td><td>4 Meats + 4 Sides</td><td>$35/person</td></tr>
+    <tr><td>Betty Box Executive</td><td>Individual boxed meals</td><td>$16/person</td></tr>
+    <tr><td>Betty Corporate</td><td>Full corporate spread</td><td>$25/person</td></tr>
+    <tr><td>Food Truck Experience</td><td>On-site food truck</td><td>$20/person (min 40)</td></tr>
+  </table>
+</div>
+
+<!-- ==================== 6. CART ==================== -->
+<div class="content page-break" id="cart">
+  <h2>6. Cart & Checkout</h2>
+
+  <h3>Cart Features</h3>
+  <ul>
+    <li><strong>Sticky sidebar</strong> on desktop (right column), slide-out drawer on mobile</li>
+    <li><strong>Editable quantities</strong> — +/- buttons on each item with minimum order enforcement</li>
+    <li><strong>Thick border styling</strong> — 3px border for visibility</li>
+    <li><strong>Real-time totals</strong> — Per person and total cost update instantly</li>
+    <li><strong>Budget tracker</strong> — Progress bar showing budget status (on-track / under / over)</li>
+    <li><strong>Serving coverage</strong> — Warning if food portions don't cover the headcount</li>
+    <li><strong>Headcount adjustment</strong> — Direct input with quick-select presets (10, 25, 50, 100, 150, 200)</li>
+    <li><strong>Smooth scrolling</strong> — Thin visible scrollbar, overscroll containment</li>
+  </ul>
+
+  <h3>Delivery Options</h3>
+  <table>
+    <tr><th>Type</th><th>Fee</th><th>Details</th></tr>
+    <tr><td>Standard Delivery (&lt;$1,000)</td><td>$100</td><td>Delivered to your address</td></tr>
+    <tr><td>Delivery ($1,000–$2,000)</td><td>$150</td><td>Mid-size order delivery</td></tr>
+    <tr><td>Delivery ($2,000+)</td><td>$250</td><td>Large order delivery</td></tr>
+    <tr><td>Local Pickup</td><td>Free</td><td>756 E. 111th St, Chicago</td></tr>
+  </table>
+
+  <h3>Pricing Calculation</h3>
+  <ul>
+    <li><strong>Subtotal</strong> — Sum of all item prices (auto-calculated based on headcount)</li>
+    <li><strong>Delivery Fee</strong> — Based on subtotal tier (see above)</li>
+    <li><strong>Buffet Setup</strong> — Optional $50 add-on</li>
+    <li><strong>Sales Tax</strong> — 10.25%</li>
+    <li><strong>Order Total</strong> — Subtotal + Delivery + Setup + Tax</li>
+  </ul>
+</div>
+
+<!-- ==================== 7. UPSELL ==================== -->
+<div class="content page-break" id="upsell">
+  <h2>7. Take Us Home — Upsell Products</h2>
+  <p>At the bottom of the checkout form (before the submit button), a prominent dark-themed section displays retail add-on products. These are managed under the "Take Us Home" category in admin menu management.</p>
+
+  <h3>Current Take-Home Products</h3>
+  <table>
+    <tr><th>Product</th><th>Price</th><th>Description</th></tr>
+    <tr><td>Chef Dominique's BBQ Sauce (32oz)</td><td>$18</td><td>Signature sweet-and-smoky sauce</td></tr>
+    <tr><td>Betty's Hot Sauce (8oz)</td><td>$12</td><td>Slow-burn heat, small batch</td></tr>
+    <tr><td>Wagyu Beef Sausage Pack (4 links)</td><td>$28</td><td>Premium wagyu, vacuum-sealed</td></tr>
+    <tr><td>Smokehouse Dry Rub (12oz)</td><td>$14</td><td>Chef Dominique's secret blend</td></tr>
+    <tr><td>Banana Pudding Jar (16oz)</td><td>$10</td><td>Grab-and-go grandma's recipe</td></tr>
+    <tr><td>Rib Tips Family Pack (3 lbs)</td><td>$45</td><td>Sealed and ready to reheat</td></tr>
+  </table>
+
+  <p>Products already in the cart are automatically hidden from the upsell section. Items added here are included in the order total and appear on all printouts.</p>
+</div>
+
+<!-- ==================== 8. ADMIN ==================== -->
+<div class="content page-break" id="admin">
+  <h2>8. Admin Dashboard</h2>
+  <p>The admin panel is accessible at <code>/admin/menu</code> and protected by password authentication.</p>
+
+  <div class="callout">
+    <strong>Admin Password:</strong> <code>bbq2026</code><br>
+    Authentication uses HMAC-signed tokens valid for 24 hours.
+  </div>
+
+  <h3>Admin Navigation</h3>
+  <table>
+    <tr><th>Page</th><th>URL</th><th>Purpose</th></tr>
+    <tr><td>Orders</td><td><code>/admin/orders</code></td><td>View, manage, and fulfill orders</td></tr>
+    <tr><td>Menu</td><td><code>/admin/menu</code></td><td>Product & package CRUD, drag reorder</td></tr>
+    <tr><td>Engineering</td><td><code>/menu-engineering</code></td><td>Menu performance analytics</td></tr>
+    <tr><td>Email</td><td><code>/admin/email</code></td><td>Email settings, templates, test send</td></tr>
+    <tr><td>Analytics</td><td><code>/admin/analytics</code></td><td>Order and user analytics</td></tr>
+    <tr><td>QuickBooks</td><td><code>/admin/quickbooks</code></td><td>QB connection management</td></tr>
+    <tr><td>Settings</td><td><code>/admin/settings</code></td><td>App configuration</td></tr>
+  </table>
+
+  <h3>Menu Management Features</h3>
+  <ul>
+    <li>Search and filter products by category (BBQ Catering, Desserts & Drinks, Take Us Home)</li>
+    <li>Create, edit, delete products with full pricing configuration</li>
+    <li>Drag-to-reorder products within categories</li>
+    <li>Toggle products active/featured</li>
+    <li>Image upload for product photos</li>
+    <li>Tag management for filtering and display</li>
+    <li>Category visibility toggles (enable/disable on public pages)</li>
+    <li>Export menu as PDF or Excel</li>
+  </ul>
+</div>
+
+<!-- ==================== 9. ORDERS ADMIN ==================== -->
+<div class="content page-break" id="orders-admin">
+  <h2>9. Orders Management</h2>
+  <p>The admin orders page (<code>/admin/orders</code>) provides a Shopify-style interface for viewing and managing all orders.</p>
+
+  <h3>Order List Features</h3>
+  <ul>
+    <li><strong>Status filter tabs</strong> — All, Pending, Invoiced, Paid, Cancelled (with counts)</li>
+    <li><strong>Search</strong> — By order number, customer name, or email (debounced)</li>
+    <li><strong>Sortable columns</strong> — Order #, Customer, Event Date, Total, Status, Created</li>
+    <li><strong>Pagination</strong> — 20 orders per page</li>
+    <li><strong>Responsive</strong> — Table on desktop, cards on mobile</li>
+  </ul>
+
+  <h3>Order Detail Panel</h3>
+  <p>Click any order to open a slide-out panel with:</p>
+  <ul>
+    <li>Status management (dropdown to change status)</li>
+    <li>Customer info (name, email, phone, company)</li>
+    <li>Event details (date, time, guests, setup type, delivery address)</li>
+    <li>Special instructions (highlighted in amber)</li>
+    <li>Full itemized order table</li>
+    <li>Pricing breakdown (subtotal, delivery, total, per-person)</li>
+    <li>QuickBooks info (invoice number, payment link) if connected</li>
+    <li><strong>Download Full Order PDF</strong> — Complete receipt with pricing</li>
+    <li><strong>Download Packing Slip</strong> — Kitchen-only checklist without prices</li>
+  </ul>
+
+  <h3>Order Statuses</h3>
+  <table>
+    <tr><th>Status</th><th>Color</th><th>Meaning</th></tr>
+    <tr><td><span class="badge badge-amber">Pending</span></td><td>Amber</td><td>Order received, not yet invoiced</td></tr>
+    <tr><td><span class="badge badge-blue">Invoiced</span></td><td>Blue</td><td>QB invoice created, awaiting payment</td></tr>
+    <tr><td><span class="badge badge-green">Paid</span></td><td>Green</td><td>Payment received</td></tr>
+    <tr><td><span class="badge badge-red">Cancelled</span></td><td>Red</td><td>Order cancelled or invoice voided</td></tr>
+  </table>
+
+  <h3>Order Number Format</h3>
+  <p>Orders use the prefix <code>LB-</code> followed by a 4-digit number (e.g., <strong>LB-2406</strong>).</p>
+</div>
+
+<!-- ==================== 10. KITCHEN ==================== -->
+<div class="content page-break" id="kitchen">
+  <h2>10. Kitchen Printouts (PDFs)</h2>
+  <p>Two PDF documents are available from the admin orders panel for kitchen use. Both are generated client-side using jsPDF.</p>
+
+  <h3>Packing Slip (No Prices)</h3>
+  <p>Designed for the kitchen prep team:</p>
+  <ul>
+    <li>LB branded header with order number and date</li>
+    <li><strong>Customer name and event date in bold</strong> at the top</li>
+    <li>Event time, guest count, contact info, delivery address</li>
+    <li>Special instructions (if any)</li>
+    <li>Checklist of items with checkboxes, quantities/sizes — <strong>no pricing</strong></li>
+    <li>Setup requirements (Full Setup or Drop-off)</li>
+    <li>"Packed by" and "Checked by" sign-off lines</li>
+  </ul>
+
+  <h3>Full Order (With Prices)</h3>
+  <p>Complete receipt for records and customer reference:</p>
+  <ul>
+    <li>Branded header with order number</li>
+    <li>All items with descriptions and pricing</li>
+    <li>Subtotal, delivery fee, total, per-person cost</li>
+    <li>Full contact and delivery details</li>
+    <li>Event date, time, and setup requirements</li>
+  </ul>
+</div>
+
+<!-- ==================== 11. EMAIL ==================== -->
+<div class="content page-break" id="email">
+  <h2>11. Email Integration (Resend)</h2>
+
+  <h3>Provider</h3>
+  <table>
+    <tr><th>Service</th><th>Details</th></tr>
+    <tr><td>Provider</td><td>Resend (<a href="https://resend.com">resend.com</a>)</td></tr>
+    <tr><td>Library</td><td><code>resend</code> v6.9.3 (npm)</td></tr>
+    <tr><td>Sending Domain</td><td><code>lexingtonbettycatering.com</code> (verified)</td></tr>
+    <tr><td>From Address</td><td><code>orders@lexingtonbettycatering.com</code></td></tr>
+    <tr><td>Reply-To</td><td><code>orders@lexingtonbettycatering.com</code></td></tr>
+  </table>
+
+  <h3>When Emails Are Sent</h3>
+  <ul>
+    <li><strong>Quote submission</strong> — Customer receives quote confirmation with 7-day validity notice</li>
+    <li><strong>Order submission</strong> — Customer receives order confirmation with delivery timeline</li>
+    <li><strong>QB Invoice</strong> — If QuickBooks is connected, a separate invoice email is sent via QB's email system</li>
+  </ul>
+
+  <h3>Email Template Contents</h3>
+  <p>The HTML email includes:</p>
+  <ul>
+    <li>Branded header (Lexington Betty Smokehouse)</li>
+    <li>Event details (date, time, guests, venue, setup)</li>
+    <li>Itemized order list with descriptions and pricing</li>
+    <li>Pricing breakdown (subtotal, delivery, total, per-person)</li>
+    <li>"What Happens Next" timeline</li>
+    <li>Company contact info in footer</li>
+  </ul>
+
+  <h3>Admin Email Settings</h3>
+  <p>Configurable at <code>/admin/email</code>:</p>
+  <ul>
+    <li>Enable/disable email notifications</li>
+    <li>Customize subject line templates (supports <code>{orderNumber}</code> placeholder)</li>
+    <li>Edit company phone, email, and address shown in emails</li>
+    <li>Send test email to verify configuration</li>
+  </ul>
+
+  <h3>DNS Records Required</h3>
+  <p>The following DNS records must be configured for <code>lexingtonbettycatering.com</code> in Resend:</p>
+  <ul>
+    <li><strong>SPF</strong> — TXT record allowing Resend to send on behalf of the domain</li>
+    <li><strong>DKIM</strong> — TXT records for email authentication</li>
+    <li><strong>DMARC</strong> — Optional but recommended for deliverability</li>
+  </ul>
+  <p>These are configured in the Resend dashboard under Domains. Status should show <span class="badge badge-green">Verified</span>.</p>
+</div>
+
+<!-- ==================== 12. QUICKBOOKS ==================== -->
+<div class="content page-break" id="quickbooks">
+  <h2>12. QuickBooks Integration</h2>
+
+  <h3>Overview</h3>
+  <p>When QuickBooks Online is connected, the platform automatically creates invoices for new orders and provides customers with online payment links.</p>
+
+  <h3>Connection Flow</h3>
+  <div class="flow-diagram">
+    <span class="flow-step">Admin clicks Connect</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">OAuth2 Authorization</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Intuit Login</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Tokens Stored in DB</span>
+  </div>
+
+  <h3>Order-to-Invoice Flow</h3>
+  <ol>
+    <li>Customer places order (not a quote)</li>
+    <li>System checks if QB is connected</li>
+    <li>Finds or creates QB customer by email</li>
+    <li>Creates invoice with all line items + delivery fee</li>
+    <li>Enables online credit card and ACH payment</li>
+    <li>Retrieves payment link from QB</li>
+    <li>Updates order record with invoice ID and payment link</li>
+    <li>Sends invoice email via QB's email system</li>
+  </ol>
+
+  <div class="callout">
+    <strong>Quotes skip QB:</strong> Quote requests do not create QuickBooks invoices. Only confirmed orders trigger the invoicing flow.
+  </div>
+
+  <h3>Webhook Handling</h3>
+  <p>QuickBooks sends webhook notifications when invoices are updated or voided:</p>
+  <ul>
+    <li><strong>Invoice Update</strong> — Verifies invoice balance = $0, then marks order as "paid"</li>
+    <li><strong>Invoice Void</strong> — Marks the linked order as "cancelled"</li>
+    <li>Signature verification using HMAC-SHA256 with timing-safe comparison</li>
+    <li>Always returns HTTP 200 to prevent retry storms</li>
+  </ul>
+
+  <h3>Security Measures</h3>
+  <ul>
+    <li>CSRF-safe OAuth state (random token in httpOnly cookie)</li>
+    <li>Token revocation on disconnect (calls Intuit revocation endpoint)</li>
+    <li>Automatic token refresh (5-minute buffer before expiry)</li>
+    <li>API versioning (minorversion=65) on all calls</li>
+    <li>Input sanitization on customer email queries</li>
+    <li>Admin-only access to connect/disconnect endpoints</li>
+  </ul>
+
+  <h3>Admin Page</h3>
+  <p>Located at <code>/admin/quickbooks</code>. Shows connection status, company ID, token expiration, and connect/disconnect buttons.</p>
+</div>
+
+<!-- ==================== 13. HOSTING ==================== -->
+<div class="content page-break" id="hosting">
+  <h2>13. Hosting & Domain</h2>
+
+  <table>
+    <tr><th>Item</th><th>Details</th></tr>
+    <tr><td>Domain</td><td><code>lexingtonbettycatering.com</code></td></tr>
+    <tr><td>Hosting</td><td>Vercel (Edge Network)</td></tr>
+    <tr><td>Vercel IP (A Record)</td><td><code>76.76.21.21</code></td></tr>
+    <tr><td>www CNAME</td><td><code>cname.vercel-dns.com</code></td></tr>
+    <tr><td>GitHub Repository</td><td><code>rdawsonsdp/lexbetty</code></td></tr>
+    <tr><td>Supabase Project ID</td><td><code>ghsqkkreeurpypitegvp</code></td></tr>
+    <tr><td>Supabase Region</td><td>US East</td></tr>
+    <tr><td>Dev Server Port</td><td>3001</td></tr>
+  </table>
+
+  <h3>Deployment</h3>
+  <p>The application deploys automatically via Vercel's GitHub integration. Every push to the <code>main</code> branch triggers a new production deployment.</p>
+
+  <h3>DNS Configuration</h3>
+  <table>
+    <tr><th>Record Type</th><th>Host</th><th>Value</th></tr>
+    <tr><td>A</td><td>@</td><td><code>76.76.21.21</code></td></tr>
+    <tr><td>CNAME</td><td>www</td><td><code>cname.vercel-dns.com</code></td></tr>
+    <tr><td>TXT (Resend SPF)</td><td>@</td><td><em>See Resend dashboard</em></td></tr>
+    <tr><td>CNAME (Resend DKIM)</td><td><em>See Resend dashboard</em></td><td><em>See Resend dashboard</em></td></tr>
+  </table>
+</div>
+
+<!-- ==================== 14. ENV VARS ==================== -->
+<div class="content page-break" id="env-vars">
+  <h2>14. Environment Variables</h2>
+  <p>All environment variables must be set in both <code>.env.local</code> (local development) and Vercel project settings (production).</p>
+
+  <table>
+    <tr><th>Variable</th><th>Purpose</th><th>Required</th></tr>
+    <tr><td><code>ADMIN_PASSWORD</code></td><td>Admin panel login password</td><td>Yes</td></tr>
+    <tr><td><code>NEXT_PUBLIC_SUPABASE_URL</code></td><td>Supabase project URL</td><td>Yes</td></tr>
+    <tr><td><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></td><td>Supabase anonymous key</td><td>Yes</td></tr>
+    <tr><td><code>SUPABASE_SERVICE_ROLE_KEY</code></td><td>Supabase service role key (server-side)</td><td>Yes</td></tr>
+    <tr><td><code>RESEND_API_KEY</code></td><td>Resend email API key</td><td>Yes</td></tr>
+    <tr><td><code>RESEND_FROM_EMAIL</code></td><td>Sender email address</td><td>Yes</td></tr>
+    <tr><td><code>ANTHROPIC_API_KEY</code></td><td>Claude AI for concierge</td><td>Optional</td></tr>
+    <tr><td><code>OPENAI_API_KEY</code></td><td>Whisper voice transcription</td><td>Optional</td></tr>
+    <tr><td><code>QB_CLIENT_ID</code></td><td>QuickBooks OAuth client ID</td><td>For QB</td></tr>
+    <tr><td><code>QB_CLIENT_SECRET</code></td><td>QuickBooks OAuth client secret</td><td>For QB</td></tr>
+    <tr><td><code>QB_REDIRECT_URI</code></td><td>QuickBooks OAuth callback URL</td><td>For QB</td></tr>
+    <tr><td><code>QB_ENVIRONMENT</code></td><td><code>sandbox</code> or <code>production</code></td><td>For QB</td></tr>
+    <tr><td><code>QB_WEBHOOK_VERIFIER_TOKEN</code></td><td>Webhook signature verification</td><td>For QB webhooks</td></tr>
+  </table>
+
+  <div class="callout">
+    <strong>Security:</strong> Never commit <code>.env.local</code> to Git. It is listed in <code>.gitignore</code>. For production, set all variables in the Vercel dashboard under Project Settings &rarr; Environment Variables.
+  </div>
+</div>
+
+<!-- ==================== 15. GETTING STARTED ==================== -->
+<div class="content page-break" id="getting-started">
+  <h2>15. Getting Started (Developer Guide)</h2>
+
+  <h3>Prerequisites</h3>
+  <ul>
+    <li>Node.js 18+ and npm</li>
+    <li>Git</li>
+    <li>Access to the GitHub repository</li>
+  </ul>
+
+  <h3>Local Setup</h3>
+  <pre><code># Clone the repository
+git clone https://github.com/rdawsonsdp/lexbetty.git
+cd lexbetty
+
+# Install dependencies
+npm install
+
+# Copy environment variables
+cp .env.example .env.local
+# Edit .env.local with your actual keys
+
+# Start the development server
+npm run dev
+# App runs on http://localhost:3001</code></pre>
+
+  <h3>Key Directories</h3>
+  <pre><code>/app                    # Next.js pages and API routes
+  /admin/               # Admin dashboard pages
+  /api/                 # Server-side API endpoints
+  /checkout/            # Checkout page
+  /order-confirmation/  # Post-order confirmation
+
+/components             # React components
+  /admin/               # Admin panel components
+  /catering/            # Ordering wizard components
+  /layout/              # Header, Footer, Layout
+  /ui/                  # Shared UI components (Card, Button, etc.)
+
+/context                # React Context providers
+  CateringContext.tsx    # Main ordering state management
+
+/lib                    # Utilities and business logic
+  /email/               # Resend email integration
+  /quickbooks/          # QuickBooks integration
+  /supabase/            # Database client and helpers
+  products.ts           # Product catalog (fallback data)
+  packages.ts           # Package definitions
+  pricing.ts            # Pricing calculation engine
+  types.ts              # TypeScript type definitions
+  order-pdf.ts          # PDF generation utilities
+
+/public/images          # Logo assets and food photography</code></pre>
+
+  <h3>Common Commands</h3>
+  <pre><code>npm run dev       # Start development server (port 3001)
+npm run build     # Production build
+npm run start     # Start production server
+npm run lint      # Run ESLint</code></pre>
+
+  <h3>Deployment</h3>
+  <p>Push to <code>main</code> branch &rarr; Vercel auto-deploys to <code>lexingtonbettycatering.com</code>.</p>
+  <pre><code>git add .
+git commit -m "Your changes"
+git push origin main
+# Vercel will automatically build and deploy</code></pre>
+</div>
+
+<!-- ==================== FOOTER ==================== -->
+<div class="content" style="text-align: center; padding: 4rem 2rem; border-top: 3px solid var(--orange); margin-top: 3rem;">
+  <p style="font-family: 'Oswald', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--dark); letter-spacing: 0.05em;">
+    LEXINGTON BETTY SMOKEHOUSE
+  </p>
+  <p style="color: var(--orange); font-family: 'Oswald', sans-serif; font-weight: 600;">
+    Best BBQ in Chicago
+  </p>
+  <p style="color: var(--warm-gray); font-size: 0.85rem; margin-top: 1rem;">
+    756 E. 111th St, Chicago, IL 60628 &middot; (312) 600-8155 &middot; orders@lexingtonbettycatering.com
+  </p>
+  <p style="color: var(--warm-gray); font-size: 0.75rem; margin-top: 0.5rem;">
+    Document generated March 2026 &middot; Version 1.0
+  </p>
+</div>
+
+</body>
+</html>

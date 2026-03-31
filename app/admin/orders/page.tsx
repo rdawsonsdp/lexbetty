@@ -42,6 +42,10 @@ interface AdminOrder {
   order_total: number;
   qb_invoice_id: string | null;
   qb_invoice_number: string | null;
+  qb_payment_id: string | null;
+  qb_payment_method: string | null;
+  qb_payment_date: string | null;
+  qb_payment_amount: number | null;
   payment_link: string | null;
   created_at: string;
   updated_at: string;
@@ -567,20 +571,62 @@ function AdminOrdersPage() {
               {(selectedOrder.qb_invoice_id || selectedOrder.payment_link) && (
                 <div>
                   <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">QuickBooks</h3>
-                  <div className="text-sm space-y-1">
-                    {selectedOrder.qb_invoice_number && (
-                      <p className="text-gray-600">Invoice #{selectedOrder.qb_invoice_number}</p>
-                    )}
-                    {selectedOrder.payment_link && (
-                      <a
-                        href={selectedOrder.payment_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#E8621A] hover:underline"
-                      >
-                        Payment Link →
-                      </a>
-                    )}
+                  <div className="border border-gray-200 rounded-xl overflow-hidden">
+                    <table className="w-full text-sm">
+                      <tbody>
+                        {selectedOrder.qb_invoice_number && (
+                          <tr className="border-b border-gray-100">
+                            <td className="px-4 py-2.5 text-gray-500 font-medium">Invoice #</td>
+                            <td className="px-4 py-2.5 text-[#1A1A1A] font-semibold">{selectedOrder.qb_invoice_number}</td>
+                          </tr>
+                        )}
+                        {selectedOrder.qb_invoice_id && (
+                          <tr className="border-b border-gray-100">
+                            <td className="px-4 py-2.5 text-gray-500 font-medium">Invoice ID</td>
+                            <td className="px-4 py-2.5 text-gray-600 font-mono text-xs">{selectedOrder.qb_invoice_id}</td>
+                          </tr>
+                        )}
+                        {selectedOrder.qb_payment_id && (
+                          <tr className="border-b border-gray-100 bg-green-50">
+                            <td className="px-4 py-2.5 text-green-700 font-medium">Payment ID</td>
+                            <td className="px-4 py-2.5 text-green-800 font-semibold">{selectedOrder.qb_payment_id}</td>
+                          </tr>
+                        )}
+                        {selectedOrder.qb_payment_method && (
+                          <tr className="border-b border-gray-100 bg-green-50">
+                            <td className="px-4 py-2.5 text-green-700 font-medium">Payment Method</td>
+                            <td className="px-4 py-2.5 text-green-800">{selectedOrder.qb_payment_method}</td>
+                          </tr>
+                        )}
+                        {selectedOrder.qb_payment_amount && (
+                          <tr className="border-b border-gray-100 bg-green-50">
+                            <td className="px-4 py-2.5 text-green-700 font-medium">Amount Paid</td>
+                            <td className="px-4 py-2.5 text-green-800 font-semibold">{formatCurrency(selectedOrder.qb_payment_amount)}</td>
+                          </tr>
+                        )}
+                        {selectedOrder.qb_payment_date && (
+                          <tr className="border-b border-gray-100 bg-green-50">
+                            <td className="px-4 py-2.5 text-green-700 font-medium">Payment Date</td>
+                            <td className="px-4 py-2.5 text-green-800">{formatDate(selectedOrder.qb_payment_date)}</td>
+                          </tr>
+                        )}
+                        {selectedOrder.payment_link && (
+                          <tr>
+                            <td className="px-4 py-2.5 text-gray-500 font-medium">Payment Link</td>
+                            <td className="px-4 py-2.5">
+                              <a
+                                href={selectedOrder.payment_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[#E8621A] hover:underline font-medium"
+                              >
+                                Open in QuickBooks →
+                              </a>
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               )}

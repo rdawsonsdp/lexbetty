@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { QBWebhookPayload } from '@/lib/quickbooks/types';
-import { getInvoiceStatus } from '@/lib/quickbooks/invoices';
+import { getInvoiceStatus, getPaymentForInvoice } from '@/lib/quickbooks/invoices';
 
 const WEBHOOK_VERIFIER_TOKEN = process.env.QB_WEBHOOK_VERIFIER_TOKEN || '';
 
@@ -49,11 +49,20 @@ export async function POST(request: NextRequest) {
             try {
               const invoiceStatus = await getInvoiceStatus(entity.id);
               if (invoiceStatus.isPaid) {
+                // Fetch payment details from QB
+                const payment = await getPaymentForInvoice(entity.id);
                 await supabaseAdmin
                   .from('orders')
-                  .update({ status: 'paid', updated_at: new Date().toISOString() })
+                  .update({
+                    status: 'paid',
+                    qb_payment_id: payment?.paymentId || null,
+                    qb_payment_method: payment?.paymentMethod || null,
+                    qb_payment_date: payment?.paymentDate ? new Date(payment.paymentDate).toISOString() : new Date().toISOString(),
+                    qb_payment_amount: payment?.totalAmount || invoiceStatus.totalAmt,
+                    updated_at: new Date().toISOString(),
+                  })
                   .eq('id', order.id);
-                console.log(`Order ${order.id} marked as paid (invoice balance verified: $0)`);
+                console.log(`Order ${order.id} marked as paid — QB Payment #${payment?.paymentId || 'unknown'}, method: ${payment?.paymentMethod || 'unknown'}`);
               } else {
                 console.log(`Invoice ${entity.id} updated but balance is $${invoiceStatus.balance} — not marking as paid`);
               }

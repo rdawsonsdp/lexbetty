@@ -116,3 +116,39 @@ export async function getInvoiceStatus(invoiceId: string): Promise<{
     isPaid: result.Invoice.Balance === 0,
   };
 }
+
+/**
+ * Find payment(s) linked to an invoice via QB query.
+ */
+export async function getPaymentForInvoice(invoiceId: string): Promise<{
+  paymentId: string;
+  paymentMethod: string;
+  paymentDate: string;
+  totalAmount: number;
+} | null> {
+  try {
+    const query = `SELECT * FROM Payment WHERE Line.LinkedTxn.TxnId = '${invoiceId}' AND Line.LinkedTxn.TxnType = 'Invoice'`;
+    const result = await qbApiCall('GET', `query?query=${encodeURIComponent(query)}`) as {
+      QueryResponse: { Payment?: Array<{
+        Id: string;
+        PaymentMethodRef?: { name: string };
+        TxnDate: string;
+        TotalAmt: number;
+      }> };
+    };
+
+    if (result.QueryResponse.Payment && result.QueryResponse.Payment.length > 0) {
+      const payment = result.QueryResponse.Payment[0];
+      return {
+        paymentId: payment.Id,
+        paymentMethod: payment.PaymentMethodRef?.name || 'Online',
+        paymentDate: payment.TxnDate,
+        totalAmount: payment.TotalAmt,
+      };
+    }
+    return null;
+  } catch {
+    console.warn(`Could not fetch payment for invoice ${invoiceId}`);
+    return null;
+  }
+}

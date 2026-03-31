@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lexington Betty Smokehouse — Cover Page</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
+
+    @page {
+      size: 8.5in 11in;
+      margin: 0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 8.5in;
+      height: 11in;
+      margin: 0 auto;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+      background: #1A1A1A;
+      color: white;
+      position: relative;
+    }
+
+    /* Background pattern overlay */
+    .bg-pattern {
+      position: absolute;
+      inset: 0;
+      opacity: 0.04;
+      background-image: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 20px,
+        rgba(232,98,26,0.3) 20px,
+        rgba(232,98,26,0.3) 21px
+      );
+    }
+
+    /* Top orange accent bar */
+    .top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: #E8621A;
+    }
+
+    /* Bottom orange accent bar */
+    .bottom-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: #E8621A;
+    }
+
+    /* Left accent stripe */
+    .left-stripe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 60px;
+      height: 100%;
+      background: #E8621A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .left-stripe-text {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 0.65rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.9);
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      transform: rotate(180deg);
+    }
+
+    /* Main content area */
+    .main {
+      position: absolute;
+      top: 0;
+      left: 60px;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 3.5rem;
+    }
+
+    /* Top section - small detail */
+    .top-detail {
+      position: absolute;
+      top: 2.5rem;
+      left: 60px;
+      right: 0;
+      padding: 0 3.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .top-detail span {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    /* Decorative line above title */
+    .deco-line {
+      width: 80px;
+      height: 3px;
+      background: #E8621A;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Main title */
+    .title {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 4rem;
+      line-height: 0.95;
+      letter-spacing: 0.04em;
+      color: #F5EDE0;
+      margin-bottom: 0.25rem;
+    }
+
+    .title-smokehouse {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 4rem;
+      line-height: 0.95;
+      letter-spacing: 0.04em;
+      color: #E8621A;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Subtitle */
+    .subtitle {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 600;
+      font-size: 1.15rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 0.75rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* Document type badge */
+    .doc-badge {
+      display: inline-block;
+      border: 2px solid #E8621A;
+      color: #E8621A;
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.25em;
+      padding: 0.6rem 1.5rem;
+      text-transform: uppercase;
+      margin-bottom: 2.5rem;
+    }
+
+    /* Info grid */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem 3rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .info-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #E8621A;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.4;
+    }
+
+    /* Tagline */
+    .tagline {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    /* Bottom info */
+    .bottom-info {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 60px;
+      right: 0;
+      padding: 0 3.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .bottom-left {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.3);
+      line-height: 1.6;
+    }
+
+    .bottom-right {
+      text-align: right;
+    }
+
+    .bottom-right .version {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      color: #E8621A;
+    }
+
+    .bottom-right .date {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.3);
+      margin-top: 0.2rem;
+    }
+
+    /* Large decorative number */
+    .deco-number {
+      position: absolute;
+      top: 50%;
+      right: 2rem;
+      transform: translateY(-50%);
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 22rem;
+      color: rgba(232,98,26,0.04);
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    @media print {
+      body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-pattern"></div>
+  <div class="top-bar"></div>
+  <div class="bottom-bar"></div>
+
+  <!-- Left orange stripe -->
+  <div class="left-stripe">
+    <span class="left-stripe-text">Lexington Betty Smokehouse &bull; Chicago, Illinois</span>
+  </div>
+
+  <!-- Decorative background element -->
+  <div class="deco-number">LB</div>
+
+  <!-- Top detail row -->
+  <div class="top-detail">
+    <span>Confidential</span>
+    <span>Catering Platform</span>
+  </div>
+
+  <!-- Main content -->
+  <div class="main">
+    <div class="deco-line"></div>
+
+    <div class="title">LEXINGTON BETTY</div>
+    <div class="title-smokehouse">SMOKEHOUSE</div>
+
+    <div class="subtitle">Application Documentation</div>
+
+    <div class="doc-badge">Operations &amp; Technical Reference</div>
+
+    <div class="info-grid">
+      <div>
+        <div class="info-label">Prepared For</div>
+        <div class="info-value">Chef Dominique Leach<br>Lexington Betty Smokehouse</div>
+      </div>
+      <div>
+        <div class="info-label">Location</div>
+        <div class="info-value">756 E. 111th St<br>Chicago, IL 60628</div>
+      </div>
+      <div>
+        <div class="info-label">Domain</div>
+        <div class="info-value">lexingtonbettycatering.com</div>
+      </div>
+      <div>
+        <div class="info-label">Contact</div>
+        <div class="info-value">(312) 600-8155<br>orders@lexingtonbettycatering.com</div>
+      </div>
+      <div>
+        <div class="info-label">Platform</div>
+        <div class="info-value">Next.js &middot; Supabase &middot; Vercel</div>
+      </div>
+      <div>
+        <div class="info-label">Integrations</div>
+        <div class="info-value">Resend &middot; QuickBooks Online</div>
+      </div>
+    </div>
+
+    <div class="tagline">&ldquo;Best BBQ in Chicago&rdquo; &mdash; As Seen on Good Morning America</div>
+  </div>
+
+  <!-- Bottom info -->
+  <div class="bottom-info">
+    <div class="bottom-left">
+      GitHub: rdawsonsdp/lexbetty<br>
+      Supabase Project: ghsqkkreeurpypitegvp
+    </div>
+    <div class="bottom-right">
+      <div class="version">VERSION 1.0</div>
+      <div class="date">March 2026</div>
+    </div>
+  </div>
+
+</body>
+</html>
