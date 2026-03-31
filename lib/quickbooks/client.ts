@@ -9,21 +9,17 @@ const QB_REDIRECT_URI = process.env.QB_REDIRECT_URI || '';
 const QB_ENVIRONMENT = (process.env.QB_ENVIRONMENT || 'sandbox') as 'sandbox' | 'production';
 const QB_API_MINOR_VERSION = '65';
 
-let oauthClient: OAuthClient | null = null;
-
 function getOAuthClient(): OAuthClient {
-  if (!oauthClient) {
-    if (!QB_CLIENT_ID || !QB_CLIENT_SECRET) {
-      throw new Error('QuickBooks credentials not configured');
-    }
-    oauthClient = new OAuthClient({
-      clientId: QB_CLIENT_ID,
-      clientSecret: QB_CLIENT_SECRET,
-      environment: QB_ENVIRONMENT,
-      redirectUri: QB_REDIRECT_URI,
-    });
+  if (!QB_CLIENT_ID || !QB_CLIENT_SECRET) {
+    throw new Error('QuickBooks credentials not configured');
   }
-  return oauthClient;
+  // Always create fresh — avoids stale redirect URI on serverless warm starts
+  return new OAuthClient({
+    clientId: QB_CLIENT_ID,
+    clientSecret: QB_CLIENT_SECRET,
+    environment: QB_ENVIRONMENT,
+    redirectUri: QB_REDIRECT_URI,
+  });
 }
 
 /**

@@ -38,6 +38,7 @@ interface QuoteEmailData {
   companyPhone?: string;
   companyEmail?: string;
   companyAddress?: string;
+  paymentLink?: string | null;
 }
 
 function formatCurrency(cents: number): string {
@@ -226,6 +227,24 @@ export function buildQuoteEmailHtml(data: QuoteEmailData): string {
             </tr>
           </table>
         </td></tr>
+
+        <!-- Pay Now Button -->
+        ${data.paymentLink ? `
+        <tr><td style="padding: 0 24px 24px;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background: #1A1A1A; border-radius: 8px;">
+            <tr><td style="padding: 24px; text-align: center;">
+              <p style="margin: 0 0 16px; font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: 700; color: #F5EDE0; letter-spacing: 1px;">
+                YOUR INVOICE IS READY
+              </p>
+              <a href="${data.paymentLink}" style="display: inline-block; background-color: #E8621A; color: #ffffff; font-family: Arial, Helvetica, sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 1px; text-decoration: none; padding: 14px 40px; border-radius: 8px;">
+                PAY NOW
+              </a>
+              <p style="margin: 12px 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #888;">
+                Secure payment powered by Intuit QuickBooks
+              </p>
+            </td></tr>
+          </table>
+        </td></tr>` : ''}
 
         <!-- Next Steps -->
         ${isQuote ? nextStepsQuote : nextStepsOrder}

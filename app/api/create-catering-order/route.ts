@@ -166,7 +166,75 @@ export async function POST(request: NextRequest) {
       console.warn('Training data save failed (non-blocking):', trainingErr);
     }
 
-    // Send confirmation email (non-blocking)
+    // ── Create QB invoice first (if connected and not a quote) ──
+    let paymentLink: string | null = null;
+    let invoiceId: string | null = null;
+    let invoiceNumber: string | null = null;
+    let customerId: string | null = null;
+
+    if (orderType !== 'quote') {
+      try {
+        const qbStatus = await isQBConnected();
+        if (qbStatus.connected) {
+          customerId = await findOrCreateCustomer({
+            name: body.buyerInfo.name,
+            email: body.buyerInfo.email,
+            phone: body.buyerInfo.phone || undefined,
+            company: body.buyerInfo.company || undefined,
+          });
+
+          const lineItems = body.items.map((item) => ({
+            description: `${item.title} — ${item.displayText}`,
+            amount: item.totalPrice,
+            quantity: item.quantity,
+          }));
+
+          const invoice = await createInvoice({
+            orderNumber,
+            customerId,
+            customerEmail: body.buyerInfo.email,
+            lineItems,
+            deliveryFee,
+            eventDate: body.buyerInfo.eventDate,
+            eventTime: body.buyerInfo.eventTime,
+            headcount: body.headcount,
+            specialInstructions: body.buyerInfo.notes,
+          });
+
+          invoiceId = invoice.invoiceId;
+          invoiceNumber = invoice.invoiceNumber;
+          paymentLink = invoice.paymentLink;
+
+          // Update order with QB details
+          if (orderId) {
+            await supabaseAdmin
+              .from('orders')
+              .update({
+                qb_invoice_id: invoiceId,
+                qb_invoice_number: invoiceNumber,
+                qb_customer_id: customerId,
+                payment_link: paymentLink,
+                status: 'invoiced',
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', orderId);
+          }
+
+          // Send invoice email via QB
+          try {
+            await sendInvoiceEmail(invoiceId);
+          } catch (emailErr) {
+            console.warn('Failed to send QB invoice email:', emailErr);
+          }
+        } else {
+          console.log('Order created without QB invoice (QB not connected):', orderNumber);
+        }
+      } catch (qbErr) {
+        console.error('QuickBooks invoice creation failed (non-blocking):', qbErr);
+      }
+    }
+
+    // ── Send confirmation email (with payment link if available) ──
     try {
       const emailSettings = await getEmailSettings();
       if (emailSettings.email_enabled) {
@@ -214,6 +282,7 @@ export async function POST(request: NextRequest) {
           companyPhone: emailSettings.company_phone,
           companyEmail: emailSettings.company_email,
           companyAddress: emailSettings.company_address,
+          paymentLink,
         });
 
         const subjectTemplate = orderType === 'quote'
@@ -237,84 +306,6 @@ export async function POST(request: NextRequest) {
       }
     } catch (emailError) {
       console.error('Email sending failed (non-blocking):', emailError);
-    }
-
-    // For quotes, skip QB invoice creation
-    if (orderType === 'quote') {
-      return NextResponse.json({
-        success: true,
-        orderNumber,
-        orderId,
-        paymentLink: null,
-      });
-    }
-
-    // Check if QuickBooks is connected
-    const qbStatus = await isQBConnected();
-
-    if (!qbStatus.connected) {
-      // QB not connected — return success without invoice
-      console.log('Order created without QB invoice (QB not connected):', orderNumber);
-      return NextResponse.json({
-        success: true,
-        orderNumber,
-        orderId,
-        paymentLink: null,
-        message: 'Order saved. QuickBooks not connected — no invoice created.',
-      });
-    }
-
-    // Create QB customer
-    const customerId = await findOrCreateCustomer({
-      name: body.buyerInfo.name,
-      email: body.buyerInfo.email,
-      phone: body.buyerInfo.phone || undefined,
-      company: body.buyerInfo.company || undefined,
-    });
-
-    // Create QB invoice
-    const lineItems = body.items.map((item) => ({
-      description: `${item.title} — ${item.displayText}`,
-      amount: item.totalPrice,
-      quantity: item.quantity,
-    }));
-
-    const { invoiceId, invoiceNumber, paymentLink } = await createInvoice({
-      orderNumber,
-      customerId,
-      customerEmail: body.buyerInfo.email,
-      lineItems,
-      deliveryFee,
-      eventDate: body.buyerInfo.eventDate,
-      eventTime: body.buyerInfo.eventTime,
-      headcount: body.headcount,
-      specialInstructions: body.buyerInfo.notes,
-    });
-
-    // Update order with QB details
-    if (orderId) {
-      try {
-        await supabaseAdmin
-          .from('orders')
-          .update({
-            qb_invoice_id: invoiceId,
-            qb_invoice_number: invoiceNumber,
-            qb_customer_id: customerId,
-            payment_link: paymentLink,
-            status: 'invoiced',
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', orderId);
-      } catch (updateErr) {
-        console.warn('Failed to update order with QB details:', updateErr);
-      }
-    }
-
-    // Send invoice email via QB
-    try {
-      await sendInvoiceEmail(invoiceId);
-    } catch (emailErr) {
-      console.warn('Failed to send QB invoice email:', emailErr);
     }
 
     return NextResponse.json({

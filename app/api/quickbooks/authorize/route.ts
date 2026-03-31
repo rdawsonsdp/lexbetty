@@ -9,6 +9,8 @@ export async function GET(request: NextRequest) {
 
   try {
     const { url, state } = getAuthorizationUrl();
+    console.log('QB Auth URL redirect_uri:', process.env.QB_REDIRECT_URI);
+    console.log('QB Auth URL full:', url);
 
     // Set the CSRF state in a short-lived cookie for verification in the callback
     const response = NextResponse.json({ authUrl: url });
