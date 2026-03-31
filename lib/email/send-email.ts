@@ -15,12 +15,14 @@ interface SendEmailParams {
   subject: string;
   html: string;
   replyTo?: string;
+  cc?: string[];
 }
 
-export async function sendEmail({ to, subject, html, replyTo }: SendEmailParams) {
+export async function sendEmail({ to, subject, html, replyTo, cc }: SendEmailParams) {
   if (!resend) {
     console.log('--- EMAIL (dev mode, no RESEND_API_KEY) ---');
     console.log(`To: ${to}`);
+    console.log(`CC: ${cc?.join(', ') || 'N/A'}`);
     console.log(`Subject: ${subject}`);
     console.log(`Reply-To: ${replyTo || 'N/A'}`);
     console.log(`HTML length: ${html.length} chars`);
@@ -37,6 +39,7 @@ export async function sendEmail({ to, subject, html, replyTo }: SendEmailParams)
     subject,
     html,
     ...(replyTo ? { replyTo } : {}),
+    ...(cc && cc.length > 0 ? { cc } : {}),
   });
 
   if (error) {

@@ -13,6 +13,7 @@ interface EmailSettings {
   company_phone: string;
   company_email: string;
   company_address: string;
+  notification_emails: string;
 }
 
 function authHeaders() {
@@ -193,6 +194,51 @@ function EmailSettingsPage() {
               />
             </div>
           </div>
+        </Card>
+
+        {/* Notifications — CC on all orders/quotes */}
+        <Card>
+          <h2 className="font-oswald text-xl font-bold text-[#1A1A1A] mb-1">Notifications</h2>
+          <p className="text-sm text-gray-500 mb-4">
+            These email addresses will be CC&apos;d on every order and quote confirmation sent to customers.
+            Use this to notify the store, kitchen, or management of new orders in real time.
+          </p>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Notification Email Addresses
+            </label>
+            <input
+              type="text"
+              value={settings.notification_emails}
+              onChange={e => update('notification_emails', e.target.value)}
+              placeholder="store@lexingtonbettycatering.com, manager@lexingtonbettycatering.com"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50"
+            />
+            <p className="text-xs text-gray-400 mt-1.5">
+              Separate multiple addresses with commas. Leave blank to disable notifications.
+            </p>
+          </div>
+          {settings.notification_emails && (
+            <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm text-green-700 font-medium">
+                Active notifications will go to:
+              </p>
+              <ul className="mt-1 space-y-0.5">
+                {settings.notification_emails.split(',').map((email, i) => {
+                  const trimmed = email.trim();
+                  if (!trimmed) return null;
+                  return (
+                    <li key={i} className="text-sm text-green-600 flex items-center gap-1.5">
+                      <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      {trimmed}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
         </Card>
 
         {/* Save Button */}

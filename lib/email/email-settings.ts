@@ -8,6 +8,7 @@ export interface EmailSettings {
   company_phone: string;
   company_email: string;
   company_address: string;
+  notification_emails: string;
 }
 
 const DEFAULTS: EmailSettings = {
@@ -17,6 +18,7 @@ const DEFAULTS: EmailSettings = {
   company_phone: '(312) 600-8155',
   company_email: 'orders@lexingtonbettycatering.com',
   company_address: '756 E. 111th St, Chicago, IL 60628',
+  notification_emails: '',
 };
 
 // In-memory fallback

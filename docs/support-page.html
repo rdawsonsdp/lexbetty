@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Support Contact — Lexington Betty Smokehouse</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+    @page {
+      size: 8.5in 11in;
+      margin: 0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 8.5in;
+      height: 11in;
+      margin: 0 auto;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+      background: #FFFFFF;
+      color: #1A1A1A;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: #E8621A;
+    }
+
+    .bottom-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: #E8621A;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 6in;
+    }
+
+    .header-icon {
+      width: 80px;
+      height: 80px;
+      background: #F5EDE0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+    }
+
+    .header-icon svg {
+      width: 40px;
+      height: 40px;
+      color: #E8621A;
+    }
+
+    .title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #1A1A1A;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      color: #9B9189;
+      text-transform: uppercase;
+      margin-bottom: 2.5rem;
+    }
+
+    .divider {
+      width: 100px;
+      height: 3px;
+      background: #E8621A;
+      margin: 0 auto 2.5rem;
+    }
+
+    /* Contact Cards */
+    .contact-card {
+      border: 3px solid #1A1A1A;
+      border-radius: 12px;
+      padding: 2rem 2.5rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .contact-card.primary {
+      border-color: #E8621A;
+      background: #FFFBF8;
+    }
+
+    .contact-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #E8621A;
+      margin-bottom: 0.75rem;
+    }
+
+    .contact-card.backup .contact-label {
+      color: #9B9189;
+    }
+
+    .contact-name {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #1A1A1A;
+      margin-bottom: 0.25rem;
+    }
+
+    .contact-company {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #9B9189;
+      margin-bottom: 1.25rem;
+    }
+
+    .contact-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .contact-row svg {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .contact-row.phone svg { color: #E8621A; }
+    .contact-row.email svg { color: #1A1A1A; }
+
+    .contact-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1A1A1A;
+      letter-spacing: 0.02em;
+    }
+
+    .contact-value.email-val {
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .backup .contact-name {
+      font-size: 1.4rem;
+    }
+
+    .backup .contact-value {
+      font-size: 1.1rem;
+    }
+
+    .footer-note {
+      margin-top: 2.5rem;
+      font-size: 0.8rem;
+      color: #9B9189;
+      line-height: 1.6;
+    }
+
+    .footer-note strong {
+      color: #1A1A1A;
+    }
+
+    @media print {
+      body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar"></div>
+  <div class="bottom-bar"></div>
+
+  <div class="container">
+
+    <!-- Header -->
+    <div class="header-icon">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+      </svg>
+    </div>
+
+    <div class="title">TECHNICAL SUPPORT</div>
+    <div class="subtitle">Lexington Betty Smokehouse Platform</div>
+    <div class="divider"></div>
+
+    <!-- Primary Contact -->
+    <div class="contact-card primary">
+      <div class="contact-label">Primary Contact</div>
+      <div class="contact-name">Robert Dawson</div>
+      <div class="contact-company">Strategic Data Products</div>
+
+      <div class="contact-row phone">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+        </svg>
+        <span class="contact-value">630-632-7291</span>
+      </div>
+
+      <div class="contact-row email">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+        <span class="contact-value email-val">rdawson@strategicdataproducts.com</span>
+      </div>
+    </div>
+
+    <!-- Backup Contact -->
+    <div class="contact-card backup">
+      <div class="contact-label">Backup Contact</div>
+      <div class="contact-name">Camille Thames Dawson</div>
+      <div class="contact-company">Strategic Data Products</div>
+
+      <div class="contact-row phone">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+        </svg>
+        <span class="contact-value">630-632-4481</span>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-note">
+      <strong>For platform issues, email or call/text anytime.</strong><br>
+      Application: lexingtonbettycatering.com &middot; Admin: /admin/menu &middot; Password: bbq2026
+    </div>
+
+  </div>
+
+</body>
+</html>

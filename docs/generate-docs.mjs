@@ -289,7 +289,8 @@ const doc = new Document({
         para('12. QuickBooks Integration'),
         para('13. Hosting & Domain'),
         para('14. Environment Variables'),
-        para('15. Getting Started (Developer Guide)'),
+        para('15. Email Notifications'),
+        para('16. Getting Started (Developer Guide)'),
 
         pageBreak(),
 
@@ -681,8 +682,65 @@ const doc = new Document({
 
         pageBreak(),
 
-        // ---- 15. GETTING STARTED ----
-        heading('15. Getting Started (Developer Guide)'),
+        // ---- 15. NOTIFICATIONS ----
+        heading('15. Email Notifications'),
+        para('The platform can automatically CC (carbon copy) store staff on every order and quote confirmation email sent to customers. This ensures the kitchen, management, or front-of-house team is notified of new orders in real time — no extra steps required.'),
+
+        heading('How It Works', HeadingLevel.HEADING_2),
+        para('When a customer submits an order or quote, the confirmation email is sent to the customer AND copied to all notification email addresses configured in the admin panel. The store receives the exact same email the customer sees — including all items, pricing, event details, and delivery information.'),
+
+        heading('Setting Up Notifications', HeadingLevel.HEADING_2),
+        para('Follow these steps to configure notification emails:', { bold: true }),
+        spacer(60),
+
+        para('Step 1: Log into the Admin Panel', { bold: true, size: 24 }),
+        para('Go to your site and navigate to the admin panel. Log in with the admin password.'),
+        para('URL: https://www.lexingtonbettycatering.com/admin/email', { size: 20 }),
+        spacer(60),
+
+        para('Step 2: Scroll to the Notifications Section', { bold: true, size: 24 }),
+        para('On the Email Settings page, scroll down past "Subject Lines" and "Company Contact" until you see the Notifications card.'),
+        spacer(60),
+
+        para('Step 3: Enter Email Addresses', { bold: true, size: 24 }),
+        para('In the "Notification Email Addresses" field, type the email addresses that should receive copies of all orders and quotes. Separate multiple addresses with commas.'),
+        spacer(30),
+        para('Examples:', { bold: true }),
+        para('Single address:  store@lexingtonbettycatering.com', { size: 20 }),
+        para('Multiple addresses:  store@lexingtonbettycatering.com, chef@lexingtonbettycatering.com, manager@gmail.com', { size: 20 }),
+        spacer(60),
+
+        para('Step 4: Click "Save Settings"', { bold: true, size: 24 }),
+        para('After entering the addresses, click the Save Settings button at the bottom of the page. You will see a green "Settings saved!" confirmation.'),
+        spacer(60),
+
+        para('Step 5: Verify with a Test Order', { bold: true, size: 24 }),
+        para('Place a test order through the site to confirm the notification emails arrive. Check spam/junk folders if they don\'t appear within a few minutes.'),
+
+        heading('Managing Notifications', HeadingLevel.HEADING_2),
+        makeTable(
+          ['Action', 'How To'],
+          [
+            ['Add a recipient', 'Add their email to the list, separated by a comma, then Save'],
+            ['Remove a recipient', 'Delete their email from the list, then Save'],
+            ['Disable all notifications', 'Clear the field completely (leave blank), then Save'],
+            ['Change a recipient', 'Edit the email address directly in the field, then Save'],
+          ]
+        ),
+
+        heading('Important Notes', HeadingLevel.HEADING_2),
+        bullet(' Notification emails are CC\'d, meaning the customer can see the CC addresses in their email. Use professional store addresses.'),
+        bullet(' Notifications are sent for both orders AND quotes — the store is always in the loop.'),
+        bullet(' If the notification field is blank, emails are sent only to the customer (no CC).'),
+        bullet(' Notification settings take effect immediately after saving — no restart or redeploy needed.'),
+        bullet(' If emails are not arriving, check: (1) the email address is correct, (2) check spam/junk folder, (3) verify the Email Notifications toggle is ON.'),
+
+        callout('Recommended: Add at least one store email address so the team is notified of every new order. This is especially important for same-week catering requests that need immediate attention.'),
+
+        pageBreak(),
+
+        // ---- 16. GETTING STARTED ----
+        heading('16. Getting Started (Developer Guide)'),
         heading('Prerequisites', HeadingLevel.HEADING_2),
         bullet(' Node.js 18+ and npm'),
         bullet(' Git'),

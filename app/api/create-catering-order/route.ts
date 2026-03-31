@@ -221,11 +221,18 @@ export async function POST(request: NextRequest) {
           : emailSettings.email_subject_order;
         const subject = subjectTemplate.replace('{orderNumber}', orderNumber);
 
+        // Parse notification CC emails
+        const ccEmails = (emailSettings.notification_emails || '')
+          .split(',')
+          .map((e: string) => e.trim())
+          .filter((e: string) => e && e.includes('@'));
+
         await sendEmail({
           to: body.buyerInfo.email,
           subject,
           html,
           replyTo: emailSettings.company_email,
+          cc: ccEmails.length > 0 ? ccEmails : undefined,
         });
       }
     } catch (emailError) {
