@@ -290,11 +290,13 @@ export async function POST(request: NextRequest) {
           : emailSettings.email_subject_order;
         const subject = subjectTemplate.replace('{orderNumber}', orderNumber);
 
-        // Parse notification CC emails
-        const ccEmails = (emailSettings.notification_emails || '')
+        // Store notification CC — always CC the store
+        const STORE_CC = ['info@lexingtonbettycatering.com'];
+        const additionalCc = (emailSettings.notification_emails || '')
           .split(',')
           .map((e: string) => e.trim())
           .filter((e: string) => e && e.includes('@'));
+        const ccEmails = [...STORE_CC, ...additionalCc.filter(e => !STORE_CC.includes(e))];
 
         await sendEmail({
           to: body.buyerInfo.email,
