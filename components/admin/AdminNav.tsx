@@ -7,6 +7,7 @@ import { FEATURES } from '@/lib/feature-flags';
 
 const NAV_ITEMS = [
   { href: '/admin/orders', label: 'Orders' },
+  { href: '/admin/customers', label: 'Customers' },
   { href: '/admin/menu', label: 'Menu' },
   { href: '/menu-engineering', label: 'Engineering' },
   { href: '/admin/email', label: 'Email' },
