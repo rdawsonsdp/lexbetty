@@ -22,7 +22,7 @@ export default function AdminNav() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="bg-[#1A1A1A] border-b border-white/10">
+    <div className="hidden lg:block bg-[#1A1A1A] border-b border-white/10">
       <div className="max-w-5xl mx-auto px-4">
         <div className="flex items-center justify-between h-14">
           <Link href="/admin/menu" className="font-oswald text-[#E8621A] font-bold text-lg tracking-wide">

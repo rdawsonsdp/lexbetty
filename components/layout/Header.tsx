@@ -7,8 +7,20 @@ import { FEATURES } from '@/lib/feature-flags';
 import { useCatering } from '@/context/CateringContext';
 import SignInDropdown from '@/components/auth/SignInDropdown';
 
+const ADMIN_LINKS = [
+  { href: '/admin/orders', label: 'Orders' },
+  { href: '/admin/customers', label: 'Customers' },
+  { href: '/admin/menu', label: 'Menu' },
+  { href: '/menu-engineering', label: 'Engineering' },
+  { href: '/admin/email', label: 'Email' },
+  { href: '/admin/analytics', label: 'Analytics' },
+  { href: '/admin/quickbooks', label: 'QuickBooks' },
+  { href: '/admin/settings', label: 'Settings' },
+];
+
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [adminExpanded, setAdminExpanded] = useState(false);
   const { state } = useCatering();
   const cartCount = state.selectedItems.length;
 
@@ -141,13 +153,34 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="/admin/menu"
-              className="block py-3 font-oswald tracking-wider text-[#1A1A1A] hover:text-[#E8621A] transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
+            <button
+              onClick={() => setAdminExpanded(!adminExpanded)}
+              className="flex items-center justify-between w-full py-3 font-oswald tracking-wider text-[#1A1A1A] hover:text-[#E8621A] transition-colors"
             >
               ADMIN
-            </Link>
+              <svg
+                className={`w-4 h-4 transition-transform ${adminExpanded ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {adminExpanded && (
+              <div className="pl-4 pb-2 space-y-1 border-l-2 border-[#E8621A]/30 ml-1">
+                {ADMIN_LINKS.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="block py-2 text-sm font-medium text-gray-600 hover:text-[#E8621A] transition-colors"
+                    onClick={() => { setMobileMenuOpen(false); setAdminExpanded(false); }}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            )}
             {/* Mobile Account */}
             {FEATURES.CUSTOMER_ACCOUNTS_ENABLED && (
               <div className="py-3">
