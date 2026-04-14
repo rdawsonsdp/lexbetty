@@ -14,7 +14,7 @@ export default function Header() {
 
   const navLinks = [
     { href: '/', label: 'HOME' },
-    { href: '/menus', label: 'CATERING MENU' },
+    { href: '/#order', label: 'CATERING MENU' },
     ...(FEATURES.BETTY_AI_ENABLED ? [{ href: '/concierge', label: 'ASK BETTY' }] : []),
   ];
 

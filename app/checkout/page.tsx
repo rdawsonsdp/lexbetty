@@ -35,6 +35,9 @@ interface FormData {
 
   // Additional
   specialInstructions: string;
+
+  // Tax Exempt
+  taxExempt: boolean;
 }
 
 const PROCESS_STEPS = [
@@ -157,7 +160,12 @@ export default function CheckoutPage() {
     deliveryType: 'delivery',
     deliveryInstructions: '',
     specialInstructions: state.eventInfo?.specialInstructions || '',
+    taxExempt: false,
   });
+  const [taxCertificateFile, setTaxCertificateFile] = useState<File | null>(null);
+  const [taxCertificateUrl, setTaxCertificateUrl] = useState<string | null>(null);
+  const [taxCertificatePath, setTaxCertificatePath] = useState<string | null>(null);
+  const [taxUploadStatus, setTaxUploadStatus] = useState<'idle' | 'uploading' | 'done' | 'error'>('idle');
   const [errors, setErrors] = useState<Partial<FormData>>({});
 
   // Calculate delivery fee based on order subtotal and delivery type
@@ -171,7 +179,8 @@ export default function CheckoutPage() {
   const deliveryFee = getDeliveryFee(totalCost, formData.deliveryType);
   const buffetSetupFee = isItemInCart('buffet-drop-off-setup') ? 50 : 0;
   const SALES_TAX_RATE = 0.1025;
-  const salesTax = Math.round((totalCost + buffetSetupFee) * SALES_TAX_RATE * 100) / 100;
+  const isTaxExempt = formData.taxExempt && taxCertificateUrl !== null;
+  const salesTax = isTaxExempt ? 0 : Math.round((totalCost + buffetSetupFee) * SALES_TAX_RATE * 100) / 100;
   const orderTotal = totalCost + deliveryFee + buffetSetupFee + salesTax;
 
   // Redirect if cart is empty
@@ -206,6 +215,38 @@ export default function CheckoutPage() {
     if (errors[name as keyof FormData]) {
       setErrors(prev => ({ ...prev, [name]: undefined }));
     }
+  };
+
+  const handleTaxCertificateUpload = async (file: File) => {
+    setTaxCertificateFile(file);
+    setTaxUploadStatus('uploading');
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const res = await fetch('/api/upload-tax-certificate', {
+        method: 'POST',
+        body: form,
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Upload failed');
+      }
+      const { url, path } = await res.json();
+      setTaxCertificateUrl(url);
+      setTaxCertificatePath(path);
+      setTaxUploadStatus('done');
+    } catch {
+      setTaxUploadStatus('error');
+      setTaxCertificateUrl(null);
+      setTaxCertificatePath(null);
+    }
+  };
+
+  const handleRemoveTaxCertificate = () => {
+    setTaxCertificateFile(null);
+    setTaxCertificateUrl(null);
+    setTaxCertificatePath(null);
+    setTaxUploadStatus('idle');
   };
 
   const validateForm = (): boolean => {
@@ -346,6 +387,9 @@ export default function CheckoutPage() {
           deliveryFee,
           salesTax,
           orderTotal,
+          taxExempt: isTaxExempt,
+          taxExemptCertificateUrl: taxCertificateUrl,
+          taxExemptCertificatePath: taxCertificatePath,
         }),
       });
 
@@ -852,6 +896,99 @@ export default function CheckoutPage() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 resize-none"
                       />
                     </div>
+
+                    {/* Tax Exempt */}
+                    <div className="sm:col-span-2 border-t border-gray-200 pt-4 mt-2">
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.taxExempt}
+                          onChange={(e) => {
+                            setFormData(prev => ({ ...prev, taxExempt: e.target.checked }));
+                            if (!e.target.checked) handleRemoveTaxCertificate();
+                          }}
+                          className="w-5 h-5 mt-0.5 rounded border-gray-300 text-[#E8621A] focus:ring-[#E8621A]"
+                        />
+                        <div>
+                          <span className="text-sm font-medium text-gray-700">Tax Exempt Organization</span>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Check this box if your organization is tax exempt. You must upload a valid tax exemption certificate to remove sales tax.
+                          </p>
+                        </div>
+                      </label>
+
+                      {formData.taxExempt && (
+                        <div className="mt-3 ml-8">
+                          {taxUploadStatus === 'done' && taxCertificateFile ? (
+                            <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                              <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-green-800">Certificate uploaded</p>
+                                <p className="text-xs text-green-600 truncate">{taxCertificateFile.name}</p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={handleRemoveTaxCertificate}
+                                className="text-sm text-red-600 hover:text-red-800 font-medium"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ) : (
+                            <div>
+                              <label className={`flex flex-col items-center justify-center w-full p-4 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+                                taxUploadStatus === 'error'
+                                  ? 'border-red-300 bg-red-50'
+                                  : 'border-gray-300 bg-gray-50 hover:border-[#E8621A]/50 hover:bg-orange-50/30'
+                              }`}>
+                                {taxUploadStatus === 'uploading' ? (
+                                  <div className="flex items-center gap-2">
+                                    <svg className="animate-spin w-5 h-5 text-[#E8621A]" fill="none" viewBox="0 0 24 24">
+                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                    </svg>
+                                    <span className="text-sm text-gray-600">Uploading...</span>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <svg className="w-8 h-8 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                    <p className="text-sm text-gray-600">
+                                      <span className="font-medium text-[#E8621A]">Click to upload</span> your tax exemption certificate
+                                    </p>
+                                    <p className="text-xs text-gray-400 mt-1">PDF, JPEG, PNG, or WebP (max 10 MB)</p>
+                                    {taxUploadStatus === 'error' && (
+                                      <p className="text-xs text-red-600 mt-1">Upload failed. Please try again.</p>
+                                    )}
+                                  </>
+                                )}
+                                <input
+                                  type="file"
+                                  className="hidden"
+                                  accept=".pdf,.jpg,.jpeg,.png,.webp"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) handleTaxCertificateUpload(file);
+                                  }}
+                                  disabled={taxUploadStatus === 'uploading'}
+                                />
+                              </label>
+                              {!taxCertificateUrl && (
+                                <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
+                                  <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                  </svg>
+                                  Sales tax will be applied until a valid certificate is uploaded
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </Card>
 
@@ -1093,7 +1230,9 @@ export default function CheckoutPage() {
                 )}
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Sales Tax (10.25%)</span>
-                  <span className="font-medium text-[#1A1A1A]">{formatCurrency(salesTax)}</span>
+                  <span className={`font-medium ${isTaxExempt ? 'text-green-700' : 'text-[#1A1A1A]'}`}>
+                    {isTaxExempt ? 'Exempt' : formatCurrency(salesTax)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">

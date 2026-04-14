@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { isAdminAuthorized } from '@/lib/admin-auth';
 import { supabaseAdmin } from '@/lib/supabase/server';
 
-const VALID_STATUSES = ['pending', 'invoiced', 'paid', 'cancelled'];
+const VALID_STATUSES = ['pending', 'invoiced', 'paid', 'ready', 'complete', 'cancelled'];
 const VALID_SORT_COLUMNS = ['created_at', 'order_number', 'customer_name', 'event_date', 'order_total', 'status'];
 
 export async function GET(request: NextRequest) {
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
       .from('orders')
       .select('status');
 
-    const statusCounts: Record<string, number> = { all: 0, pending: 0, invoiced: 0, paid: 0, cancelled: 0 };
+    const statusCounts: Record<string, number> = { all: 0, pending: 0, invoiced: 0, paid: 0, ready: 0, complete: 0, cancelled: 0 };
     if (allStatuses) {
       statusCounts.all = allStatuses.length;
       allStatuses.forEach((o) => {
@@ -81,19 +81,32 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { id, status } = body;
+    const { id, status, admin_notes } = body;
 
-    if (!id || !status || !VALID_STATUSES.includes(status)) {
-      return NextResponse.json({ error: 'Invalid request: id and valid status required' }, { status: 400 });
+    if (!id) {
+      return NextResponse.json({ error: 'Order id is required' }, { status: 400 });
+    }
+
+    const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+
+    if (status !== undefined) {
+      if (!VALID_STATUSES.includes(status)) {
+        return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+      }
+      updates.status = status;
+    }
+
+    if (admin_notes !== undefined) {
+      updates.admin_notes = admin_notes;
     }
 
     const { error } = await supabaseAdmin
       .from('orders')
-      .update({ status, updated_at: new Date().toISOString() })
+      .update(updates)
       .eq('id', id);
 
     if (error) {
-      console.error('Failed to update order status:', error);
+      console.error('Failed to update order:', error);
       return NextResponse.json({ error: 'Failed to update order' }, { status: 500 });
     }
 
