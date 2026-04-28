@@ -1,13 +1,13 @@
 'use client';
 
-import ProductSelectionStep from '@/components/catering/ProductSelectionStep';
+import PackageSelectionStep from '@/components/catering/PackageSelectionStep';
 import StepIndicator from '@/components/catering/StepIndicator';
 
-export default function ProductsPage() {
+export default function PackagesPage() {
   return (
     <div className="min-h-screen bg-[#F5EDE0]">
       <StepIndicator />
-      <ProductSelectionStep />
+      <PackageSelectionStep />
     </div>
   );
 }

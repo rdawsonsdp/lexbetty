@@ -12,6 +12,7 @@ interface OrderDetails {
   orderType?: 'quote' | 'order';
   items: Array<{
     title: string;
+    description?: string;
     displayText: string;
     totalPrice: number;
   }>;
@@ -385,15 +386,29 @@ export default function OrderConfirmationPage() {
               Order Summary
             </h2>
             <div className="space-y-3 mb-4">
-              {orderDetails.items.map((item, i) => (
-                <div key={i} className="flex justify-between text-sm">
-                  <div>
-                    <p className="font-medium text-[#1A1A1A]">{item.title}</p>
-                    <p className="text-gray-500 text-xs">{item.displayText}</p>
+              {orderDetails.items.map((item, i) => {
+                const descLines = item.description?.split('\n') || [];
+                return (
+                  <div key={i} className="pb-3 border-b border-gray-100 last:border-0 last:pb-0">
+                    <div className="flex justify-between text-sm gap-3">
+                      <p className="font-oswald font-bold text-[#1A1A1A]">{item.title}</p>
+                      <p className="font-oswald font-bold text-[#1A1A1A] flex-shrink-0">{formatCurrency(item.totalPrice)}</p>
+                    </div>
+                    {descLines.length > 0 && (
+                      <div className="mt-1">
+                        {descLines.map((line, j) => (
+                          <p key={j} className={`text-xs ${j === 0 ? 'text-[#E8621A] font-semibold' : 'text-gray-500'}`}>
+                            {j > 0 && '• '}{line}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                    {!item.description && item.displayText && (
+                      <p className="text-gray-500 text-xs mt-0.5">{item.displayText}</p>
+                    )}
                   </div>
-                  <p className="font-semibold text-[#1A1A1A]">{formatCurrency(item.totalPrice)}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
             <div className="border-t border-gray-200 pt-3 space-y-2">
               <div className="flex justify-between text-sm">

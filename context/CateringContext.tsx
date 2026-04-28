@@ -43,6 +43,8 @@ const initialState: CateringState = {
   selectedItems: [],
   selectedPackage: null,
   buyerInfo: null,
+  editingOrderId: null,
+  editingOrderNumber: null,
 };
 
 function loadState(): CateringState {
@@ -244,8 +246,34 @@ function cateringReducer(state: CateringState, action: CateringAction): Catering
       };
     }
 
+    case 'LOAD_ORDER_FOR_EDIT': {
+      return {
+        ...initialState,
+        eventType: action.payload.eventType,
+        eventInfo: action.payload.eventInfo,
+        headcount: action.payload.headcount,
+        orderType: 'build-your-own',
+        orderMode: 'alacarte',
+        selectedItems: action.payload.items,
+        buyerInfo: action.payload.buyerInfo,
+        editingOrderId: action.payload.orderId,
+        editingOrderNumber: action.payload.orderNumber,
+        currentStep: 5,
+      };
+    }
+
+    case 'EXIT_EDIT_MODE': {
+      saveState(initialState);
+      return initialState;
+    }
+
     case 'HYDRATE': {
-      return action.payload;
+      return {
+        ...initialState,
+        ...action.payload,
+        editingOrderId: action.payload.editingOrderId ?? null,
+        editingOrderNumber: action.payload.editingOrderNumber ?? null,
+      };
     }
 
     case 'RESET': {

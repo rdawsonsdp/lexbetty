@@ -2,31 +2,33 @@ import OAuthClient from 'intuit-oauth';
 import crypto from 'crypto';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { QBTokens } from './types';
+import { getQBCredentials } from './credentials';
 
-const QB_CLIENT_ID = process.env.QB_CLIENT_ID || '';
-const QB_CLIENT_SECRET = process.env.QB_CLIENT_SECRET || '';
-const QB_REDIRECT_URI = process.env.QB_REDIRECT_URI || '';
-const QB_ENVIRONMENT = (process.env.QB_ENVIRONMENT || 'sandbox') as 'sandbox' | 'production';
 const QB_API_MINOR_VERSION = '65';
 
-function getOAuthClient(): OAuthClient {
-  if (!QB_CLIENT_ID || !QB_CLIENT_SECRET) {
-    throw new Error('QuickBooks credentials not configured');
+async function getOAuthClient(): Promise<{ client: OAuthClient; environment: 'sandbox' | 'production'; clientId: string; clientSecret: string }> {
+  const creds = await getQBCredentials();
+  if (!creds.clientId || !creds.clientSecret) {
+    throw new Error('QuickBooks credentials not configured. Add them on the QuickBooks admin page.');
+  }
+  if (!creds.redirectUri) {
+    throw new Error('QuickBooks redirect URI not configured. Add it on the QuickBooks admin page.');
   }
   // Always create fresh — avoids stale redirect URI on serverless warm starts
-  return new OAuthClient({
-    clientId: QB_CLIENT_ID,
-    clientSecret: QB_CLIENT_SECRET,
-    environment: QB_ENVIRONMENT,
-    redirectUri: QB_REDIRECT_URI,
+  const client = new OAuthClient({
+    clientId: creds.clientId,
+    clientSecret: creds.clientSecret,
+    environment: creds.environment,
+    redirectUri: creds.redirectUri,
   });
+  return { client, environment: creds.environment, clientId: creds.clientId, clientSecret: creds.clientSecret };
 }
 
 /**
  * Generate the OAuth2 authorization URL with CSRF-safe random state.
  */
-export function getAuthorizationUrl(): { url: string; state: string } {
-  const client = getOAuthClient();
+export async function getAuthorizationUrl(): Promise<{ url: string; state: string }> {
+  const { client } = await getOAuthClient();
   const state = crypto.randomBytes(16).toString('hex');
   const url = client.authorizeUri({
     scope: [OAuthClient.scopes.Accounting],
@@ -39,11 +41,22 @@ export function getAuthorizationUrl(): { url: string; state: string } {
  * Exchange the authorization code for tokens after OAuth2 callback.
  */
 export async function handleOAuthCallback(url: string): Promise<{ companyId: string }> {
-  const client = getOAuthClient();
+  const { client } = await getOAuthClient();
   const authResponse = await client.createToken(url);
   const token = authResponse.getJson();
 
-  const companyId = token.realmId || process.env.QB_COMPANY_ID || '';
+  // intuit-oauth's getJson() doesn't always surface realmId — fall back to URL param
+  let realmIdFromUrl = '';
+  try {
+    realmIdFromUrl = new URL(url).searchParams.get('realmId') || '';
+  } catch {
+    // ignore
+  }
+
+  const companyId = token.realmId || realmIdFromUrl || process.env.QB_COMPANY_ID || '';
+  if (!companyId) {
+    throw new Error('QuickBooks did not return a company ID (realmId).');
+  }
   const now = new Date();
 
   // Access token expires in ~1 hour, refresh token in ~101 days
@@ -70,7 +83,7 @@ export async function handleOAuthCallback(url: string): Promise<{ companyId: str
 /**
  * Get a valid access token, refreshing if needed.
  */
-async function getValidToken(): Promise<{ accessToken: string; companyId: string }> {
+async function getValidToken(): Promise<{ accessToken: string; companyId: string; environment: 'sandbox' | 'production' }> {
   const { data, error } = await supabaseAdmin
     .from('qb_tokens')
     .select('*')
@@ -87,7 +100,7 @@ async function getValidToken(): Promise<{ accessToken: string; companyId: string
 
   // If access token expires within 5 minutes, refresh it
   if (expiresAt.getTime() - now.getTime() < 5 * 60 * 1000) {
-    const client = getOAuthClient();
+    const { client, environment } = await getOAuthClient();
     client.setToken({
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
@@ -114,10 +127,11 @@ async function getValidToken(): Promise<{ accessToken: string; companyId: string
       })
       .eq('company_id', tokens.company_id);
 
-    return { accessToken: newToken.access_token, companyId: tokens.company_id };
+    return { accessToken: newToken.access_token, companyId: tokens.company_id, environment };
   }
 
-  return { accessToken: tokens.access_token, companyId: tokens.company_id };
+  const creds = await getQBCredentials();
+  return { accessToken: tokens.access_token, companyId: tokens.company_id, environment: creds.environment };
 }
 
 /**
@@ -128,8 +142,8 @@ export async function qbApiCall(
   endpoint: string,
   body?: unknown
 ): Promise<unknown> {
-  const { accessToken, companyId } = await getValidToken();
-  const baseUrl = QB_ENVIRONMENT === 'production'
+  const { accessToken, companyId, environment } = await getValidToken();
+  const baseUrl = environment === 'production'
     ? 'https://quickbooks.api.intuit.com'
     : 'https://sandbox-quickbooks.api.intuit.com';
 
@@ -196,21 +210,22 @@ export async function disconnectQB(): Promise<void> {
       .single();
 
     if (data) {
-      // Revoke token with Intuit's revocation endpoint (best-effort)
-      const revokeUrl = QB_ENVIRONMENT === 'production'
-        ? 'https://oauth.platform.intuit.com/oauth2/v1/tokens/revoke'
-        : 'https://oauth.platform.intuit.com/oauth2/v1/tokens/revoke';
-      const basicAuth = Buffer.from(`${QB_CLIENT_ID}:${QB_CLIENT_SECRET}`).toString('base64');
-      await fetch(revokeUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Basic ${basicAuth}`,
-        },
-        body: JSON.stringify({ token: data.access_token }),
-      }).catch(() => {
-        // Revocation is best-effort — still delete locally
-      });
+      const creds = await getQBCredentials().catch(() => null);
+      if (creds?.clientId && creds?.clientSecret) {
+        // Revoke token with Intuit's revocation endpoint (best-effort)
+        const revokeUrl = 'https://oauth.platform.intuit.com/oauth2/v1/tokens/revoke';
+        const basicAuth = Buffer.from(`${creds.clientId}:${creds.clientSecret}`).toString('base64');
+        await fetch(revokeUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Basic ${basicAuth}`,
+          },
+          body: JSON.stringify({ token: data.access_token }),
+        }).catch(() => {
+          // Revocation is best-effort — still delete locally
+        });
+      }
     }
   } catch {
     // Continue with local deletion even if revocation fails

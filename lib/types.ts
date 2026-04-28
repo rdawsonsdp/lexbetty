@@ -188,6 +188,10 @@ export interface CateringState {
   selectedItems: SelectedCateringItem[];
   selectedPackage: CateringPackage | null;
   buyerInfo: BuyerInfo | null;
+  // When set, the cart represents an admin edit session for this DB order.
+  // Checkout will PATCH instead of POST and the layout shows an edit banner.
+  editingOrderId: string | null;
+  editingOrderNumber: string | null;
 }
 
 // Action types for reducer
@@ -214,6 +218,16 @@ export type CateringAction =
       headcount: number;
       eventType: EventType;
     }}
+  | { type: 'LOAD_ORDER_FOR_EDIT'; payload: {
+      orderId: string;
+      orderNumber: string;
+      items: SelectedCateringItem[];
+      headcount: number;
+      eventType: EventType | null;
+      eventInfo: EventInfo | null;
+      buyerInfo: BuyerInfo | null;
+    }}
+  | { type: 'EXIT_EDIT_MODE' }
   | { type: 'HYDRATE'; payload: CateringState }
   | { type: 'RESET' };
 

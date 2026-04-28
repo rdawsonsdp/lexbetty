@@ -35,6 +35,7 @@ interface FormData {
 
   // Additional
   specialInstructions: string;
+  customerNotes: string;
 
   // Tax Exempt
   taxExempt: boolean;
@@ -125,8 +126,10 @@ export default function CheckoutPage() {
   const { state, dispatch, calculatedItems, totalCost, isItemInCart } = useCatering();
   const [currentStep, setCurrentStep] = useState(1); // 1 = details, 2 = confirmation
   const [isSubmitting, setIsSubmitting] = useState<'quote' | 'order' | null>(null);
+  const [orderSubmitted, setOrderSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [specialOrderConfirmed, setSpecialOrderConfirmed] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
 
   // Check for special order items in the cart
   const specialOrderItems = state.selectedItems.filter(item => item.product.specialOrder);
@@ -143,23 +146,29 @@ export default function CheckoutPage() {
     }
   };
 
+  // Seed customer fields from state.buyerInfo when in edit mode (admin loaded an order)
+  const buyerName = state.buyerInfo?.name?.trim() || '';
+  const [seedFirst, ...seedRest] = buyerName.split(' ');
+  const seedLast = seedRest.join(' ');
+
   const [formData, setFormData] = useState<FormData>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    company: '',
-    address: state.eventInfo?.address || '',
+    firstName: seedFirst || '',
+    lastName: seedLast || '',
+    email: state.buyerInfo?.email || '',
+    phone: state.buyerInfo?.phone || '',
+    company: state.buyerInfo?.company || '',
+    address: state.eventInfo?.address || state.buyerInfo?.deliveryAddress || '',
     address2: '',
     city: state.eventInfo?.city || '',
     state: state.eventInfo?.state || '',
     zip: state.eventInfo?.zip || '',
     eventName: state.eventInfo?.eventName || '',
-    eventDate: state.eventInfo?.eventDate || '',
-    deliveryTime: state.eventInfo?.eventTime || '',
+    eventDate: state.eventInfo?.eventDate || state.buyerInfo?.eventDate || '',
+    deliveryTime: state.eventInfo?.eventTime || state.buyerInfo?.eventTime || '',
     deliveryType: 'delivery',
     deliveryInstructions: '',
-    specialInstructions: state.eventInfo?.specialInstructions || '',
+    specialInstructions: state.eventInfo?.specialInstructions || state.buyerInfo?.notes || '',
+    customerNotes: '',
     taxExempt: false,
   });
   const [taxCertificateFile, setTaxCertificateFile] = useState<File | null>(null);
@@ -183,17 +192,45 @@ export default function CheckoutPage() {
   const salesTax = isTaxExempt ? 0 : Math.round((totalCost + buffetSetupFee) * SALES_TAX_RATE * 100) / 100;
   const orderTotal = totalCost + deliveryFee + buffetSetupFee + salesTax;
 
-  // Redirect if cart is empty
+  // Show processing animation if submitting or order was just placed
+  if (isSubmitting || orderSubmitted) {
+    return (
+      <div className="min-h-screen bg-[#F5EDE0] flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <span className="w-4 h-4 bg-[#E8621A] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+            <span className="w-4 h-4 bg-[#E8621A] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+            <span className="w-4 h-4 bg-[#E8621A] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          </div>
+          <h2 className="font-oswald text-2xl font-bold text-[#1A1A1A] tracking-wide mb-2">
+            {state.editingOrderId
+              ? 'SAVING ORDER CHANGES...'
+              : isSubmitting === 'quote'
+                ? 'SENDING YOUR QUOTE...'
+                : isSubmitting === 'order'
+                  ? 'PLACING YOUR ORDER...'
+                  : 'THE FOOD IS ORDERED!'}
+          </h2>
+          <p className="text-gray-600 text-sm">Hold tight — we&apos;re getting everything ready.</p>
+        </div>
+      </div>
+    );
+  }
+
   if (calculatedItems.length === 0) {
     return (
       <div className="min-h-screen bg-[#F5EDE0] flex items-center justify-center p-4">
         <Card className="max-w-md w-full text-center">
-          <div className="text-5xl mb-4">🛒</div>
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <span className="w-3 h-3 bg-[#1A1A1A]/20 rounded-full" />
+            <span className="w-3 h-3 bg-[#1A1A1A]/20 rounded-full" />
+            <span className="w-3 h-3 bg-[#1A1A1A]/20 rounded-full" />
+          </div>
           <h2 className="font-oswald text-2xl font-bold text-[#1A1A1A] mb-2">Your Cart is Empty</h2>
           <p className="text-gray-600 mb-6">Add some items to your order before checking out.</p>
           <Link
-            href="/#catering"
-            className="inline-block bg-[#1A1A1A] text-white font-oswald font-bold px-6 py-3 rounded-lg hover:bg-[#E8621A] hover:text-[#1A1A1A] transition-colors"
+            href="/"
+            className="inline-block bg-[#1A1A1A] text-white font-oswald font-bold px-6 py-3 rounded-lg hover:bg-[#E8621A] transition-colors"
           >
             Start Ordering
           </Link>
@@ -258,10 +295,12 @@ export default function CheckoutPage() {
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Invalid email format';
     if (!formData.phone.trim()) newErrors.phone = 'Phone is required';
     if (!formData.company.trim()) newErrors.company = 'Company/Organization is required';
-    if (!formData.address.trim()) newErrors.address = 'Address is required';
-    if (!formData.city.trim()) newErrors.city = 'City is required';
-    if (!formData.state.trim()) newErrors.state = 'State is required';
-    if (!formData.zip.trim()) newErrors.zip = 'ZIP code is required';
+    if (formData.deliveryType === 'delivery') {
+      if (!formData.address.trim()) newErrors.address = 'Address is required';
+      if (!formData.city.trim()) newErrors.city = 'City is required';
+      if (!formData.state.trim()) newErrors.state = 'State is required';
+      if (!formData.zip.trim()) newErrors.zip = 'ZIP code is required';
+    }
     if (!formData.eventDate) newErrors.eventDate = 'Event date is required';
     if (!formData.deliveryTime) newErrors.deliveryTime = 'Delivery time is required';
 
@@ -296,6 +335,73 @@ export default function CheckoutPage() {
   const handleSubmitOrder = async (orderType: 'quote' | 'order') => {
     setIsSubmitting(orderType);
     setSubmitError(null);
+
+    // ── Edit mode: PATCH the existing admin order instead of creating a new one ──
+    if (state.editingOrderId) {
+      try {
+        const adminToken = sessionStorage.getItem('admin_token') || '';
+        const fullAddress = `${formData.address}${formData.address2 ? ', ' + formData.address2 : ''}, ${formData.city}, ${formData.state} ${formData.zip}`;
+
+        const itemsPayload = calculatedItems.map((item) => ({
+          productId: item.product.id,
+          title: item.product.title,
+          description: item.product.description,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          totalPrice: item.totalPrice,
+          selectedSize: item.selectedSize,
+          displayText: item.displayText,
+          servesMin: item.servesMin,
+          servesMax: item.servesMax,
+        }));
+
+        const res = await fetch(`/api/admin/orders/${state.editingOrderId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${adminToken}`,
+          },
+          body: JSON.stringify({
+            customerName: `${formData.firstName} ${formData.lastName}`.trim(),
+            customerEmail: formData.email,
+            customerPhone: formData.phone || null,
+            customerCompany: formData.company || null,
+            deliveryAddress: fullAddress,
+            eventDate: formData.eventDate || null,
+            eventTime: formData.deliveryTime || null,
+            headcount: state.headcount,
+            eventType: state.eventType,
+            setupRequired: setupInCart,
+            specialInstructions: formData.specialInstructions || null,
+            customerNotes: formData.customerNotes || null,
+            items: itemsPayload,
+            deliveryFee,
+            taxExempt: isTaxExempt,
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to save order changes');
+        }
+
+        const editedOrderId = state.editingOrderId;
+        dispatch({ type: 'EXIT_EDIT_MODE' });
+        setOrderSubmitted(true);
+
+        const qbNote = data.qbWarning
+          ? `?updated=true&qbWarning=${encodeURIComponent(data.qbWarning)}`
+          : data.qbSynced
+            ? '?updated=true&qbSynced=true'
+            : '?updated=true';
+        router.push(`/admin/orders${qbNote}#${editedOrderId}`);
+      } catch (err) {
+        setSubmitError(err instanceof Error ? err.message : 'Failed to save order changes');
+        setIsSubmitting(null);
+        setOrderSubmitted(false);
+      }
+      return;
+    }
 
     try {
       // Save order details to sessionStorage for confirmation page
@@ -374,6 +480,7 @@ export default function CheckoutPage() {
             deliveryAddress: `${formData.address}${formData.address2 ? ', ' + formData.address2 : ''}, ${formData.city}, ${formData.state} ${formData.zip}`,
             notes: formData.specialInstructions,
           },
+          customerNotes: formData.customerNotes || null,
           delivery: {
             address: formData.address,
             address2: formData.address2,
@@ -408,12 +515,13 @@ export default function CheckoutPage() {
       sessionStorage.setItem('last-order-details', JSON.stringify(orderDetails));
 
       // Reset the catering state and redirect
+      setOrderSubmitted(true);
       dispatch({ type: 'RESET' });
       router.push('/order-confirmation');
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'Something went wrong. Please try again.');
-    } finally {
       setIsSubmitting(null);
+      setOrderSubmitted(false);
     }
   };
 
@@ -623,7 +731,99 @@ export default function CheckoutPage() {
                   </div>
                 </Card>
 
-                {/* Delivery / Billing Address — always editable */}
+                {/* Order Notes Accordion */}
+                <div className="border border-gray-200 rounded-xl overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setNotesOpen(!notesOpen)}
+                    className="w-full flex items-center justify-between px-5 py-4 bg-white hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <svg className="w-5 h-5 text-[#E8621A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      <span className="font-oswald text-lg font-bold text-[#1A1A1A] tracking-wide">Add Order Notes</span>
+                    </div>
+                    <svg
+                      className={`w-5 h-5 text-gray-500 transition-transform ${notesOpen ? 'rotate-180' : ''}`}
+                      fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {notesOpen && (
+                    <div className="px-5 pb-4 bg-white border-t border-gray-100">
+                      <p className="text-xs text-gray-500 mb-2 mt-3">
+                        Anything we should know? Serving preferences, setup details, or special requests.
+                      </p>
+                      <textarea
+                        name="customerNotes"
+                        value={formData.customerNotes}
+                        onChange={handleInputChange}
+                        rows={3}
+                        placeholder="e.g. Please label all trays, need serving utensils, nut-free table setup..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8621A]/50 resize-none text-sm"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Delivery Type — moved up so address can be conditional */}
+                <Card>
+                  <h2 className="font-oswald text-xl font-bold text-[#1A1A1A] mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-[#E8621A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    </svg>
+                    How would you like to receive your order?
+                  </h2>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <label
+                      className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
+                        formData.deliveryType === 'delivery'
+                          ? 'border-[#E8621A] bg-[#E8621A]/5'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="deliveryType"
+                        value="delivery"
+                        checked={formData.deliveryType === 'delivery'}
+                        onChange={handleInputChange}
+                        className="text-[#E8621A] focus:ring-[#E8621A]"
+                      />
+                      <div>
+                        <span className="text-sm font-medium text-[#1A1A1A]">Delivery</span>
+                        <p className="text-xs text-gray-500">
+                          {totalCost >= 2000 ? '$250' : totalCost >= 1000 ? '$150' : '$100'} delivery fee
+                        </p>
+                      </div>
+                    </label>
+                    <label
+                      className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
+                        formData.deliveryType === 'pickup'
+                          ? 'border-[#E8621A] bg-[#E8621A]/5'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="deliveryType"
+                        value="pickup"
+                        checked={formData.deliveryType === 'pickup'}
+                        onChange={handleInputChange}
+                        className="text-[#E8621A] focus:ring-[#E8621A]"
+                      />
+                      <div>
+                        <span className="text-sm font-medium text-[#1A1A1A]">Local Pickup</span>
+                        <p className="text-xs text-gray-500">Free — 756 E. 111th St, Chicago</p>
+                      </div>
+                    </label>
+                  </div>
+                </Card>
+
+                {/* Delivery Address — only shown for delivery orders */}
+                {formData.deliveryType === 'delivery' && (
                 <Card>
                   <h2 className="font-oswald text-xl font-bold text-[#1A1A1A] mb-4 flex items-center gap-2">
                     <svg className="w-5 h-5 text-[#E8621A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -733,6 +933,7 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                 </Card>
+                )}
 
                 {/* Event Details */}
                 <Card>
@@ -798,7 +999,7 @@ export default function CheckoutPage() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Delivery Time <span className="text-red-500">*</span>
+                        {formData.deliveryType === 'pickup' ? 'Pickup' : 'Delivery'} Time <span className="text-red-500">*</span>
                       </label>
                       <select
                         name="deliveryTime"
@@ -814,57 +1015,6 @@ export default function CheckoutPage() {
                         ))}
                       </select>
                       {errors.deliveryTime && <p className="text-red-500 text-xs mt-1">{errors.deliveryTime}</p>}
-                    </div>
-
-                    {/* Delivery Type */}
-                    <div className="sm:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        How would you like to receive your order? <span className="text-red-500">*</span>
-                      </label>
-                      <div className="grid sm:grid-cols-2 gap-3">
-                        <label
-                          className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
-                            formData.deliveryType === 'delivery'
-                              ? 'border-[#E8621A] bg-[#E8621A]/5'
-                              : 'border-gray-200 hover:border-gray-300'
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="deliveryType"
-                            value="delivery"
-                            checked={formData.deliveryType === 'delivery'}
-                            onChange={handleInputChange}
-                            className="text-[#E8621A] focus:ring-[#E8621A]"
-                          />
-                          <div>
-                            <span className="text-sm font-medium text-[#1A1A1A]">Delivery</span>
-                            <p className="text-xs text-gray-500">
-                              {totalCost >= 2000 ? '$250' : totalCost >= 1000 ? '$150' : '$100'} delivery fee
-                            </p>
-                          </div>
-                        </label>
-                        <label
-                          className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
-                            formData.deliveryType === 'pickup'
-                              ? 'border-[#E8621A] bg-[#E8621A]/5'
-                              : 'border-gray-200 hover:border-gray-300'
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="deliveryType"
-                            value="pickup"
-                            checked={formData.deliveryType === 'pickup'}
-                            onChange={handleInputChange}
-                            className="text-[#E8621A] focus:ring-[#E8621A]"
-                          />
-                          <div>
-                            <span className="text-sm font-medium text-[#1A1A1A]">Local Pickup</span>
-                            <p className="text-xs text-gray-500">Free — 756 E. 111th St, Chicago</p>
-                          </div>
-                        </label>
-                      </div>
                     </div>
 
                     {/* Buffet Drop Off Set Up */}
@@ -1104,17 +1254,30 @@ export default function CheckoutPage() {
                   {/* Order Items */}
                   <div>
                     <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Order Items</h3>
-                    <div className="space-y-3">
-                      {calculatedItems.map(item => (
-                        <div key={item.product.id} className="flex justify-between text-sm gap-4">
-                          <div className="min-w-0 flex-1">
-                            <p className="font-medium text-[#1A1A1A]">{item.product.title}</p>
-                            <p className="text-gray-400 text-xs line-clamp-2">{item.product.description}</p>
-                            <p className="text-gray-500 text-xs mt-0.5">{item.displayText}</p>
+                    <div className="space-y-4">
+                      {calculatedItems.map(item => {
+                        const descLines = item.product.description?.split('\n') || [];
+                        return (
+                          <div key={item.product.id} className="pb-3 border-b border-gray-100 last:border-0 last:pb-0">
+                            <div className="flex justify-between text-sm gap-3">
+                              <p className="font-oswald font-bold text-[#1A1A1A]">{item.product.title}</p>
+                              <p className="font-oswald font-bold text-[#1A1A1A] flex-shrink-0">{formatCurrency(item.totalPrice)}</p>
+                            </div>
+                            {descLines.length > 0 && (
+                              <div className="mt-1">
+                                {descLines.map((line, j) => (
+                                  <p key={j} className={`text-xs ${j === 0 ? 'text-[#E8621A] font-semibold' : 'text-gray-500'}`}>
+                                    {j > 0 && '• '}{line}
+                                  </p>
+                                ))}
+                              </div>
+                            )}
+                            {descLines.length === 0 && item.displayText && (
+                              <p className="text-gray-500 text-xs mt-0.5">{item.displayText}</p>
+                            )}
                           </div>
-                          <p className="font-semibold text-[#1A1A1A] flex-shrink-0">{formatCurrency(item.totalPrice)}</p>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 </Card>
@@ -1171,23 +1334,25 @@ export default function CheckoutPage() {
                   </button>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 mt-4">
-                  <button
-                    onClick={() => handleSubmitOrder('quote')}
-                    disabled={!!isSubmitting || (hasSpecialOrderItems && !specialOrderConfirmed)}
-                    className="flex-1 px-6 py-3 border-2 border-[#E8621A] text-[#E8621A] font-oswald font-bold rounded-lg hover:bg-[#E8621A]/10 transition-colors disabled:opacity-50"
-                  >
-                    {isSubmitting === 'quote' ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
-                        Sending Quote...
-                      </span>
-                    ) : (
-                      'Request a Quote'
-                    )}
-                  </button>
+                  {!state.editingOrderId && (
+                    <button
+                      onClick={() => handleSubmitOrder('quote')}
+                      disabled={!!isSubmitting || (hasSpecialOrderItems && !specialOrderConfirmed)}
+                      className="flex-1 px-6 py-3 border-2 border-[#E8621A] text-[#E8621A] font-oswald font-bold rounded-lg hover:bg-[#E8621A]/10 transition-colors disabled:opacity-50"
+                    >
+                      {isSubmitting === 'quote' ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                          Sending Quote...
+                        </span>
+                      ) : (
+                        'Request a Quote'
+                      )}
+                    </button>
+                  )}
                   <Button onClick={() => handleSubmitOrder('order')} className="flex-1" disabled={!!isSubmitting || (hasSpecialOrderItems && !specialOrderConfirmed)}>
                     {isSubmitting === 'order' ? (
                       <span className="flex items-center gap-2">
@@ -1195,10 +1360,10 @@ export default function CheckoutPage() {
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                         </svg>
-                        Placing Order...
+                        {state.editingOrderId ? 'Saving Changes...' : 'Placing Order...'}
                       </span>
                     ) : (
-                      'Place Order'
+                      state.editingOrderId ? 'Save Changes' : 'Place Order'
                     )}
                   </Button>
                 </div>
@@ -1213,6 +1378,24 @@ export default function CheckoutPage() {
                 Order Summary
               </h2>
 
+              {/* Catering Order Items — shown first */}
+              <div className="mb-4 pb-4 border-b border-gray-200">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Your Catering Order</p>
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {calculatedItems.map(item => (
+                    <div key={item.product.id} className="text-sm flex justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[#1A1A1A] font-medium">{item.product.title}</p>
+                        <p className="text-gray-400 text-xs line-clamp-1">{item.product.description}</p>
+                        <p className="text-gray-500 text-xs">{item.displayText}</p>
+                      </div>
+                      <p className="text-[#1A1A1A] font-semibold flex-shrink-0">{formatCurrency(item.totalPrice)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Totals */}
               <div className="space-y-3 mb-4 pb-4 border-b border-gray-200">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Subtotal ({calculatedItems.length} item{calculatedItems.length !== 1 ? 's' : ''})</span>
@@ -1247,26 +1430,9 @@ export default function CheckoutPage() {
                 <span className="text-[#E8621A]">{formatCurrency(orderTotal)}</span>
               </div>
 
-              <div className="flex justify-between text-sm text-gray-500">
+              <div className="flex justify-between text-sm text-gray-500 mb-4">
                 <span>Per Person</span>
                 <span>{formatCurrency(orderTotal / state.headcount)}</span>
-              </div>
-
-              {/* Items Preview */}
-              <div className="mt-6 pt-4 border-t border-gray-200">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Items</p>
-                <div className="space-y-3 max-h-64 overflow-y-auto">
-                  {calculatedItems.map(item => (
-                    <div key={item.product.id} className="text-sm flex justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[#1A1A1A] font-medium">{item.product.title}</p>
-                        <p className="text-gray-400 text-xs line-clamp-1">{item.product.description}</p>
-                        <p className="text-gray-500 text-xs">{item.displayText}</p>
-                      </div>
-                      <p className="text-[#1A1A1A] font-semibold flex-shrink-0">{formatCurrency(item.totalPrice)}</p>
-                    </div>
-                  ))}
-                </div>
               </div>
 
               {/* Trust Signals */}

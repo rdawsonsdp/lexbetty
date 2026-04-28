@@ -116,6 +116,17 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-500">
           <p>&copy; {currentYear} Lexington Betty Smokehouse. All rights reserved.</p>
+          <p className="mt-2 flex items-center justify-center gap-1.5">
+            Powered by{' '}
+            <a
+              href="https://eightysixai.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-[#E8621A] hover:text-white transition-colors font-oswald font-bold tracking-wide"
+            >
+              86ai
+            </a>
+          </p>
         </div>
       </div>
     </footer>

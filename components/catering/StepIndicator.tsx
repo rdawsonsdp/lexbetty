@@ -1,80 +1,63 @@
 'use client';
 
-interface StepIndicatorProps {
-  currentStep: 1 | 2 | 3 | 4 | 5 | 6;
-  onNavigate: (step: number) => void;
-}
+import { usePathname } from 'next/navigation';
 
 const STEPS = [
-  { number: 1, label: 'Order Type' },
-  { number: 2, label: 'Event Details' },
-  { number: 3, label: 'Guests & Budget' },
-  { number: 4, label: 'Menu Style' },
-  { number: 5, label: 'Build Order' },
-  { number: 6, label: 'Extras' },
+  { id: 'plan', label: 'Plan', paths: ['/plan', '/'] },
+  { id: 'order', label: 'Order', paths: ['/products', '/packages', '/food-truck', '/menus'] },
+  { id: 'pay', label: 'Pay', paths: ['/checkout'] },
 ];
 
-export default function StepIndicator({
-  currentStep,
-  onNavigate,
-}: StepIndicatorProps) {
+interface StepIndicatorProps {
+  currentStep?: number;
+  onNavigate?: (step: number) => void;
+}
+
+export default function StepIndicator({ currentStep, onNavigate }: StepIndicatorProps) {
+  const pathname = usePathname();
+
+  const activeIndex = STEPS.findIndex(step =>
+    step.paths.some(p => pathname.startsWith(p) && p !== '/')
+  );
+
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-30">
+    <nav className="bg-white border-b border-gray-200 sticky top-[52px] sm:top-[56px] z-30">
       <div className="container mx-auto px-4">
-        <ol className="flex items-center gap-1 sm:gap-2 py-3 overflow-x-auto text-sm">
+        <ol className="flex items-center justify-center gap-2 sm:gap-4 py-3 text-sm">
           {STEPS.map((step, index) => {
-            const isCompleted = currentStep > step.number;
-            const isCurrent = currentStep === step.number;
-            const isClickable = isCompleted;
+            const isActive = index === activeIndex;
+            const isCompleted = activeIndex > index;
 
             return (
-              <li key={step.number} className="flex items-center shrink-0">
+              <li key={step.id} className="flex items-center shrink-0">
                 {index > 0 && (
                   <svg
-                    className="w-4 h-4 text-gray-300 mx-1 sm:mx-2 shrink-0"
+                    className="w-4 h-4 text-gray-300 mr-2 sm:mr-4 shrink-0"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 )}
-                <button
-                  onClick={() => isClickable && onNavigate(step.number)}
-                  disabled={!isClickable}
+                <span
                   className={`
-                    flex items-center gap-1.5 px-2 py-1 rounded-md transition-all whitespace-nowrap
-                    ${isCompleted
-                      ? 'text-[#E8621A] hover:bg-[#E8621A]/10 cursor-pointer font-medium'
-                      : isCurrent
-                      ? 'text-[#1A1A1A] font-bold cursor-default'
-                      : 'text-gray-400 cursor-default'
+                    font-oswald tracking-wider text-base sm:text-lg
+                    ${isActive
+                      ? 'text-[#E8621A] font-bold'
+                      : isCompleted
+                      ? 'text-green-600 font-medium'
+                      : 'text-gray-400 font-medium'
                     }
                   `}
                 >
                   {isCompleted && (
-                    <svg
-                      className="w-4 h-4 text-green-500 shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
+                    <svg className="w-4 h-4 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   )}
-                  <span className="hidden sm:inline">{step.label}</span>
-                  <span className="sm:hidden">{step.number}</span>
-                </button>
+                  {step.label}.
+                </span>
               </li>
             );
           })}

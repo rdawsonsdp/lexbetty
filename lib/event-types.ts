@@ -3,14 +3,14 @@ import { EventTypeConfig } from './types';
 export const EVENT_TYPES: EventTypeConfig[] = [
   {
     id: 'lunch',
-    name: 'Build Your Event Menu',
+    name: 'Try Our Event Planner',
     description: 'Pick your proteins, sides, and headcount — we handle the rest',
     icon: '🔥',
     suggestedItems: ['rib tips', 'brisket', 'pulled pork', 'smoked chicken', 'mac n cheese'],
   },
   {
     id: 'alacarte',
-    name: 'Jump In and Order',
+    name: 'Order A La Carte',
     description: 'Order exactly what you want, ready when your team is',
     icon: '🍽️',
     suggestedItems: ['brisket', 'pulled pork', 'rib tips', 'mac n cheese', 'banana pudding'],

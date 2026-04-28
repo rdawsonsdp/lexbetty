@@ -52,6 +52,7 @@ interface CreateOrderRequest {
   taxExempt?: boolean;
   taxExemptCertificateUrl?: string | null;
   taxExemptCertificatePath?: string | null;
+  customerNotes?: string | null;
   analytics?: {
     session_id?: string;
     items_added?: { product_id: string; title: string }[];
@@ -120,6 +121,7 @@ export async function POST(request: NextRequest) {
           order_total: orderTotal,
           tax_exempt: body.taxExempt || false,
           tax_exempt_certificate_url: body.taxExemptCertificatePath || null,
+          customer_notes: body.customerNotes || null,
         })
         .select('id')
         .single();

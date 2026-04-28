@@ -98,6 +98,104 @@ export async function sendInvoiceEmail(invoiceId: string): Promise<void> {
   await qbApiCall('POST', `invoice/${invoiceId}/send`);
 }
 
+interface UpdateInvoiceInput {
+  customerId?: string;
+  customerEmail?: string;
+  lineItems?: LineItem[];
+  deliveryFee?: number;
+  eventDate?: string;
+  eventTime?: string;
+  headcount?: number;
+  specialInstructions?: string;
+}
+
+/**
+ * Update an existing QuickBooks invoice. QB requires the current SyncToken
+ * for optimistic concurrency — we fetch the latest invoice first.
+ *
+ * Throws if the invoice has been modified since we last read it (stale token),
+ * or if it has been paid (Balance < TotalAmt).
+ */
+export async function updateInvoice(
+  invoiceId: string,
+  input: UpdateInvoiceInput
+): Promise<{ invoiceId: string; invoiceNumber: string; paymentLink: string | null }> {
+  // 1. Fetch current invoice for SyncToken + paid-state check
+  const current = await qbApiCall('GET', `invoice/${invoiceId}`) as {
+    Invoice: QBInvoice & { SyncToken: string };
+  };
+
+  if (current.Invoice.Balance < current.Invoice.TotalAmt) {
+    throw new Error('Invoice has payments applied — cannot edit. Void or refund first.');
+  }
+
+  const syncToken = current.Invoice.SyncToken;
+
+  // 2. Build the patch (full replacement: QB's "sparse update" still requires full Line array if Line is present)
+  const patch: Record<string, unknown> = {
+    Id: invoiceId,
+    SyncToken: syncToken,
+    sparse: true,
+  };
+
+  if (input.lineItems) {
+    const lines: Array<Record<string, unknown>> = input.lineItems.map((item) => ({
+      Amount: item.amount,
+      DetailType: 'SalesItemLineDetail',
+      Description: item.description,
+      SalesItemLineDetail: {
+        Qty: item.quantity || 1,
+        UnitPrice: item.quantity ? item.amount / item.quantity : item.amount,
+      },
+    }));
+    if (input.deliveryFee && input.deliveryFee > 0) {
+      lines.push({
+        Amount: input.deliveryFee,
+        DetailType: 'SalesItemLineDetail',
+        Description: 'Delivery Fee',
+        SalesItemLineDetail: { Qty: 1, UnitPrice: input.deliveryFee },
+      });
+    }
+    patch.Line = lines;
+  }
+
+  if (input.customerId) {
+    patch.CustomerRef = { value: input.customerId };
+  }
+  if (input.customerEmail) {
+    patch.BillEmail = { Address: input.customerEmail };
+  }
+
+  // Rebuild memo if any event detail changed
+  if (input.eventDate || input.eventTime || input.headcount || input.specialInstructions) {
+    const memoParts: string[] = [];
+    if (input.eventDate) memoParts.push(`Event Date: ${input.eventDate}`);
+    if (input.eventTime) memoParts.push(`Event Time: ${input.eventTime}`);
+    if (input.headcount) memoParts.push(`Headcount: ${input.headcount} guests`);
+    if (input.specialInstructions) memoParts.push(`Notes: ${input.specialInstructions}`);
+    patch.CustomerMemo = { value: memoParts.join(' | ') };
+  }
+
+  const result = await qbApiCall('POST', 'invoice', patch) as { Invoice: QBInvoice };
+
+  // 3. Re-fetch with payment link
+  let paymentLink: string | null = null;
+  try {
+    const withLink = await qbApiCall('GET', `invoice/${invoiceId}?include=invoiceLink`) as {
+      Invoice: QBInvoice;
+    };
+    paymentLink = withLink.Invoice.InvoiceLink || null;
+  } catch {
+    // best-effort
+  }
+
+  return {
+    invoiceId: result.Invoice.Id,
+    invoiceNumber: result.Invoice.DocNumber,
+    paymentLink,
+  };
+}
+
 /**
  * Get the current status of an invoice.
  */

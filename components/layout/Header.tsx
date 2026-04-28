@@ -18,16 +18,20 @@ const ADMIN_LINKS = [
   { href: '/admin/settings', label: 'Settings' },
 ];
 
-export default function Header() {
+interface HeaderProps {
+  onCartClick?: () => void;
+}
+
+export default function Header({ onCartClick }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [adminExpanded, setAdminExpanded] = useState(false);
   const { state } = useCatering();
   const cartCount = state.selectedItems.length;
 
   const navLinks = [
-    { href: '/', label: 'HOME' },
-    { href: '/#order', label: 'CATERING MENU' },
-    ...(FEATURES.BETTY_AI_ENABLED ? [{ href: '/concierge', label: 'ASK BETTY' }] : []),
+    { href: 'https://www.lexingtonbetty.com', label: 'HOME', external: true },
+    { href: '/#order', label: 'CATERING MENU', external: false },
+    ...(FEATURES.BETTY_AI_ENABLED ? [{ href: '/concierge', label: 'ASK BETTY', external: false }] : []),
   ];
 
   return (
@@ -49,13 +53,25 @@ export default function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-5 xl:gap-7 flex-nowrap">
             {navLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className="font-oswald text-sm xl:text-base tracking-wider text-[#1A1A1A] hover:text-[#E8621A] transition-colors whitespace-nowrap"
-              >
-                {link.label}
-              </Link>
+              link.external ? (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-oswald text-sm xl:text-base tracking-wider text-[#1A1A1A] hover:text-[#E8621A] transition-colors whitespace-nowrap"
+                >
+                  {link.label}
+                </a>
+              ) : (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="font-oswald text-sm xl:text-base tracking-wider text-[#1A1A1A] hover:text-[#E8621A] transition-colors whitespace-nowrap"
+                >
+                  {link.label}
+                </Link>
+              )
             ))}
             {/* Admin Link */}
             <Link
@@ -92,8 +108,8 @@ export default function Header() {
             {/* Account */}
             {FEATURES.CUSTOMER_ACCOUNTS_ENABLED && <SignInDropdown />}
             {/* Cart */}
-            <Link
-              href="/checkout"
+            <button
+              onClick={onCartClick}
               className="ml-2 relative bg-[#E8621A] text-white font-oswald text-sm xl:text-base tracking-wider px-5 py-2 hover:opacity-90 transition-opacity whitespace-nowrap flex items-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,12 +121,27 @@ export default function Header() {
                   {cartCount}
                 </span>
               )}
-            </Link>
+            </button>
           </nav>
 
-          {/* Mobile menu toggle */}
+          {/* Mobile: Cart + Menu toggle */}
+          <div className="lg:hidden flex items-center gap-2">
+            <button
+              onClick={onCartClick}
+              className="relative p-2 hover:bg-gray-100 rounded transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label="Open cart"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              {cartCount > 0 && (
+                <span className="absolute top-0 right-0 bg-[#E8621A] text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                  {cartCount}
+                </span>
+              )}
+            </button>
           <button
-            className="lg:hidden p-2 hover:bg-gray-100 rounded transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="p-2 hover:bg-gray-100 rounded transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
             aria-expanded={mobileMenuOpen}
@@ -138,20 +169,34 @@ export default function Header() {
               )}
             </svg>
           </button>
+          </div>
         </div>
 
         {/* Mobile menu */}
         {mobileMenuOpen && (
           <nav className="lg:hidden mt-4 pb-4 border-t border-gray-200 pt-4 relative z-[100]">
             {navLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className="block py-3 font-oswald tracking-wider text-[#1A1A1A] hover:text-[#E8621A] transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {link.label}
-              </Link>
+              link.external ? (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block py-3 font-oswald tracking-wider text-[#1A1A1A] hover:text-[#E8621A] transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </a>
+              ) : (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="block py-3 font-oswald tracking-wider text-[#1A1A1A] hover:text-[#E8621A] transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              )
             ))}
             <button
               onClick={() => setAdminExpanded(!adminExpanded)}
@@ -187,13 +232,12 @@ export default function Header() {
                 <SignInDropdown />
               </div>
             )}
-            <Link
-              href="/checkout"
-              className="block mt-3 bg-[#E8621A] text-white font-oswald tracking-wider px-5 py-3 text-center hover:opacity-90 transition-opacity relative"
-              onClick={() => setMobileMenuOpen(false)}
+            <button
+              onClick={() => { setMobileMenuOpen(false); onCartClick?.(); }}
+              className="block w-full mt-3 bg-[#E8621A] text-white font-oswald tracking-wider px-5 py-3 text-center hover:opacity-90 transition-opacity relative"
             >
               CART {cartCount > 0 && `(${cartCount})`}
-            </Link>
+            </button>
             <div className="flex items-center gap-4 mt-4 pt-3 border-t border-gray-200">
               <a
                 href="https://www.instagram.com/lexingtonbettysmokehouse/"

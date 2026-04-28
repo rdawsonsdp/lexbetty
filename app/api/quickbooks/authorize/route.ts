@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const { url, state } = getAuthorizationUrl();
+    const { url, state } = await getAuthorizationUrl();
     console.log('=== QB AUTHORIZE DEBUG ===');
     console.log('QB_CLIENT_ID:', process.env.QB_CLIENT_ID);
     console.log('QB_CLIENT_SECRET:', process.env.QB_CLIENT_SECRET ? '***set***' : '***MISSING***');

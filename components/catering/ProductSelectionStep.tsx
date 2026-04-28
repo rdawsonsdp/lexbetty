@@ -320,7 +320,7 @@ export default function ProductSelectionStep() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Left: Hero image */}
                     {section.image && (
-                      <div className="relative aspect-[3/4] rounded-xl overflow-hidden">
+                      <div className="relative aspect-[16/9] md:aspect-[3/4] rounded-xl overflow-hidden">
                         <Image
                           src={section.image}
                           alt={section.label}
@@ -350,34 +350,19 @@ export default function ProductSelectionStep() {
           </div>
         </div>
 
-        {/* Mobile Cart Button - Fixed at bottom */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 p-4 bg-gradient-to-t from-white via-white to-transparent">
-          <button
-            onClick={() => setIsCartOpen(true)}
-            className="w-full bg-[#1A1A1A] text-white rounded-xl py-4 px-6 flex items-center justify-between shadow-lg hover:bg-[#4a4646] transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                {state.selectedItems.length > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-[#E8621A] text-[#1A1A1A] text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                    {state.selectedItems.length}
-                  </span>
-                )}
-              </div>
-              <span className="font-oswald font-semibold">
-                {state.selectedItems.length === 0 ? 'View Cart' : `${state.selectedItems.length} item${state.selectedItems.length !== 1 ? 's' : ''}`}
+        {/* Mobile Cart Bar - Fixed at bottom */}
+        {state.selectedItems.length > 0 && (
+          <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#1A1A1A] px-6 py-3">
+            <div className="flex items-center justify-between">
+              <span className="font-oswald font-semibold text-white text-sm">
+                {state.selectedItems.length} item{state.selectedItems.length !== 1 ? 's' : ''}
               </span>
-            </div>
-            {state.selectedItems.length > 0 && (
-              <span className="font-oswald font-bold text-[#E8621A]">
+              <span className="font-oswald font-bold text-[#E8621A] text-lg">
                 {formatCurrency(orderTotal)}
               </span>
-            )}
-          </button>
-        </div>
+            </div>
+          </div>
+        )}
 
         {/* Mobile Cart Drawer */}
         {isCartOpen && (
