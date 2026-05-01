@@ -45,6 +45,30 @@ export default function EventInfoStep() {
   return (
     <div ref={sectionRef} className="bg-white py-6 sm:py-12 scroll-mt-4">
       <div className="container mx-auto px-4">
+        {/* Corporate intro */}
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12">
+          <h1 className="font-oswald text-2xl sm:text-4xl md:text-5xl font-bold text-[#1A1A1A] tracking-wider mb-3 sm:mb-4">
+            PLAN YOUR NEXT CORPORATE EVENT
+          </h1>
+          <p className="text-gray-700 text-sm sm:text-base md:text-lg leading-relaxed mb-5">
+            Let us cater your next boardroom lunch, client meeting, conference, or all-hands.
+            Tell us your guest count and budget — our team will work with your organization to
+            curate a <span className="font-semibold text-[#1A1A1A]">chef-crafted menu</span> that&apos;s on-brand,
+            on-budget, and on-time.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F5EDE0] rounded-full text-xs sm:text-sm font-semibold text-[#1A1A1A]">
+              <span className="text-[#E8621A]">●</span> Tailored to your team
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F5EDE0] rounded-full text-xs sm:text-sm font-semibold text-[#1A1A1A]">
+              <span className="text-[#E8621A]">●</span> Concierge planning
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F5EDE0] rounded-full text-xs sm:text-sm font-semibold text-[#1A1A1A]">
+              <span className="text-[#E8621A]">●</span> Delivered &amp; ready to serve
+            </span>
+          </div>
+        </div>
+
         {/* Headcount — compact on mobile */}
         <div className="text-center mb-6 sm:mb-12">
           <h2 className="font-oswald text-xl sm:text-3xl md:text-4xl font-bold text-[#1A1A1A] tracking-wider mb-1 sm:mb-3">

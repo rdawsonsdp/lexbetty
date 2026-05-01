@@ -4,25 +4,33 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCatering } from '@/context/CateringContext';
-import { CATERING_PACKAGES } from '@/lib/packages';
+import { useActivePackages } from '@/lib/hooks/useActivePackages';
 import { formatCurrency } from '@/lib/pricing';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import StepIndicator from '@/components/catering/StepIndicator';
 
-const foodTruckPkg = CATERING_PACKAGES.find(p => p.id === 'betty-food-truck')!;
-
 export default function FoodTruckPage() {
   const router = useRouter();
   const { state, dispatch } = useCatering();
-  const [headcount, setHeadcountLocal] = useState(foodTruckPkg.minHeadcount || 40);
+  const { packages, loading } = useActivePackages();
+  const foodTruckPkg = packages.find((p) => p.id === 'betty-food-truck');
+  const [headcount, setHeadcountLocal] = useState(40);
 
-  const isInCart = state.selectedItems.some(item => item.product.id === foodTruckPkg.id);
+  if (loading || !foodTruckPkg) {
+    return (
+      <div className="min-h-screen bg-[#F5EDE0] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1A1A1A]" />
+      </div>
+    );
+  }
 
+  const isInCart = state.selectedItems.some((item) => item.product.id === foodTruckPkg.id);
   const total = headcount * foodTruckPkg.pricePerPerson;
 
+  const minHeadcount = foodTruckPkg.minHeadcount || 40;
   const setHeadcount = (value: number) => {
-    setHeadcountLocal(Math.max(foodTruckPkg.minHeadcount || 40, value));
+    setHeadcountLocal(Math.max(minHeadcount, value));
   };
 
   const handleAddToCart = () => {

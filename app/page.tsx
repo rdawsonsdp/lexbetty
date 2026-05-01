@@ -116,7 +116,7 @@ export default function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
                 <div className="absolute inset-0 flex flex-col items-center justify-end p-3 sm:p-6 text-center">
                   <h3 className="font-oswald text-lg sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2 tracking-wide drop-shadow-lg">
-                    ORDER MENU PACKAGES
+                    EXECUTIVE & CORPORATE BOX LUNCHES
                   </h3>
                   <p className="text-white/90 text-xs sm:text-sm drop-shadow hidden sm:block">
                     Pre-built menus ready to order
@@ -135,7 +135,7 @@ export default function HomePage() {
                 className="relative overflow-hidden rounded-xl cursor-pointer transition-all duration-300 shadow-md h-[140px] sm:h-[220px] md:h-[280px] hover:scale-105"
               >
                 <Image
-                  src="/images/chef-dominique-ribs.jpg"
+                  src="/images/food-truck-hero.webp"
                   alt="Betty Food Truck"
                   fill
                   className="object-cover"

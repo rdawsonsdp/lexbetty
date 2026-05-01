@@ -52,8 +52,11 @@ export async function PATCH(
     if (body.items !== undefined && !Array.isArray(body.items)) {
       return NextResponse.json({ error: 'Items must be an array' }, { status: 400 });
     }
-    if (body.status !== undefined && !['pending', 'invoiced', 'cancelled'].includes(body.status)) {
+    if (body.status !== undefined && !['pending', 'invoiced', 'paid', 'cancelled'].includes(body.status)) {
       return NextResponse.json({ error: 'Invalid status for edit endpoint' }, { status: 400 });
+    }
+    if (body.paymentAmount !== undefined && body.paymentAmount !== null && (!Number.isFinite(body.paymentAmount) || body.paymentAmount < 0)) {
+      return NextResponse.json({ error: 'Invalid payment amount' }, { status: 400 });
     }
 
     const result = await updateOrder(id, body);

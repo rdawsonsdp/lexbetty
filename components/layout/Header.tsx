@@ -14,7 +14,6 @@ const ADMIN_LINKS = [
   { href: '/menu-engineering', label: 'Engineering' },
   { href: '/admin/email', label: 'Email' },
   { href: '/admin/analytics', label: 'Analytics' },
-  { href: '/admin/quickbooks', label: 'QuickBooks' },
   { href: '/admin/settings', label: 'Settings' },
 ];
 

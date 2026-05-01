@@ -40,12 +40,14 @@ interface AdminOrder {
   subtotal: number;
   delivery_fee: number;
   order_total: number;
-  qb_invoice_id: string | null;
-  qb_invoice_number: string | null;
-  qb_payment_id: string | null;
-  qb_payment_method: string | null;
-  qb_payment_date: string | null;
-  qb_payment_amount: number | null;
+  payment_processor: 'quickbooks' | 'clover' | null;
+  external_invoice_id: string | null;
+  external_invoice_number: string | null;
+  external_checkout_id: string | null;
+  external_payment_id: string | null;
+  payment_method: string | null;
+  payment_date: string | null;
+  payment_amount: number | null;
   payment_link: string | null;
   tax_exempt: boolean;
   tax_exempt_certificate_url: string | null;
@@ -150,6 +152,21 @@ function AdminOrdersPage() {
   const [page, setPage] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  // Prefill amount when modal opens
+  useEffect(() => {
+    if (showPaymentModal && selectedOrder) {
+      setPayAmount(selectedOrder.order_total || 0);
+    }
+  }, [showPaymentModal, selectedOrder]);
+  const [payMethod, setPayMethod] = useState<'card' | 'cash' | 'check' | 'ach' | 'other'>('card');
+  const [payReference, setPayReference] = useState('');
+  const [payAmount, setPayAmount] = useState<number>(0);
+  const [payDate, setPayDate] = useState<string>(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  });
+  const [savingPayment, setSavingPayment] = useState(false);
   const [adminNotes, setAdminNotes] = useState('');
   const [savingNotes, setSavingNotes] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -234,6 +251,70 @@ function AdminOrdersPage() {
       setToast({ message: 'Failed to update order status', type: 'error' });
     } finally {
       setUpdatingStatus(false);
+    }
+  };
+
+  const handleRecordPayment = async () => {
+    if (!selectedOrder) return;
+    if (!(payAmount > 0)) {
+      setToast({ message: 'Amount must be greater than 0', type: 'error' });
+      return;
+    }
+    if (!confirm('Mark this order as paid?')) return;
+    setSavingPayment(true);
+    try {
+      const [yyyy, mm, dd] = payDate.split('-').map(Number);
+      const now = new Date();
+      const paidAt = new Date(yyyy, (mm || 1) - 1, dd || 1, now.getHours(), now.getMinutes(), now.getSeconds()).toISOString();
+      const res = await fetch(`/api/admin/orders/${selectedOrder.id}`, {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          status: 'paid',
+          paymentMethod: payMethod,
+          paymentReference: payReference.trim() || null,
+          paymentAmount: payAmount,
+          paymentDate: paidAt,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to mark paid');
+      }
+
+      // Auto-send payment receipt to customer
+      let receiptOk = true;
+      try {
+        const recRes = await fetch(`/api/admin/orders/${selectedOrder.id}/payment-receipt`, {
+          method: 'POST',
+          headers: authHeaders(),
+        });
+        receiptOk = recRes.ok;
+      } catch {
+        receiptOk = false;
+      }
+
+      setToast({
+        message: receiptOk
+          ? `Payment recorded · receipt emailed to ${selectedOrder.customer_email}`
+          : `Payment recorded · receipt email failed — please follow up`,
+        type: receiptOk ? 'success' : 'error',
+      });
+      setShowPaymentModal(false);
+      setPayReference('');
+      setSelectedOrder({
+        ...selectedOrder,
+        status: 'paid',
+        payment_method: payMethod,
+        external_payment_id: payReference.trim() || null,
+        payment_amount: payAmount,
+        payment_date: paidAt,
+      });
+      fetchOrders();
+    } catch (err) {
+      setToast({ message: err instanceof Error ? err.message : 'Failed to record payment', type: 'error' });
+    } finally {
+      setSavingPayment(false);
     }
   };
 
@@ -495,7 +576,7 @@ function AdminOrdersPage() {
                 >
                   <option value="pending">Pending</option>
                   <option value="invoiced">Invoiced</option>
-                  <option value="paid">Paid</option>
+                  <option value="paid" disabled>Paid (use Record Payment)</option>
                   <option value="ready">Ready</option>
                   <option value="complete">Complete</option>
                   <option value="cancelled">Cancelled</option>
@@ -520,7 +601,7 @@ function AdminOrdersPage() {
                 )}
                 {selectedOrder.status !== 'paid' && selectedOrder.status !== 'ready' && selectedOrder.status !== 'complete' && (
                   <button
-                    onClick={() => handleStatusUpdate(selectedOrder.id, 'paid')}
+                    onClick={() => setShowPaymentModal(true)}
                     disabled={updatingStatus}
                     className="flex items-center gap-1.5 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                   >
@@ -704,69 +785,87 @@ function AdminOrdersPage() {
                 </div>
               </div>
 
-              {/* QuickBooks Info */}
-              {(selectedOrder.qb_invoice_id || selectedOrder.payment_link) && (
-                <div>
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">QuickBooks</h3>
-                  <div className="border border-gray-200 rounded-xl overflow-hidden">
-                    <table className="w-full text-sm">
-                      <tbody>
-                        {selectedOrder.qb_invoice_number && (
-                          <tr className="border-b border-gray-100">
-                            <td className="px-4 py-2.5 text-gray-500 font-medium">Invoice #</td>
-                            <td className="px-4 py-2.5 text-[#1A1A1A] font-semibold">{selectedOrder.qb_invoice_number}</td>
-                          </tr>
-                        )}
-                        {selectedOrder.qb_invoice_id && (
-                          <tr className="border-b border-gray-100">
-                            <td className="px-4 py-2.5 text-gray-500 font-medium">Invoice ID</td>
-                            <td className="px-4 py-2.5 text-gray-600 font-mono text-xs">{selectedOrder.qb_invoice_id}</td>
-                          </tr>
-                        )}
-                        {selectedOrder.qb_payment_id && (
-                          <tr className="border-b border-gray-100 bg-green-50">
-                            <td className="px-4 py-2.5 text-green-700 font-medium">Payment ID</td>
-                            <td className="px-4 py-2.5 text-green-800 font-semibold">{selectedOrder.qb_payment_id}</td>
-                          </tr>
-                        )}
-                        {selectedOrder.qb_payment_method && (
-                          <tr className="border-b border-gray-100 bg-green-50">
-                            <td className="px-4 py-2.5 text-green-700 font-medium">Payment Method</td>
-                            <td className="px-4 py-2.5 text-green-800">{selectedOrder.qb_payment_method}</td>
-                          </tr>
-                        )}
-                        {selectedOrder.qb_payment_amount && (
-                          <tr className="border-b border-gray-100 bg-green-50">
-                            <td className="px-4 py-2.5 text-green-700 font-medium">Amount Paid</td>
-                            <td className="px-4 py-2.5 text-green-800 font-semibold">{formatCurrency(selectedOrder.qb_payment_amount)}</td>
-                          </tr>
-                        )}
-                        {selectedOrder.qb_payment_date && (
-                          <tr className="border-b border-gray-100 bg-green-50">
-                            <td className="px-4 py-2.5 text-green-700 font-medium">Payment Date</td>
-                            <td className="px-4 py-2.5 text-green-800">{formatDate(selectedOrder.qb_payment_date)}</td>
-                          </tr>
-                        )}
-                        {selectedOrder.payment_link && (
-                          <tr>
-                            <td className="px-4 py-2.5 text-gray-500 font-medium">Payment Link</td>
-                            <td className="px-4 py-2.5">
-                              <a
-                                href={selectedOrder.payment_link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-[#E8621A] hover:underline font-medium"
-                              >
-                                Open in QuickBooks →
-                              </a>
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
+              {/* Payment Info */}
+              {(selectedOrder.external_invoice_id || selectedOrder.external_checkout_id || selectedOrder.payment_link) && (() => {
+                const processorLabel =
+                  selectedOrder.payment_processor === 'quickbooks'
+                    ? 'QuickBooks'
+                    : selectedOrder.payment_processor === 'clover'
+                    ? 'Clover'
+                    : 'Payment';
+                const linkLabel =
+                  selectedOrder.payment_processor === 'clover'
+                    ? 'Open Clover checkout →'
+                    : 'Open in QuickBooks →';
+                return (
+                  <div>
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">{processorLabel}</h3>
+                    <div className="border border-gray-200 rounded-xl overflow-hidden">
+                      <table className="w-full text-sm">
+                        <tbody>
+                          {selectedOrder.external_invoice_number && (
+                            <tr className="border-b border-gray-100">
+                              <td className="px-4 py-2.5 text-gray-500 font-medium">Invoice #</td>
+                              <td className="px-4 py-2.5 text-[#1A1A1A] font-semibold">{selectedOrder.external_invoice_number}</td>
+                            </tr>
+                          )}
+                          {selectedOrder.external_invoice_id && (
+                            <tr className="border-b border-gray-100">
+                              <td className="px-4 py-2.5 text-gray-500 font-medium">Invoice ID</td>
+                              <td className="px-4 py-2.5 text-gray-600 font-mono text-xs">{selectedOrder.external_invoice_id}</td>
+                            </tr>
+                          )}
+                          {selectedOrder.external_checkout_id && (
+                            <tr className="border-b border-gray-100">
+                              <td className="px-4 py-2.5 text-gray-500 font-medium">Checkout ID</td>
+                              <td className="px-4 py-2.5 text-gray-600 font-mono text-xs">{selectedOrder.external_checkout_id}</td>
+                            </tr>
+                          )}
+                          {selectedOrder.external_payment_id && (
+                            <tr className="border-b border-gray-100 bg-green-50">
+                              <td className="px-4 py-2.5 text-green-700 font-medium">Payment ID</td>
+                              <td className="px-4 py-2.5 text-green-800 font-semibold">{selectedOrder.external_payment_id}</td>
+                            </tr>
+                          )}
+                          {selectedOrder.payment_method && (
+                            <tr className="border-b border-gray-100 bg-green-50">
+                              <td className="px-4 py-2.5 text-green-700 font-medium">Payment Method</td>
+                              <td className="px-4 py-2.5 text-green-800">{selectedOrder.payment_method}</td>
+                            </tr>
+                          )}
+                          {selectedOrder.payment_amount && (
+                            <tr className="border-b border-gray-100 bg-green-50">
+                              <td className="px-4 py-2.5 text-green-700 font-medium">Amount Paid</td>
+                              <td className="px-4 py-2.5 text-green-800 font-semibold">{formatCurrency(selectedOrder.payment_amount)}</td>
+                            </tr>
+                          )}
+                          {selectedOrder.payment_date && (
+                            <tr className="border-b border-gray-100 bg-green-50">
+                              <td className="px-4 py-2.5 text-green-700 font-medium">Payment Date</td>
+                              <td className="px-4 py-2.5 text-green-800">{formatDate(selectedOrder.payment_date)}</td>
+                            </tr>
+                          )}
+                          {selectedOrder.payment_link && (
+                            <tr>
+                              <td className="px-4 py-2.5 text-gray-500 font-medium">Payment Link</td>
+                              <td className="px-4 py-2.5">
+                                <a
+                                  href={selectedOrder.payment_link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[#E8621A] hover:underline font-medium"
+                                >
+                                  {linkLabel}
+                                </a>
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-3 pt-2">
@@ -802,6 +901,102 @@ function AdminOrdersPage() {
           }`}
         >
           {toast.message}
+        </div>
+      )}
+
+      {/* Payment Capture Modal */}
+      {showPaymentModal && selectedOrder && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+          onClick={() => !savingPayment && setShowPaymentModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <div>
+                <h3 className="font-oswald text-lg font-bold text-[#1A1A1A] tracking-wide">Record Payment</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Order {selectedOrder.order_number} · {formatCurrency(selectedOrder.order_total)} due</p>
+              </div>
+              <button
+                onClick={() => !savingPayment && setShowPaymentModal(false)}
+                className="text-gray-400 hover:text-gray-700 p-1"
+                aria-label="Close"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              <p className="text-xs text-gray-600">
+                Fill these in after collecting payment via Clover or other method.
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Method</label>
+                  <select
+                    value={payMethod}
+                    onChange={(e) => setPayMethod(e.target.value as typeof payMethod)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#E8621A]/30"
+                  >
+                    <option value="card">Card</option>
+                    <option value="cash">Cash</option>
+                    <option value="check">Check</option>
+                    <option value="ach">ACH</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Date</label>
+                  <input
+                    type="date"
+                    value={payDate}
+                    onChange={(e) => setPayDate(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#E8621A]/30"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Confirmation / Reference #</label>
+                <input
+                  type="text"
+                  value={payReference}
+                  onChange={(e) => setPayReference(e.target.value)}
+                  placeholder="Clover transaction ID, check #, last 4 of card…"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#E8621A]/30"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Amount Paid</label>
+                <input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={payAmount}
+                  onChange={(e) => setPayAmount(parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#E8621A]/30"
+                />
+              </div>
+            </div>
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-2">
+              <button
+                onClick={() => setShowPaymentModal(false)}
+                disabled={savingPayment}
+                className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg bg-white hover:bg-gray-100 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRecordPayment}
+                disabled={savingPayment || !(payAmount > 0)}
+                className="px-4 py-2 text-sm font-bold bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+              >
+                {savingPayment ? 'Saving…' : 'Mark Paid'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

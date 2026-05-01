@@ -12,7 +12,6 @@ const NAV_ITEMS = [
   { href: '/menu-engineering', label: 'Engineering' },
   { href: '/admin/email', label: 'Email' },
   { href: '/admin/analytics', label: 'Analytics' },
-  { href: '/admin/quickbooks', label: 'QuickBooks' },
   ...(FEATURES.BETTY_AI_ENABLED ? [{ href: '/admin/concierge-rules', label: "Betty's Rules" }] : []),
   { href: '/admin/settings', label: 'Settings' },
 ];

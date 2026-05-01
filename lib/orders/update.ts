@@ -1,7 +1,4 @@
 import { supabaseAdmin } from '@/lib/supabase/server';
-import { findOrCreateCustomer } from '@/lib/quickbooks/customers';
-import { updateInvoice } from '@/lib/quickbooks/invoices';
-import { isQBConnected } from '@/lib/quickbooks/client';
 
 export interface OrderItemInput {
   productId: string;
@@ -32,41 +29,24 @@ export interface OrderUpdateInput {
   items?: OrderItemInput[];
   deliveryFee?: number;
   taxExempt?: boolean;
-  status?: 'pending' | 'invoiced' | 'cancelled';
+  status?: 'pending' | 'invoiced' | 'paid' | 'cancelled';
+  paymentMethod?: string | null;
+  paymentReference?: string | null;
+  paymentDate?: string | null;
+  paymentAmount?: number | null;
 }
 
 export interface UpdateOrderResult {
   ok: true;
   orderId: string;
-  qbSynced: boolean;
-  qbWarning?: string;
 }
 
 const EDITABLE_STATUSES = new Set(['pending', 'invoiced']);
-
-const FINANCIAL_FIELDS: (keyof OrderUpdateInput)[] = [
-  'items',
-  'deliveryFee',
-];
-
-const QB_RELEVANT_FIELDS: (keyof OrderUpdateInput)[] = [
-  'items',
-  'deliveryFee',
-  'eventDate',
-  'eventTime',
-  'headcount',
-  'specialInstructions',
-  'customerName',
-  'customerEmail',
-  'customerPhone',
-  'customerCompany',
-];
 
 export async function updateOrder(
   orderId: string,
   input: OrderUpdateInput
 ): Promise<UpdateOrderResult> {
-  // 1. Load current order
   const { data: order, error: loadError } = await supabaseAdmin
     .from('orders')
     .select('*')
@@ -77,13 +57,10 @@ export async function updateOrder(
     throw new Error(`Order not found: ${orderId}`);
   }
 
-  // 2. Status gate — only pending or invoiced orders are editable.
-  // Once paid/ready/complete/cancelled, the order is locked.
   if (!EDITABLE_STATUSES.has(order.status)) {
     throw new Error(`Order is ${order.status} — cannot edit. Only pending or invoiced orders are editable.`);
   }
 
-  // 3. Build the update row (merge input over current)
   const items = input.items ?? order.items;
   const deliveryFee = input.deliveryFee ?? order.delivery_fee;
   const subtotal = Array.isArray(items)
@@ -108,6 +85,10 @@ export async function updateOrder(
   if (input.customerNotes !== undefined) updateRow.customer_notes = input.customerNotes;
   if (input.taxExempt !== undefined) updateRow.tax_exempt = input.taxExempt;
   if (input.status !== undefined) updateRow.status = input.status;
+  if (input.paymentMethod !== undefined) updateRow.payment_method = input.paymentMethod;
+  if (input.paymentReference !== undefined) updateRow.external_payment_id = input.paymentReference;
+  if (input.paymentDate !== undefined) updateRow.payment_date = input.paymentDate;
+  if (input.paymentAmount !== undefined) updateRow.payment_amount = input.paymentAmount;
   if (input.items !== undefined) {
     updateRow.items = input.items;
     updateRow.subtotal = subtotal;
@@ -118,7 +99,6 @@ export async function updateOrder(
     updateRow.order_total = orderTotal;
   }
 
-  // 4. Persist DB changes first — QB sync is best-effort
   const { error: updateError } = await supabaseAdmin
     .from('orders')
     .update(updateRow)
@@ -128,71 +108,5 @@ export async function updateOrder(
     throw new Error(`Failed to update order: ${updateError.message}`);
   }
 
-  // 5. If the order has a QB invoice and any QB-relevant field changed, sync to QB
-  let qbSynced = false;
-  let qbWarning: string | undefined;
-
-  const hasFinancialChange = FINANCIAL_FIELDS.some(f => input[f] !== undefined);
-  const hasQBRelevantChange = QB_RELEVANT_FIELDS.some(f => input[f] !== undefined);
-
-  if (order.qb_invoice_id && hasQBRelevantChange) {
-    try {
-      const qbStatus = await isQBConnected();
-      if (!qbStatus.connected) {
-        qbWarning = 'QuickBooks not connected — invoice not updated.';
-      } else {
-        // Resolve customer ref if customer fields changed
-        let customerId: string | undefined = order.qb_customer_id || undefined;
-        const customerChanged =
-          input.customerName !== undefined ||
-          input.customerEmail !== undefined ||
-          input.customerPhone !== undefined ||
-          input.customerCompany !== undefined;
-
-        if (customerChanged) {
-          customerId = await findOrCreateCustomer({
-            name: input.customerName ?? order.customer_name,
-            email: input.customerEmail ?? order.customer_email,
-            phone: input.customerPhone ?? order.customer_phone ?? undefined,
-            company: input.customerCompany ?? order.customer_company ?? undefined,
-          });
-        }
-
-        const lineItems = (items as OrderItemInput[]).map((item) => ({
-          description: `${item.title} — ${item.displayText}`,
-          amount: item.totalPrice,
-          quantity: item.quantity,
-        }));
-
-        const qbResult = await updateInvoice(order.qb_invoice_id, {
-          customerId: customerChanged ? customerId : undefined,
-          customerEmail: input.customerEmail,
-          lineItems: hasFinancialChange ? lineItems : undefined,
-          deliveryFee: hasFinancialChange ? deliveryFee : undefined,
-          eventDate: input.eventDate ?? undefined,
-          eventTime: input.eventTime ?? undefined,
-          headcount: input.headcount,
-          specialInstructions: input.specialInstructions ?? undefined,
-        });
-
-        // Persist refreshed payment link + customer id
-        const qbPatch: Record<string, unknown> = {
-          updated_at: new Date().toISOString(),
-        };
-        if (qbResult.paymentLink) qbPatch.payment_link = qbResult.paymentLink;
-        if (customerId && customerChanged) qbPatch.qb_customer_id = customerId;
-
-        if (Object.keys(qbPatch).length > 1) {
-          await supabaseAdmin.from('orders').update(qbPatch).eq('id', orderId);
-        }
-
-        qbSynced = true;
-      }
-    } catch (qbErr) {
-      qbWarning = qbErr instanceof Error ? qbErr.message : 'QuickBooks sync failed';
-      console.warn(`QB sync failed for order ${orderId}:`, qbWarning);
-    }
-  }
-
-  return { ok: true, orderId, qbSynced, qbWarning };
+  return { ok: true, orderId };
 }

@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
-import { findOrCreateCustomer } from '@/lib/quickbooks/customers';
-import { createInvoice, sendInvoiceEmail } from '@/lib/quickbooks/invoices';
-import { isQBConnected } from '@/lib/quickbooks/client';
 import { sendEmail } from '@/lib/email/send-email';
 import { buildQuoteEmailHtml } from '@/lib/email/quote-template';
+import { buildStoreNotificationHtml } from '@/lib/email/store-notification-template';
 import { getEmailSettings } from '@/lib/email/email-settings';
 
 interface OrderItem {
@@ -173,73 +171,9 @@ export async function POST(request: NextRequest) {
       console.warn('Training data save failed (non-blocking):', trainingErr);
     }
 
-    // ── Create QB invoice first (if connected and not a quote) ──
-    let paymentLink: string | null = null;
-    let invoiceId: string | null = null;
-    let invoiceNumber: string | null = null;
-    let customerId: string | null = null;
-
-    if (orderType !== 'quote') {
-      try {
-        const qbStatus = await isQBConnected();
-        if (qbStatus.connected) {
-          customerId = await findOrCreateCustomer({
-            name: body.buyerInfo.name,
-            email: body.buyerInfo.email,
-            phone: body.buyerInfo.phone || undefined,
-            company: body.buyerInfo.company || undefined,
-          });
-
-          const lineItems = body.items.map((item) => ({
-            description: `${item.title} — ${item.displayText}`,
-            amount: item.totalPrice,
-            quantity: item.quantity,
-          }));
-
-          const invoice = await createInvoice({
-            orderNumber,
-            customerId,
-            customerEmail: body.buyerInfo.email,
-            lineItems,
-            deliveryFee,
-            eventDate: body.buyerInfo.eventDate,
-            eventTime: body.buyerInfo.eventTime,
-            headcount: body.headcount,
-            specialInstructions: body.buyerInfo.notes,
-          });
-
-          invoiceId = invoice.invoiceId;
-          invoiceNumber = invoice.invoiceNumber;
-          paymentLink = invoice.paymentLink;
-
-          // Update order with QB details
-          if (orderId) {
-            await supabaseAdmin
-              .from('orders')
-              .update({
-                qb_invoice_id: invoiceId,
-                qb_invoice_number: invoiceNumber,
-                qb_customer_id: customerId,
-                payment_link: paymentLink,
-                status: 'invoiced',
-                updated_at: new Date().toISOString(),
-              })
-              .eq('id', orderId);
-          }
-
-          // Send invoice email via QB
-          try {
-            await sendInvoiceEmail(invoiceId);
-          } catch (emailErr) {
-            console.warn('Failed to send QB invoice email:', emailErr);
-          }
-        } else {
-          console.log('Order created without QB invoice (QB not connected):', orderNumber);
-        }
-      } catch (qbErr) {
-        console.error('QuickBooks invoice creation failed (non-blocking):', qbErr);
-      }
-    }
+    // Payments are handled manually — staff calls customer to collect after order arrives.
+    const paymentLink: string | null = null;
+    const invoiceNumber: string | null = null;
 
     // ── Send confirmation email (with payment link if available) ──
     try {
@@ -295,23 +229,69 @@ export async function POST(request: NextRequest) {
         const subjectTemplate = orderType === 'quote'
           ? emailSettings.email_subject_quote
           : emailSettings.email_subject_order;
-        const subject = subjectTemplate.replace('{orderNumber}', orderNumber);
+        const customerSubject = subjectTemplate.replace('{orderNumber}', orderNumber);
 
-        // Store notification CC — always CC the store
-        const STORE_CC = ['info@lexingtonbetty.com'];
-        const additionalCc = (emailSettings.notification_emails || '')
+        // 1. Customer email — receipt-style, no internal action items
+        await sendEmail({
+          to: body.buyerInfo.email,
+          subject: customerSubject,
+          html,
+          replyTo: emailSettings.company_email,
+        });
+
+        // 2. Restaurant/staff email — payment-collection-focused with key info up top
+        const STORE_RECIPIENTS = ['info@lexingtonbetty.com'];
+        const additionalRecipients = (emailSettings.notification_emails || '')
           .split(',')
           .map((e: string) => e.trim())
           .filter((e: string) => e && e.includes('@'));
-        const ccEmails = [...STORE_CC, ...additionalCc.filter(e => !STORE_CC.includes(e))];
+        const staffRecipients = [
+          ...STORE_RECIPIENTS,
+          ...additionalRecipients.filter((e) => !STORE_RECIPIENTS.includes(e)),
+        ];
 
-        await sendEmail({
-          to: body.buyerInfo.email,
-          subject,
-          html,
-          replyTo: emailSettings.company_email,
-          cc: ccEmails.length > 0 ? ccEmails : undefined,
-        });
+        if (staffRecipients.length > 0) {
+          const staffHtml = buildStoreNotificationHtml({
+            orderType,
+            orderNumber,
+            customerName: body.buyerInfo.name,
+            customerEmail: body.buyerInfo.email,
+            customerPhone: body.buyerInfo.phone,
+            customerCompany: body.buyerInfo.company,
+            eventDate: body.buyerInfo.eventDate,
+            eventTime: body.buyerInfo.eventTime || '',
+            headcount: body.headcount,
+            eventType: body.eventType,
+            delivery: body.delivery || {
+              address: body.buyerInfo.deliveryAddress || '',
+              address2: '',
+              city: '',
+              state: '',
+              zip: '',
+            },
+            setupRequired: body.setupRequired ?? true,
+            specialInstructions: body.buyerInfo.notes || '',
+            items: (body.items || []).map((i) => ({
+              title: i.title,
+              displayText: i.displayText,
+              totalPrice: i.totalPrice,
+            })),
+            subtotal,
+            deliveryFee,
+            orderTotal,
+            perPerson: orderTotal / body.headcount,
+          });
+
+          const staffSubject = `[ACTION] Catering ${orderType === 'quote' ? 'Quote' : 'Order'} ${orderNumber} — Call ${body.buyerInfo.name} to collect payment`;
+
+          await sendEmail({
+            to: staffRecipients[0],
+            cc: staffRecipients.slice(1),
+            subject: staffSubject,
+            html: staffHtml,
+            replyTo: body.buyerInfo.email,
+          });
+        }
       }
     } catch (emailError) {
       console.error('Email sending failed (non-blocking):', emailError);

@@ -12,6 +12,7 @@ import CateringProductCard from './CateringProductCard';
 import MenuItemRow from './MenuItemRow';
 import CateringCart from './CateringCart';
 import MeatPlannerPopup from './MeatPlannerPopup';
+import LunchSpecialsCallout from './LunchSpecialsCallout';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 
@@ -82,15 +83,12 @@ export default function ProductSelectionStep() {
   // Check if this event type has meat products
   const hasMeatProducts = allProducts.some(p => p.tags?.includes(MEAT_TAG));
 
-  // Auto-open meat planner on first mount (if meats available)
   useEffect(() => {
     if (hasAutoOpenedRef.current || !hasMeatProducts) return;
     hasAutoOpenedRef.current = true;
     const hasMeatsInCart = state.selectedItems.some(i => i.product.tags?.includes(MEAT_TAG));
     if (hasMeatsInCart) {
       setMeatsPlanned(true);
-    } else {
-      setShowMeatPlanner(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasMeatProducts]);
@@ -234,18 +232,6 @@ export default function ProductSelectionStep() {
                 Edit Meats
               </button>
             </div>
-          ) : !meatsPlanned ? (
-            <div className="mb-4 text-center">
-              <button
-                onClick={() => setShowMeatPlanner(true)}
-                className="inline-flex items-center gap-2 text-sm text-[#E8621A] hover:underline font-medium"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                Open Meat Planner
-              </button>
-            </div>
           ) : null
         )}
 
@@ -302,18 +288,32 @@ export default function ProductSelectionStep() {
                 )}
               </Card>
             ) : (
-              groupedSections.map((section) => (
+              groupedSections.map((section, idx) => (
                 <div
                   key={section.id}
                   ref={(el) => { sectionRefs.current[section.id] = el; }}
                   className="mb-12 scroll-mt-24"
                 >
                   {/* Section Header */}
-                  <div className="mb-5">
-                    <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#1A1A1A] tracking-wide uppercase">
-                      {section.label}
-                    </h3>
-                    <div className="w-12 h-1 bg-[#E8621A] mt-2" />
+                  <div className="mb-5 flex items-end justify-between gap-3">
+                    <div>
+                      <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#1A1A1A] tracking-wide uppercase">
+                        {section.label}
+                      </h3>
+                      <div className="w-12 h-1 bg-[#E8621A] mt-2" />
+                    </div>
+                    {section.id === 'meats' && hasMeatProducts && !meatsPlanned && (
+                      <button
+                        onClick={() => setShowMeatPlanner(true)}
+                        className="inline-flex items-center gap-2 px-3 py-2 sm:px-4 bg-[#E8621A] text-white rounded-lg font-oswald text-sm tracking-wide hover:bg-[#c8531a] transition-colors shadow-sm"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2M9 12h6m-6 4h6" />
+                        </svg>
+                        <span className="hidden sm:inline">Open Meat Planner</span>
+                        <span className="sm:hidden">Meat Planner</span>
+                      </button>
+                    )}
                   </div>
 
                   {/* 2-column: hero image left, menu items right */}
@@ -337,6 +337,10 @@ export default function ProductSelectionStep() {
                       ))}
                     </div>
                   </div>
+                  {/* Lunch Specials breakout — render after the second section, or after the only section if just one */}
+                  {(idx === 1 || (groupedSections.length === 1 && idx === 0)) && (
+                    <LunchSpecialsCallout />
+                  )}
                 </div>
               ))
             )}

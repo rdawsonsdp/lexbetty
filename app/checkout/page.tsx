@@ -389,12 +389,7 @@ export default function CheckoutPage() {
         dispatch({ type: 'EXIT_EDIT_MODE' });
         setOrderSubmitted(true);
 
-        const qbNote = data.qbWarning
-          ? `?updated=true&qbWarning=${encodeURIComponent(data.qbWarning)}`
-          : data.qbSynced
-            ? '?updated=true&qbSynced=true'
-            : '?updated=true';
-        router.push(`/admin/orders${qbNote}#${editedOrderId}`);
+        router.push(`/admin/orders?updated=true#${editedOrderId}`);
       } catch (err) {
         setSubmitError(err instanceof Error ? err.message : 'Failed to save order changes');
         setIsSubmitting(null);

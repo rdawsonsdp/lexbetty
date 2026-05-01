@@ -10,7 +10,23 @@ import { CateringPackage } from '@/lib/types';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 
-export default function PackageSelectionStep() {
+interface PackageSelectionStepProps {
+  filter?: (pkg: CateringPackage) => boolean;
+  title?: string;
+  subtitle?: string;
+  heroImage?: string;
+  showFeastUpsell?: boolean;
+  scrollOnMount?: boolean;
+}
+
+export default function PackageSelectionStep({
+  filter,
+  title = 'OUR MENU PACKAGES',
+  subtitle = 'Pre-built menus designed for your event. Select your guest count and add to cart.',
+  heroImage,
+  showFeastUpsell = true,
+  scrollOnMount = true,
+}: PackageSelectionStepProps = {}) {
   const router = useRouter();
   const { state, dispatch } = useCatering();
   const { packages: allFetchedPackages } = useActivePackages();
@@ -18,6 +34,7 @@ export default function PackageSelectionStep() {
   const [headcounts, setHeadcounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
+    if (!scrollOnMount) return;
     const hash = window.location.hash.replace('#', '');
     if (hash) {
       const timer = setTimeout(() => {
@@ -30,10 +47,12 @@ export default function PackageSelectionStep() {
     } else {
       sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }, []);
+  }, [scrollOnMount]);
 
-  // Show all packages except food truck (it has its own page)
-  const allPackages = allFetchedPackages.filter(pkg => pkg.id !== 'betty-food-truck');
+  // Default filter: exclude food truck (it has its own page).
+  // Caller may pass a stricter filter for box-only or party-deal-only views.
+  const defaultFilter = (pkg: CateringPackage) => pkg.id !== 'betty-food-truck';
+  const allPackages = allFetchedPackages.filter(filter || defaultFilter);
 
   const getHeadcount = (pkgId: string, minHeadcount?: number) =>
     headcounts[pkgId] || minHeadcount || 10;
@@ -80,15 +99,35 @@ export default function PackageSelectionStep() {
   };
 
   return (
-    <div ref={sectionRef} className="bg-white py-12 sm:py-16 scroll-mt-4">
-      <div className="container mx-auto px-4">
+    <div ref={sectionRef} className="bg-white scroll-mt-4">
+      {heroImage && (
+        <div
+          className="relative w-full h-64 sm:h-80 md:h-[420px] bg-center bg-cover flex items-center justify-center"
+          style={{ backgroundImage: `url(${heroImage})` }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
+          <div className="relative z-10 text-center px-4 max-w-3xl">
+            <h1 className="font-oswald text-4xl sm:text-5xl md:text-6xl font-bold text-white tracking-wider mb-4 drop-shadow-lg">
+              {title}
+            </h1>
+            <p className="text-white/90 text-base sm:text-lg md:text-xl drop-shadow">
+              {subtitle}
+            </p>
+          </div>
+        </div>
+      )}
+      <div className={`container mx-auto px-4 ${heroImage ? 'py-10 sm:py-12' : 'py-12 sm:py-16'}`}>
         <div className="text-center mb-10">
-          <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#1A1A1A] tracking-wider mb-4">
-            OUR MENU PACKAGES
-          </h2>
-          <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto mb-8">
-            Pre-built menus designed for your event. Select your guest count and add to cart.
-          </p>
+          {!heroImage && (
+            <>
+              <h2 className="font-oswald text-3xl sm:text-4xl md:text-5xl font-bold text-[#1A1A1A] tracking-wider mb-4">
+                {title}
+              </h2>
+              <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto mb-8">
+                {subtitle}
+              </p>
+            </>
+          )}
 
           <p className="font-oswald text-sm text-[#9B9189] tracking-wider uppercase mb-4">Jump to a package</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-3xl mx-auto text-left">
@@ -257,6 +296,7 @@ export default function PackageSelectionStep() {
         )}
 
         {/* Upsell CTAs */}
+        {showFeastUpsell && (
         <div className="mt-12 border-t border-gray-200 pt-10">
           <h3 className="font-oswald text-xl sm:text-2xl font-bold text-[#1A1A1A] tracking-wider text-center mb-6">
             MAKE IT A FEAST
@@ -279,6 +319,7 @@ export default function PackageSelectionStep() {
             ))}
           </div>
         </div>
+        )}
       </div>
     </div>
   );
