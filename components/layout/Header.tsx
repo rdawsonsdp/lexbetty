@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { FEATURES } from '@/lib/feature-flags';
 import { useCatering } from '@/context/CateringContext';
+import { useDrafts } from '@/context/DraftsContext';
 import SignInDropdown from '@/components/auth/SignInDropdown';
 
 const ADMIN_LINKS = [
@@ -19,13 +20,16 @@ const ADMIN_LINKS = [
 
 interface HeaderProps {
   onCartClick?: () => void;
+  onDraftsClick?: () => void;
 }
 
-export default function Header({ onCartClick }: HeaderProps) {
+export default function Header({ onCartClick, onDraftsClick }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [adminExpanded, setAdminExpanded] = useState(false);
   const { state } = useCatering();
+  const { drafts } = useDrafts();
   const cartCount = state.selectedItems.length;
+  const draftCount = drafts.length;
 
   const navLinks = [
     { href: 'https://www.lexingtonbetty.com', label: 'HOME', external: true },
@@ -106,6 +110,23 @@ export default function Header({ onCartClick }: HeaderProps) {
             </div>
             {/* Account */}
             {FEATURES.CUSTOMER_ACCOUNTS_ENABLED && <SignInDropdown />}
+            {/* Drafts */}
+            <button
+              onClick={onDraftsClick}
+              className="ml-2 relative p-2 hover:bg-gray-100 rounded transition-colors flex items-center justify-center"
+              aria-label="Saved drafts"
+              title="Saved drafts"
+            >
+              <svg className="w-5 h-5 text-[#1A1A1A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V5z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 3v5h5" />
+              </svg>
+              {draftCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#1A1A1A] text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                  {draftCount}
+                </span>
+              )}
+            </button>
             {/* Cart */}
             <button
               onClick={onCartClick}
@@ -123,8 +144,23 @@ export default function Header({ onCartClick }: HeaderProps) {
             </button>
           </nav>
 
-          {/* Mobile: Cart + Menu toggle */}
+          {/* Mobile: Drafts + Cart + Menu toggle */}
           <div className="lg:hidden flex items-center gap-2">
+            <button
+              onClick={onDraftsClick}
+              className="relative p-2 hover:bg-gray-100 rounded transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label="Saved drafts"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V5z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 3v5h5" />
+              </svg>
+              {draftCount > 0 && (
+                <span className="absolute top-0 right-0 bg-[#1A1A1A] text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                  {draftCount}
+                </span>
+              )}
+            </button>
             <button
               onClick={onCartClick}
               className="relative p-2 hover:bg-gray-100 rounded transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"

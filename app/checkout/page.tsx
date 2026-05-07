@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCatering } from '@/context/CateringContext';
+import { useDrafts } from '@/context/DraftsContext';
 import { formatCurrency } from '@/lib/pricing';
 import { getProductById, getTakeHomeProducts } from '@/lib/products';
 import Card from '@/components/ui/Card';
@@ -124,6 +125,7 @@ const DELIVERY_TIMES = [
 export default function CheckoutPage() {
   const router = useRouter();
   const { state, dispatch, calculatedItems, totalCost, isItemInCart } = useCatering();
+  const { activeDraft, saveCheckoutForm, markActiveConverted } = useDrafts();
   const [currentStep, setCurrentStep] = useState(1); // 1 = details, 2 = confirmation
   const [isSubmitting, setIsSubmitting] = useState<'quote' | 'order' | null>(null);
   const [orderSubmitted, setOrderSubmitted] = useState(false);
@@ -151,26 +153,41 @@ export default function CheckoutPage() {
   const [seedFirst, ...seedRest] = buyerName.split(' ');
   const seedLast = seedRest.join(' ');
 
+  const draftCheckoutForm = activeDraft?.state?.checkoutForm;
   const [formData, setFormData] = useState<FormData>({
-    firstName: seedFirst || '',
-    lastName: seedLast || '',
-    email: state.buyerInfo?.email || '',
-    phone: state.buyerInfo?.phone || '',
-    company: state.buyerInfo?.company || '',
-    address: state.eventInfo?.address || state.buyerInfo?.deliveryAddress || '',
-    address2: '',
-    city: state.eventInfo?.city || '',
-    state: state.eventInfo?.state || '',
-    zip: state.eventInfo?.zip || '',
-    eventName: state.eventInfo?.eventName || '',
-    eventDate: state.eventInfo?.eventDate || state.buyerInfo?.eventDate || '',
-    deliveryTime: state.eventInfo?.eventTime || state.buyerInfo?.eventTime || '',
-    deliveryType: 'delivery',
-    deliveryInstructions: '',
-    specialInstructions: state.eventInfo?.specialInstructions || state.buyerInfo?.notes || '',
-    customerNotes: '',
-    taxExempt: false,
+    firstName: draftCheckoutForm?.firstName || seedFirst || '',
+    lastName: draftCheckoutForm?.lastName || seedLast || '',
+    email: draftCheckoutForm?.email || state.buyerInfo?.email || '',
+    phone: draftCheckoutForm?.phone || state.buyerInfo?.phone || '',
+    company: draftCheckoutForm?.company || state.buyerInfo?.company || '',
+    address: draftCheckoutForm?.address || state.eventInfo?.address || state.buyerInfo?.deliveryAddress || '',
+    address2: draftCheckoutForm?.address2 || '',
+    city: draftCheckoutForm?.city || state.eventInfo?.city || '',
+    state: draftCheckoutForm?.state || state.eventInfo?.state || '',
+    zip: draftCheckoutForm?.zip || state.eventInfo?.zip || '',
+    eventName: draftCheckoutForm?.eventName || state.eventInfo?.eventName || '',
+    eventDate: draftCheckoutForm?.eventDate || state.eventInfo?.eventDate || state.buyerInfo?.eventDate || '',
+    deliveryTime: draftCheckoutForm?.deliveryTime || state.eventInfo?.eventTime || state.buyerInfo?.eventTime || '',
+    deliveryType: draftCheckoutForm?.deliveryType || 'delivery',
+    deliveryInstructions: draftCheckoutForm?.deliveryInstructions || '',
+    specialInstructions: draftCheckoutForm?.specialInstructions || state.eventInfo?.specialInstructions || state.buyerInfo?.notes || '',
+    customerNotes: draftCheckoutForm?.customerNotes || '',
+    taxExempt: draftCheckoutForm?.taxExempt ?? false,
   });
+
+  // Persist form changes to the active draft so customers can resume checkout later.
+  // Skip during admin-edit sessions (no draft tied to those).
+  const formSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (state.editingOrderId) return;
+    if (formSaveTimerRef.current) clearTimeout(formSaveTimerRef.current);
+    formSaveTimerRef.current = setTimeout(() => {
+      saveCheckoutForm(formData);
+    }, 500);
+    return () => {
+      if (formSaveTimerRef.current) clearTimeout(formSaveTimerRef.current);
+    };
+  }, [formData, saveCheckoutForm, state.editingOrderId]);
   const [taxCertificateFile, setTaxCertificateFile] = useState<File | null>(null);
   const [taxCertificateUrl, setTaxCertificateUrl] = useState<string | null>(null);
   const [taxCertificatePath, setTaxCertificatePath] = useState<string | null>(null);
@@ -508,6 +525,11 @@ export default function CheckoutPage() {
       orderDetails.paymentLink = result.paymentLink || null;
 
       sessionStorage.setItem('last-order-details', JSON.stringify(orderDetails));
+
+      // Mark the active draft converted (best-effort) before resetting state.
+      if (result.orderId) {
+        try { await markActiveConverted(result.orderId); } catch { /* ignore */ }
+      }
 
       // Reset the catering state and redirect
       setOrderSubmitted(true);

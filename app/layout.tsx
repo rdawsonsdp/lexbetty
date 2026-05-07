@@ -5,6 +5,7 @@ import Layout from '@/components/layout/Layout';
 import { CateringProvider } from '@/context/CateringContext';
 import { AnalyticsProvider } from '@/context/AnalyticsContext';
 import { AuthProvider } from '@/context/AuthContext';
+import { DraftsProvider } from '@/context/DraftsContext';
 
 const oswald = Oswald({
   variable: '--font-oswald',
@@ -50,7 +51,9 @@ export default function RootLayout({
         <AnalyticsProvider>
           <AuthProvider>
             <CateringProvider>
-              <Layout>{children}</Layout>
+              <DraftsProvider>
+                <Layout>{children}</Layout>
+              </DraftsProvider>
             </CateringProvider>
           </AuthProvider>
         </AnalyticsProvider>
