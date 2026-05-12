@@ -332,11 +332,12 @@ export function calculateAllOrderItems(
       };
     }
 
-    // --- tray / pan / per-person / flat: item.quantity is a multiplier
+    // --- tray / pan / per-person / flat: quantity is derived from headcount,
+    // not a multiplier. item.quantity is ignored here to prevent double-counting
+    // the headcount-derived pan/tray/person count against the user's stepper.
     return {
       ...calc,
-      itemQuantity: item.quantity,
-      totalPrice: calc.totalPrice * item.quantity,
+      itemQuantity: 1,
     };
   });
 }
